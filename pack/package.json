@@ -1,0 +1,12 @@
+{
+  "name": "laurelin-agent-pack",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Laurelin skills, doctrine, and gates for Prime Agent (pi-compatible).",
+  "keywords": ["pi-package"],
+  "pi": {
+    "extensions": ["./extensions"],
+    "skills": ["./skills"],
+    "prompts": ["./prompts"]
+  }
+}
