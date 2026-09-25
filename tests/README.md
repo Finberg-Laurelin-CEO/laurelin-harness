@@ -27,3 +27,4 @@ prime-agent -e ./pack
 7. `/title` shows the title screen again. `LAURELIN_NO_IMAGE=1 prime-agent -e ./pack` forces the glyph mark.
 8. Repeat steps 1 to 6 with the other terminal background and the matching theme.
 | workers (Step 2: delegate_worker, call_model, Jev context pruning) | `tests/test-workers.sh` |
+| gates | `tests/test-gates.sh` |
