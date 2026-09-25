@@ -1,0 +1,1 @@
+{"definition":{"additionalProperties":false,"description":"Truth value of a finite-set predicate.","properties":{"holds":{"title":"Holds","type":"boolean"}},"required":["holds"],"title":"FiniteSetBooleanResult","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.finite-sets-result.finite_set.decide.disjoint","version":"2"}

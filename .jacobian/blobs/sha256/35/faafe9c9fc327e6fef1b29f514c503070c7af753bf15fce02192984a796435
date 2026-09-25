@@ -1,0 +1,1 @@
+{"definition":{"additionalProperties":false,"properties":{"n":{"maximum":1000000000000,"minimum":0,"title":"N","type":"integer"}},"required":["n"],"title":"FloorSquareRootRequest","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.number-theory-input.FloorSquareRootRequest","version":"1"}

@@ -1,0 +1,1 @@
+{"definition":{"additionalProperties":false,"properties":{"girth":{"maximum":32,"minimum":0,"title":"Girth","type":"integer"},"has_cycle":{"title":"Has Cycle","type":"boolean"}},"required":["girth","has_cycle"],"title":"GraphGirthResult","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.graph-invariants-result.graph.invariant.girth.compute","version":"1"}

@@ -1,0 +1,1 @@
+{"definition":{"description":"Finite sets of canonical integers with exact operations","element_type":"canonical integer","max_set_size":128},"descriptor_version":"1","kind":"semantics","name":"jacobian.exact-finite-integer-sets","version":"1"}

@@ -1,0 +1,1 @@
+{"definition":{"additionalProperties":false,"description":"Truth value of a rational predicate.","properties":{"holds":{"title":"Holds","type":"boolean"}},"required":["holds"],"title":"RationalComparisonResult","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.arithmetic-result.rational.decide.equal","version":"2"}

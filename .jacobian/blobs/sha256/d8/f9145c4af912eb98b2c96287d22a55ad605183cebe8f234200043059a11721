@@ -1,0 +1,1 @@
+{"definition":{"description":"Exact integer divisibility, primes, arithmetic functions, modular arithmetic, and bounded finite abelian group factorization","integer_encoding":"canonical decimal string"},"descriptor_version":"1","kind":"semantics","name":"jacobian.exact-integer-number-theory","version":"2"}

@@ -1,0 +1,1 @@
+{"definition":{"description":"deterministic formal-dataset row normalization and environment provenance binding","verification":"none; materialization never establishes theorem truth"},"descriptor_version":"1","kind":"semantics","name":"jacobian.formal-dataset-materialization","version":"1"}

@@ -1,0 +1,1 @@
+{"definition":{"additionalProperties":false,"description":"Truth value of a sequence predicate.","properties":{"holds":{"title":"Holds","type":"boolean"}},"required":["holds"],"title":"IntegerSequenceBooleanResult","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.sequences-result.sequence.decide.geometric","version":"2"}

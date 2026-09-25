@@ -1,0 +1,1 @@
+{"definition":{"coefficient_field":"QQ","description":"univariate sparse polynomials over QQ serving as strict-positivity decision sources","maximum_degree":64,"maximum_terms":1024,"monomial_order":"descending lexicographic","zero_terms":"omitted"},"descriptor_version":"1","kind":"semantics","name":"jacobian.univariate-rational-polynomial-positivity-source","version":"1"}

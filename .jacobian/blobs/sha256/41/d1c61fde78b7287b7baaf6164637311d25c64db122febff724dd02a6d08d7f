@@ -1,0 +1,1 @@
+{"definition":{"additionalProperties":false,"properties":{"holds":{"title":"Holds","type":"boolean"}},"required":["holds"],"title":"GeometryBooleanResult","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.geometry-result.geometry.lines.decide.perpendicular","version":"2"}

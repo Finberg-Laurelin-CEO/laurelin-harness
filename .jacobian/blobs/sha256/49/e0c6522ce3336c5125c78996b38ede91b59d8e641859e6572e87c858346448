@@ -1,0 +1,1 @@
+{"definition":{"additionalProperties":false,"description":"Truth value of a number-theory predicate.","properties":{"holds":{"title":"Holds","type":"boolean"}},"required":["holds"],"title":"BooleanResult","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.number-theory-result.integer.decide.perfect","version":"2"}

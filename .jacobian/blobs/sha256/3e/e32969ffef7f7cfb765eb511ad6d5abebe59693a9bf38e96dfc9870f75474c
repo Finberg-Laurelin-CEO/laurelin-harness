@@ -1,0 +1,1 @@
+{"definition":{"description":"isomorphism of two finite simple undirected graphs through one explicit vertex bijection","maximum_order":256},"descriptor_version":"1","kind":"semantics","name":"jacobian.simple-undirected-graph-isomorphism","version":"1"}

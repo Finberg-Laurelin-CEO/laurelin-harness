@@ -1,0 +1,1 @@
+{"definition":{"domain":"bounded rational linear systems","producer":"Python-FLINT 0.9.0","results":"ordinary solution and inconsistency candidates are inline"},"descriptor_version":"1","kind":"semantics","name":"jacobian.exact-rational-linear","version":"1"}

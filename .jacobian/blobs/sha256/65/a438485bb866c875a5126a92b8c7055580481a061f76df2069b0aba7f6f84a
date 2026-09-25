@@ -1,0 +1,1 @@
+{"definition":{"additionalProperties":false,"properties":{"k":{"maximum":1000,"minimum":0,"title":"K","type":"integer"},"n":{"maximum":1000,"minimum":0,"title":"N","type":"integer"}},"required":["n","k"],"title":"NonnegativePairRequest","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.combinatorics-input.NonnegativePairRequest","version":"1"}

@@ -1,0 +1,1 @@
+{"definition":{"description":"Finite sequences of canonical integers with exact operations","element_type":"canonical integer","max_sequence_length":256},"descriptor_version":"1","kind":"semantics","name":"jacobian.exact-finite-integer-sequences","version":"1"}

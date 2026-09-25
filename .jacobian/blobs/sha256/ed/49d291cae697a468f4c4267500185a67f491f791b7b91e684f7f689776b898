@@ -1,0 +1,1 @@
+{"definition":{"description":"authorized checker decision bound to canonical inline exact input and candidate values plus its measured execution manifest"},"descriptor_version":"1","kind":"semantics","name":"jacobian.inline-exact-verification-record","version":"2"}
