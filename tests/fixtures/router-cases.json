@@ -1,0 +1,25 @@
+{
+  "_comment": "Twenty past-prompt-style messages for tests/test-router.sh. Generic, no private content. Each has the worker and intent Joe would expect. last_assistant, when present, is the agent's previous line and is part of the state.",
+  "cases": [
+    { "id": 1, "message": "Rewrite the intro of the seed deck so it reads plainly, one idea per sentence.", "expect": { "worker": "claude", "intent": "new_task" } },
+    { "id": 2, "message": "Fix tests/run-all.sh so it stops on the first failure and prints which test failed.", "expect": { "worker": "codex", "intent": "new_task" } },
+    { "id": 3, "message": "Research the deep-tech fund whose site I pasted and tell me what stage and sectors they invest in.", "expect": { "worker": "coordinator", "intent": "new_task" } },
+    { "id": 4, "message": "Don't change my prose. Only add the missing citations.", "expect": { "worker": "coordinator", "intent": "steer" } },
+    { "id": 5, "message": "push it", "last_assistant": "The commit is ready on branch ideation. Shall I push it to origin?", "expect": { "worker": "coordinator", "intent": "approval" } },
+    { "id": 6, "message": "what does gbrain do", "expect": { "worker": "coordinator", "intent": "question" } },
+    { "id": 7, "message": "Write a two-page memo on the tritium supply chain from the notes in the vault folder.", "expect": { "worker": "claude", "intent": "new_task" } },
+    { "id": 8, "message": "Add a --dry-run flag to bin/link-skills.sh that prints the commands without running them.", "expect": { "worker": "codex", "intent": "new_task" } },
+    { "id": 9, "message": "That's wrong. The memo format puts the ask at the end, not at the top.", "last_assistant": "I put the ask in the first paragraph of the memo so the reader sees it first.", "expect": { "worker": "coordinator", "intent": "correction" } },
+    { "id": 10, "message": "yes, go ahead", "last_assistant": "The draft is ready. Should I send it to the three reviewers?", "expect": { "worker": "coordinator", "intent": "approval" } },
+    { "id": 11, "message": "Which of our skills handles PDF building?", "expect": { "worker": "coordinator", "intent": "question" } },
+    { "id": 12, "message": "Move the three design PDFs into the engineering folder and print the new paths.", "expect": { "worker": "codex", "intent": "new_task" } },
+    { "id": 13, "message": "Use the strong model for this one, it is investor-facing.", "expect": { "worker": "coordinator", "intent": "steer" } },
+    { "id": 14, "message": "Draft a cold email to a seed investor about the round. Plain STE, under 150 words.", "expect": { "worker": "claude", "intent": "new_task" } },
+    { "id": 15, "message": "Why did the prose gate fail on the last run?", "expect": { "worker": "coordinator", "intent": "question" } },
+    { "id": 16, "message": "No. I said take the numbers from the newest engineering doc, not from the memo.", "last_assistant": "I used the figures from the memo since it was the most recent file in the folder.", "expect": { "worker": "coordinator", "intent": "correction" } },
+    { "id": 17, "message": "Write a python script that pulls every number out of a markdown file together with its sentence.", "expect": { "worker": "codex", "intent": "new_task" } },
+    { "id": 18, "message": "Summarise the whitepaper's confinement section in five bullet points for a non-physicist.", "expect": { "worker": "claude", "intent": "new_task" } },
+    { "id": 19, "message": "approve", "last_assistant": "The site deploy to production is waiting for your approval.", "expect": { "worker": "coordinator", "intent": "approval" } },
+    { "id": 20, "message": "Focus on investors in the US only for now, skip the European ones.", "expect": { "worker": "coordinator", "intent": "steer" } }
+  ]
+}

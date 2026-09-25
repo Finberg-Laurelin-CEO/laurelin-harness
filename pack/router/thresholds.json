@@ -1,0 +1,9 @@
+{
+  "_comment": "Per-question confidence thresholds for laurelin-router. A Jev answer under its threshold becomes abstain. Missing keys use default. Section 6 of the test set (calibrate.sh) will suggest better values from labeled decisions.",
+  "default": 0.6,
+  "worker": 0.6,
+  "skill": 0.6,
+  "classification": 0.6,
+  "outward": 0.6,
+  "intent": 0.6
+}

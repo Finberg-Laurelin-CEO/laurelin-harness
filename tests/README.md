@@ -14,6 +14,7 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | gates | `tests/test-gates.sh` |
 | safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
 | bridge (task file, gates read it, live check lights, live approvals, worker events) | `tests/test-bridge.sh` |
+| router (Step 3: Jev picks worker, skill, class, outward, intent; decision log) | `tests/test-router.sh` |
 
 ## Manual test: interface (Joe, in Ghostty)
 
