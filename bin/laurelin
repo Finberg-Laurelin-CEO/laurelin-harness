@@ -194,6 +194,11 @@ launch() {
       for g in "$PACK"/gates/*.sh; do
         # Only executable gates. lib.sh and other helpers are sourced, not run.
         case "$(basename "$g")" in lib*|_*) continue ;; esac
+        # LAURELIN_GATES limits the set: a comma list of names ("prose,location"),
+        # or "none" for no gates. Unset: every executable gate. Used by the test-set runner.
+        if [ -n "${LAURELIN_GATES:-}" ]; then
+          case ",${LAURELIN_GATES}," in *",$(basename "$g" .sh),"*) ;; *) continue ;; esac
+        fi
         if [ -x "$g" ]; then
           args+=(--autonomous-gate "$g")
         fi

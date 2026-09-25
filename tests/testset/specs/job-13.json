@@ -1,0 +1,19 @@
+{
+  "id": "job-13",
+  "name": "Tritium memo in house style",
+  "group": "Engineering",
+  "enabled": false,
+  "prompt": "Write the tritium memo from the notes in {root}/notes.md in the Laurelin house style and issue the PDF into {target}. Every number must trace to the notes or the vault.",
+  "target": "tritium/Issued Documents/",
+  "claim": "The memo is issued in house style with every number traced, in the issued documents folder.",
+  "checks": "A B C D",
+  "rubric": [
+    "The memo follows the house style: plain words, defined terms, no filler.",
+    "Every number traces to the notes or the vault.",
+    "No page has overlapping or clipped text.",
+    "The PDF sits in the issued documents folder."
+  ],
+  "source": "tritium/Issued Documents/",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "canonical": ""
+}

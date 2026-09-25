@@ -1,0 +1,16 @@
+{
+  "id": "synthetic-1",
+  "name": "A three-sentence file",
+  "group": "Synthetic",
+  "prompt": "Write a plain text file at {target} that holds exactly three sentences about why a workshop keeps a written log of each test. Plain words, no lists, no headings. Reply with one line that says the file is written.",
+  "target": "notes/why-log.txt",
+  "claim": "The file holds exactly three sentences about keeping a written test log.",
+  "checks": "A D",
+  "rubric": [
+    "The file exists and holds exactly three sentences.",
+    "Every sentence is about keeping a written log of tests.",
+    "The text uses plain words with no headings, lists or filler.",
+    "The final reply says the file was written and nothing more."
+  ],
+  "source": ""
+}

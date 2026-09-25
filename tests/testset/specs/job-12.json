@@ -1,0 +1,19 @@
+{
+  "id": "job-12",
+  "name": "Vendor requirements matrix and classification guide",
+  "group": "Engineering",
+  "enabled": false,
+  "prompt": "Write the vendor disclosure matrix at {target} from the vault's classification guide and the vendor's requirement list in {root}/requirements.md. Read the vault first. Use the Laurelin letterhead template from the vault, no other.",
+  "target": "Organizations/<vendor>/... Disclosure Matrix.md",
+  "claim": "The matrix is written from the vault guide, on the Laurelin letterhead, in the vendor's folder.",
+  "checks": "B D G",
+  "rubric": [
+    "Each requirement row cites the vault classification guide.",
+    "Every value in the matrix matches the vault.",
+    "The document uses the Laurelin letterhead, not another company's.",
+    "The file sits in the vendor's folder."
+  ],
+  "source": "Organizations/<vendor>/... Disclosure Matrix.md; Classification/Laurelin Classification Guide.md",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "canonical": ""
+}

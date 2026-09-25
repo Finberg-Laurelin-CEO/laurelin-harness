@@ -8,3 +8,4 @@ decision-log/*.jsonl
 .tmp-agent-dir/
 tests/tmp/
 .jacobian/
+tests/testset/results/

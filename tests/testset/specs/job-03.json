@@ -1,0 +1,19 @@
+{
+  "id": "job-03",
+  "name": "Whitepaper memo in LaTeX",
+  "group": "Fundraising",
+  "enabled": false,
+  "prompt": "Typeset the memo text in {root}/memo-source.md as a LaTeX memo and build the PDF at {target}. Keep every sentence of the source word for word. Change layout only, never the prose or the claims.",
+  "target": "Deck Rewrite 2026-08/Laurelin Deck Memo.pdf",
+  "claim": "The memo PDF holds Joe's prose unchanged, laid out cleanly, in the deck rewrite folder.",
+  "checks": "A C D E",
+  "rubric": [
+    "Every sentence of the source text appears unchanged in the PDF.",
+    "No claim was added, removed or softened.",
+    "No equation, figure or table runs off the page or overlaps other text.",
+    "The PDF sits in the deck rewrite folder."
+  ],
+  "source": "Deck Rewrite 2026-08/Laurelin Deck Memo.pdf",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "original": ""
+}

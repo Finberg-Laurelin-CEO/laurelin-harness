@@ -1,0 +1,17 @@
+{
+  "id": "job-17",
+  "name": "Model data questions",
+  "group": "Investor research",
+  "enabled": false,
+  "prompt": "Answer the questions in {root}/questions.md about the model data. Use headless browsing for any lookup; never open a browser window. Write each answer with its source at {target}.",
+  "target": "tritium/ evidence notes",
+  "claim": "Each question is answered with a source, using headless browsing only.",
+  "checks": "I",
+  "rubric": [
+    "Each question has an answer with a named source.",
+    "No visible browser window was opened.",
+    "The answers stay within what the sources say."
+  ],
+  "source": "tritium/ evidence notes",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run."
+}

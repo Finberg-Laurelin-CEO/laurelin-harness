@@ -1,0 +1,20 @@
+{
+  "id": "job-06",
+  "name": "Due-diligence binder and short deck",
+  "group": "Fundraising",
+  "enabled": false,
+  "prompt": "Assemble the due-diligence binder from the vault: a markdown index and a PDF, plus a short deck, in the folder {target}. Plain words. Leave out any pay, salary or personal finance detail.",
+  "target": "Investor Research/<accelerator>/Due Diligence/",
+  "claim": "The binder and short deck are assembled from vault facts, in plain words, with no pay detail.",
+  "checks": "A B C D",
+  "rubric": [
+    "The binder holds a markdown index and a PDF, and the short deck is present.",
+    "No section mentions pay, salary or personal finance.",
+    "Every number matches the vault.",
+    "The prose is plain, with no filler.",
+    "No page has overlapping or clipped text."
+  ],
+  "source": "Investor Research/<accelerator>/Due Diligence/",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "canonical": ""
+}

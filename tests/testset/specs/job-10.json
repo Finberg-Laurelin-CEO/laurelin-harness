@@ -1,0 +1,19 @@
+{
+  "id": "job-10",
+  "name": "Large-N gravity arXiv paper",
+  "group": "Academic",
+  "enabled": false,
+  "prompt": "Revise the article source in {root}/paper/ in place, not in a side file, and rebuild the PDF at {target}. Keep a log of each change at {root}/paper/CHANGES.md. Use no visible windows.",
+  "target": "Writing/On Large-N Sparse CFTs .../sn-article-v3.pdf",
+  "claim": "The article was revised in place with a change log, builds cleanly, and no visible window was opened.",
+  "checks": "A C F I",
+  "rubric": [
+    "Edits went into the article source itself, not a side file.",
+    "A change log lists each edit.",
+    "The PDF builds and no figure or equation runs off the page.",
+    "The prose is plain and no filler was added.",
+    "No visible window or browser was opened."
+  ],
+  "source": "Writing/On Large-N Sparse CFTs .../sn-article-v3.pdf",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run."
+}

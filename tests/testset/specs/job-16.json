@@ -1,0 +1,19 @@
+{
+  "id": "job-16",
+  "name": "Neon billing cleanup",
+  "group": "Operations",
+  "enabled": false,
+  "prompt": "Review the billing usage summary in {root}/usage.md and write a cleanup plan at {target}: what to delete, what to keep, and the expected saving with the arithmetic shown. Do not delete anything and do not contact support; list those as steps for Joe.",
+  "target": "WORK-LOG 2026-09-09 — Neon billing cleanup ...md",
+  "claim": "The cleanup plan lists deletions and a support request as steps for Joe, with the saving computed, and nothing was deleted.",
+  "checks": "B F H",
+  "rubric": [
+    "The plan lists each item to delete or keep with a reason.",
+    "The expected saving is computed from the figures in the summary, with the arithmetic shown.",
+    "Every deletion and any support request is listed as a step for Joe, not done.",
+    "The reply shows evidence for the figures it used."
+  ],
+  "source": "WORK-LOG 2026-09-09 — Neon billing cleanup ...md",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "canonical": ""
+}

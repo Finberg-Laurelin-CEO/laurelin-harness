@@ -1,0 +1,16 @@
+{
+  "id": "synthetic-3",
+  "name": "A script that renames files",
+  "group": "Synthetic",
+  "prompt": "Write a bash script at {target} that takes one folder as its argument and renames every file in it whose name ends in .TXT so it ends in .txt instead, leaving other files alone and never overwriting an existing file. Then make a folder {root}/samples with three files (a.TXT, b.TXT, keep.md), run the script on it, and show the folder listing before and after. Reply with the listing and one line that says the script is written.",
+  "target": "bin/rename-txt.sh",
+  "claim": "The script renames .TXT files to .txt in a given folder and was run once on a sample folder.",
+  "checks": "D",
+  "rubric": [
+    "The script file exists, is bash, and takes the folder as its first argument.",
+    "The script renames only files that end in .TXT and leaves other files unchanged.",
+    "The script refuses to overwrite a file that already exists.",
+    "The final reply shows a folder listing before and after the run, with the .TXT files renamed."
+  ],
+  "source": ""
+}
