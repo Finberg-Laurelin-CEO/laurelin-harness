@@ -8,7 +8,8 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | launcher (`bin/laurelin`, Steps 1b and 1e) | `tests/test-launcher.sh` |
 | interface (theme and `laurelin-ui` extension) | `tests/test-interface.sh` |
 | workers (Step 2: delegate_worker, call_model, Jev context pruning) | `tests/test-workers.sh` |
-| gates | `tests/test-gates.sh` |
+| gates (Step 4: prose, location, verbatim, evidence) | `tests/test-gates.sh` |
+| gates2 (Step 4: numbers and layout gates) | `tests/test-gates2.sh` |
 | safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
 
 ## Manual test: interface (Joe, in Ghostty)
