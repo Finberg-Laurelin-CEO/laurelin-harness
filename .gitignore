@@ -10,3 +10,5 @@ tests/tmp/
 .jacobian/
 .laurelin/
 tests/testset/results/
+__pycache__/
+*.pyc
