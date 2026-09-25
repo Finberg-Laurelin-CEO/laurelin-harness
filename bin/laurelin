@@ -1,0 +1,203 @@
+#!/usr/bin/env bash
+# laurelin: start Prime Agent with the Laurelin package, and manage API keys.
+#
+# Plan: PLAN.md section 10, Steps 1b and 1e. Brief: docs/briefs/launcher.md.
+# Keys live in ~/.config/agent-keys/env (one NAME=value per line, mode 600).
+# This script reads that file into the environment and never prints a value.
+
+set -euo pipefail
+
+# Find the repo root, even when this script is reached through a symlink.
+self="$0"
+while [ -L "$self" ]; do
+  target="$(readlink "$self")"
+  case "$target" in
+    /*) self="$target" ;;
+    *) self="$(dirname "$self")/$target" ;;
+  esac
+done
+REPO="$(cd "$(dirname "$self")/.." && pwd)"
+PACK="$REPO/pack"
+STORE="${LAURELIN_KEY_STORE:-$HOME/.config/agent-keys/env}"
+
+# Expected key names, whether each is required, and which tool uses it.
+# Names only. No value ever appears in this file.
+KEY_TABLE="
+TYPESAFE_API_KEY required Jev judgments (jev, jev-decide, jev-sweep, fastbrowse)
+CONTEXT_DEV_API_KEY required context.dev research tool (MCP server)
+FOLK_API_KEY required Folk CRM (investor and contact records)
+OPENAI_API_KEY required gbrain embeddings
+GITLAB_TOKEN required GitLab (git remotes)
+VENICE_API_KEY optional Venice models
+"
+
+die() { echo "laurelin: $*" >&2; exit 1; }
+
+usage() {
+  cat <<EOF
+laurelin: Prime Agent with the Laurelin package.
+
+Usage:
+  laurelin                      Open an interactive session.
+  laurelin "task"               Open a session and start with this task.
+  laurelin -p "question"        Print one answer and exit. Good for scripts.
+  laurelin --autonomous "task"  Run until every gate in pack/gates passes,
+                                or Prime's limits stop it.
+  laurelin agents               See running and saved sessions, and reattach.
+  laurelin list                 List agents.
+  laurelin attach <agent>       Attach the screen to a running agent.
+  laurelin send <agent> "msg"   Send a message to a running agent.
+  laurelin stop <agent>         Stop an agent.
+  laurelin schedule ...         Prompts that run later or on a schedule.
+  laurelin keys add NAME        Store a key. You type the value; it is not shown.
+  laurelin keys list            Show key names and which tool uses each.
+  laurelin keys check           Show which expected keys are present or missing.
+  laurelin --help               This text.
+
+Any other flag goes straight to prime-agent (for example --model, --thinking,
+--continue). Run "prime-agent --help" for the full list.
+
+Keys are read from $STORE at launch. Values are never printed.
+
+To run "laurelin" from anywhere, make one symlink:
+  ln -s "$REPO/bin/laurelin" ~/.local/bin/laurelin
+EOF
+}
+
+# Read the key store into the environment. Prints nothing.
+load_store() {
+  [ -f "$STORE" ] || return 0
+  set -a
+  # shellcheck disable=SC1090
+  . "$STORE" >/dev/null 2>&1 || true
+  set +a
+}
+
+# Names defined in the store, one per line. Values are not read.
+store_names() {
+  [ -f "$STORE" ] || return 0
+  grep -E -o '^(export[[:space:]]+)?[A-Za-z_][A-Za-z0-9_]*=' "$STORE" \
+    | sed -E 's/^export[[:space:]]+//; s/=$//'
+}
+
+# The tool that uses a key, from KEY_TABLE.
+key_use() {
+  printf '%s\n' "$KEY_TABLE" | awk -v n="$1" '$1 == n { $1 = ""; $2 = ""; sub(/^ +/, ""); print }'
+}
+
+keys_add() {
+  local name="${1:-}" value quoted tmp replaced=0 line dir
+  [[ "$name" =~ ^[A-Z][A-Z0-9_]*$ ]] || die "keys add: give a name in capitals, like FOLK_API_KEY"
+  printf 'Value for %s (not shown): ' "$name" >&2
+  IFS= read -r -s value
+  printf '\n' >&2
+  [ -n "$value" ] || die "keys add: no value given, nothing changed"
+
+  dir="$(dirname "$STORE")"
+  mkdir -p "$dir"
+  chmod 700 "$dir"
+  umask 077
+  tmp="$(mktemp "$dir/.env.XXXXXX")"
+  # Single quotes keep any character safe for "source". A quote inside the
+  # value becomes '\'' which the shell reads back as one quote. sed gets the
+  # value on stdin, never as an argument, so it never shows in a process list.
+  quoted="'$(printf '%s' "$value" | sed "s/'/'\\\\''/g")'"
+
+  if [ -f "$STORE" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+      case "$line" in
+        "export $name="* | "$name="*)
+          if [ "$replaced" -eq 0 ]; then
+            printf 'export %s=%s\n' "$name" "$quoted"
+            replaced=1
+          fi
+          ;;
+        *) printf '%s\n' "$line" ;;
+      esac
+    done < "$STORE" > "$tmp"
+  fi
+  [ "$replaced" -eq 1 ] || printf 'export %s=%s\n' "$name" "$quoted" >> "$tmp"
+  chmod 600 "$tmp"
+  mv "$tmp" "$STORE"
+  chmod 600 "$STORE"
+  if [ "$replaced" -eq 1 ]; then
+    echo "$name: replaced in $STORE"
+  else
+    echo "$name: added to $STORE"
+  fi
+}
+
+keys_list() {
+  local n use
+  [ -f "$STORE" ] || die "no key store at $STORE (use: laurelin keys add NAME)"
+  echo "Keys in $STORE (names only):"
+  while IFS= read -r n; do
+    [ -n "$n" ] || continue
+    use="$(key_use "$n")"
+    printf '  %-22s %s\n' "$n" "${use:-not in the table; no known tool uses it}"
+  done < <(store_names)
+}
+
+# One line per expected name: present or missing. Exit 1 if a required key is missing.
+keys_check() {
+  local name need in_store missing=0
+  load_store
+  while read -r name need _; do
+    [ -n "$name" ] || continue
+    if store_names | grep -qx "$name"; then
+      in_store=1
+    else
+      in_store=0
+    fi
+    if [ "$in_store" -eq 1 ]; then
+      printf '%-22s present\n' "$name"
+    elif [ -n "${!name:-}" ]; then
+      printf '%-22s present (shell only, not in the store)\n' "$name"
+    elif [ "$need" = optional ]; then
+      printf '%-22s missing (optional)\n' "$name"
+    else
+      printf '%-22s missing\n' "$name"
+      missing=1
+    fi
+  done <<< "$KEY_TABLE"
+  return "$missing"
+}
+
+keys() {
+  case "${1:-}" in
+    add) shift; keys_add "$@" ;;
+    list) keys_list ;;
+    check) keys_check ;;
+    *) die "keys: use add NAME, list, or check" ;;
+  esac
+}
+
+# Start Prime with the pack, the theme if it exists, and the gates on autonomous runs.
+launch() {
+  local args a g
+  load_store
+  args=(-e "$PACK")
+  if [ -f "$PACK/themes/laurelin.json" ]; then
+    args+=(--theme "$PACK/themes/laurelin.json")
+  fi
+  for a in "$@"; do
+    if [ "$a" = "--autonomous" ]; then
+      for g in "$PACK"/gates/*.sh; do
+        if [ -f "$g" ]; then
+          args+=(--autonomous-gate "$g")
+        fi
+      done
+      break
+    fi
+  done
+  exec prime-agent "${args[@]}" "$@"
+}
+
+command -v prime-agent >/dev/null 2>&1 || die "prime-agent is not on PATH. Install Prime Agent first."
+
+case "${1:-}" in
+  -h | --help | help) usage ;;
+  keys) shift; keys "$@" ;;
+  agents | schedule | attach | send | list | stop) load_store; exec prime-agent "$@" ;;
+  *) launch "$@" ;;
+esac
