@@ -28,3 +28,4 @@ prime-agent -e ./pack
 8. Repeat steps 1 to 6 with the other terminal background and the matching theme.
 | workers (Step 2: delegate_worker, call_model, Jev context pruning) | `tests/test-workers.sh` |
 | gates | `tests/test-gates.sh` |
+| safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
