@@ -69,7 +69,7 @@ elif ! command -v prime-agent >/dev/null 2>&1; then
   say "skipped: no model (prime-agent is not on PATH)"
 else
   [ -f "$HOME/.config/agent-keys/env" ] && . "$HOME/.config/agent-keys/env"
-  prompt="List the Laurelin skills you have. Print each skill name exactly as given, one per line, nothing else."
+  prompt="List the folder names of every skill you have loaded, one name per line, names only, no commentary. There should be about twelve."
   raw="$(timeout 180 prime-agent -e ./pack --no-session -p "$prompt" --mode json 2>/dev/null)"
   rc=$?
   answer="$(printf '%s' "$raw" | python3 -c '
@@ -92,7 +92,9 @@ try:
 except Exception:
     for line in raw.splitlines():
         try:
-            walk(json.loads(line))
+            ev = json.loads(line)
+            if ev.get("type") == "message_end":
+                walk(ev)
         except Exception:
             pass
 print("\n".join(texts))

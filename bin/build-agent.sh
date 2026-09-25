@@ -7,4 +7,4 @@ echo "installing dependencies (repo-local)"
 HUSKY=0 npm install --no-audit --no-fund
 echo "building"
 npm run build
-echo "built: $(node packages/coding-agent/dist/bundle/cli.js --version)"
+echo "built: $(node packages/coding-agent/dist/bundle/cli.js --version 2>&1 | head -1)"
