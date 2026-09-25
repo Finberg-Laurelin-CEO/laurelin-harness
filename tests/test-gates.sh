@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Test for the gates piece. Each built gate passes on its good fixture and fails on its bad
-# fixture; the stubs print "not built"; every run logs a JSON line; Prime runs one gate as
+# fixture; numbers and layout skip without their inputs; every run logs a JSON line; Prime runs one gate as
 # --autonomous-gate. Run from anywhere:  tests/test-gates.sh
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -51,13 +51,14 @@ expect fail "evidence unrelated"     LAURELIN_CLAIM="the PDF renders with no ove
 "$EVIDENCE" run --label unit-test -- 'echo "2 of 3 tests failed"; exit 1' >/dev/null 2>&1
 expect fail "evidence failed row"    LAURELIN_CLAIM="all unit tests passed" $G/evidence.sh
 
-echo "== stubs"
-expect pass "numbers stub" $G/numbers.sh
-expect pass "layout stub"  $G/layout.sh
-if [ "$($G/numbers.sh)" = "numbers: not built" ] && [ "$($G/layout.sh)" = "layout: not built" ]; then
-  pass=$((pass + 1)); echo "ok    stubs say not built"
+echo "== numbers and layout skip without their inputs (full test: tests/test-gates2.sh)"
+expect pass "numbers no canonical" LAURELIN_TARGET=$F/prose-good/note.md $G/numbers.sh
+expect pass "layout not a pdf"     LAURELIN_TARGET=$F/prose-good/note.md $G/layout.sh
+if [ "$(LAURELIN_TARGET=$F/prose-good/note.md $G/numbers.sh | cut -d, -f1)" = "numbers: skipped" ] \
+   && [ "$(LAURELIN_TARGET=$F/prose-good/note.md $G/layout.sh | cut -d, -f1)" = "layout: skipped" ]; then
+  pass=$((pass + 1)); echo "ok    both say skipped"
 else
-  fail=$((fail + 1)); echo "FAIL  stubs say not built"
+  fail=$((fail + 1)); echo "FAIL  both say skipped"
 fi
 
 echo "== decision log"
