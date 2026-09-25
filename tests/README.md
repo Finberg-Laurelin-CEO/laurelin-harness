@@ -1,6 +1,6 @@
 # Tests
 
-One command per piece, run from the repo root. `tests/run-all.sh` runs every one.
+One command per piece, run from the repo root. `tests/run-all.sh` runs every one in step order.
 
 | Piece | Command |
 |---|---|
@@ -8,13 +8,12 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | launcher (`bin/laurelin`, Steps 1b and 1e) | `tests/test-launcher.sh` |
 | interface (theme and `laurelin-ui` extension) | `tests/test-interface.sh` |
 | workers (Step 2: delegate_worker, call_model, Jev context pruning) | `tests/test-workers.sh` |
+| worker settings (Step 2: worker-only Claude Code settings, token cut) | `tests/test-worker-settings.sh` |
 | gates (Step 4: prose, location, verbatim, evidence) | `tests/test-gates.sh` |
 | gates2 (Step 4: numbers and layout gates) | `tests/test-gates2.sh` |
-| worker settings (Step 2: worker-only Claude Code settings, token cut) | `tests/test-worker-settings.sh` |
-| gates | `tests/test-gates.sh` |
-| safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
 | bridge (task file, gates read it, live check lights, live approvals, worker events) | `tests/test-bridge.sh` |
 | router (Step 3: Jev picks worker, skill, class, outward, intent; decision log) | `tests/test-router.sh` |
+| safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
 | test set (Step 6: runner, scoring, calibration) | `tests/test-testset.sh` (runs one synthetic job through Prime, about a minute) |
 
 ## Test-set runner (Step 6)
