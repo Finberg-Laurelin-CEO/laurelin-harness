@@ -1,0 +1,18 @@
+{
+  "id": "job-14",
+  "name": "Reactor page label overlaps",
+  "group": "Websites",
+  "enabled": false,
+  "prompt": "Fix the overlapping labels on the reactor page at {target}. Render the page headless and confirm no label overlaps another at desktop and phone widths. Do not push, deploy or promote anything.",
+  "target": "~/Laurelin_YC_Website/app/reactor/page.tsx",
+  "claim": "The reactor page labels no longer overlap at any width, and nothing was pushed.",
+  "checks": "C H",
+  "rubric": [
+    "No label overlaps another at desktop width.",
+    "No label overlaps another at phone width.",
+    "The reply shows the rendered check, not only a claim.",
+    "Nothing was pushed, deployed or promoted."
+  ],
+  "source": "~/Laurelin_YC_Website/app/reactor/page.tsx",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run."
+}

@@ -1,0 +1,18 @@
+{
+  "id": "job-18",
+  "name": "Vault index rebuild",
+  "group": "Vault upkeep",
+  "enabled": false,
+  "prompt": "Rebuild the vault index from the current folder tree: an overview note at {target} and a top-level index note beside it. Read the vault first. Show the folder walk you ran.",
+  "target": "Company Brain/Vault Index/Overview.md",
+  "claim": "The index notes list the current folders and sit in the right place.",
+  "checks": "D F G",
+  "rubric": [
+    "The overview lists every top-level folder in the vault.",
+    "Both notes sit in the vault index location.",
+    "The reply shows the command that walked the folders and its output.",
+    "No note was invented; every entry maps to a real folder or file."
+  ],
+  "source": "Company Brain/Vault Index/Overview.md; 00 Vault Index.md",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run."
+}

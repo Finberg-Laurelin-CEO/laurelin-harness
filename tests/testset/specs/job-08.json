@@ -1,0 +1,18 @@
+{
+  "id": "job-08",
+  "name": "Accelerator portal application",
+  "group": "Fundraising",
+  "enabled": false,
+  "prompt": "Draft the answers for the accelerator application from the question list in {root}/questions.md and save them at {target}. If you look anything up on the web, use headless browsing only. Do not fill or submit the portal form.",
+  "target": "Investor Research/<accelerator 2>/Blueprint II Application - Answers.md",
+  "claim": "The application answers are drafted and saved; no visible browser was opened; nothing was submitted.",
+  "checks": "A F H I",
+  "rubric": [
+    "Each question has an answer in plain words.",
+    "Any web lookup used headless browsing; no visible browser window was opened.",
+    "The reply shows evidence for any lookup it relied on.",
+    "The portal form was not filled or submitted."
+  ],
+  "source": "Investor Research/<accelerator 2>/Blueprint II Application - Answers.md",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run."
+}

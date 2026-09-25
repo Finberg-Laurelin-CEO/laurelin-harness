@@ -1,0 +1,20 @@
+{
+  "id": "job-09",
+  "name": "Yang-Mills Paper IX",
+  "group": "Academic",
+  "enabled": false,
+  "prompt": "Fix the layout of the paper in {root}/paper/ so every equation and figure fits on the page, then rebuild the PDF at {target}. Never delete a section; comment it out if it must go. Derive each result you touch; do not assert it. Show the build log.",
+  "target": "Writing/Yang-Mills/Paper IX - Mass Gap/main.pdf",
+  "claim": "The paper builds with every equation and figure on the page, no section deleted, and results derived.",
+  "checks": "C D E F",
+  "rubric": [
+    "Every equation and figure fits inside the page.",
+    "No section was deleted; anything removed is commented out in the source.",
+    "Each result the edit touched is derived, not asserted.",
+    "Joe's prose is unchanged outside the edited spots.",
+    "The reply shows the build command and its output."
+  ],
+  "source": "Writing/Yang-Mills/Paper IX - Mass Gap/main.pdf",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "original": ""
+}

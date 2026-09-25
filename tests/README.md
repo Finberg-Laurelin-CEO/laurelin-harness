@@ -15,6 +15,18 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
 | bridge (task file, gates read it, live check lights, live approvals, worker events) | `tests/test-bridge.sh` |
 | router (Step 3: Jev picks worker, skill, class, outward, intent; decision log) | `tests/test-router.sh` |
+| test set (Step 6: runner, scoring, calibration) | `tests/test-testset.sh` (runs one synthetic job through Prime, about a minute) |
+
+## Test-set runner (Step 6)
+
+```
+tests/testset/run.sh                      # every enabled spec (the three synthetic ones)
+tests/testset/run.sh --only synthetic-2   # one or more ids, comma separated; runs a disabled spec too
+tests/testset/run.sh --root <dir>         # put the results in this folder instead of tests/tmp
+tests/testset/calibrate.sh                # confidence report over all results and decision logs
+```
+
+Results land in `tests/testset/results/<date>-<id>.json` (gitignored). Run artifacts (event stream, gate log, stderr) are under `tests/tmp/testset/<id>/`. The spec format is in `tests/testset/spec-format.md`; the committed baseline is `tests/testset/baseline.md`.
 
 ## Manual test: interface (Joe, in Ghostty)
 

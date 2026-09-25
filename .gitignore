@@ -9,3 +9,4 @@ decision-log/*.jsonl
 tests/tmp/
 .jacobian/
 .laurelin/
+tests/testset/results/

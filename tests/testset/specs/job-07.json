@@ -1,0 +1,18 @@
+{
+  "id": "job-07",
+  "name": "Grant application draft",
+  "group": "Fundraising",
+  "enabled": false,
+  "prompt": "Draft the grant application answers from the program's question list in {root}/questions.md, using vault facts. Save the draft at {target}, inside the fund's existing folder. Do not create new top-level folders. Do not submit.",
+  "target": "Investor Research/<grant fund>/Application — Round 1 2026-08.md",
+  "claim": "The application draft is saved inside the fund's folder, from vault facts, and was not submitted.",
+  "checks": "A D G H",
+  "rubric": [
+    "Each program question has a plain-words answer.",
+    "Every fact comes from the vault.",
+    "The draft sits inside the fund's existing folder and no stray top-level folder was made.",
+    "Nothing was submitted or sent."
+  ],
+  "source": "Investor Research/<grant fund>/Application — Round 1 2026-08.md",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run."
+}

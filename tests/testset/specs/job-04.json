@@ -1,0 +1,22 @@
+{
+  "id": "job-04",
+  "name": "Deck v7 from a call transcript",
+  "group": "Fundraising",
+  "enabled": false,
+  "prompt": "Update the deck from the call transcript in {root}/transcript.md. Use Joe's words from the call for any new slide text. Where the transcript and the vault disagree on a number, flag it in the reply and leave the slide unchanged. Build the PDF at {target}. Do not send or share it.",
+  "target": "Investor Research/_circulating-decks/Laurelin-General-Deck-v7.pdf",
+  "claim": "The deck reflects the call, keeps Joe's words, flags every discrepancy, and was not sent.",
+  "checks": "B C E F H",
+  "rubric": [
+    "New slide text uses Joe's words from the transcript unchanged.",
+    "Each number on the slides matches the vault or is flagged in the reply as a discrepancy.",
+    "A disagreement between transcript and vault is flagged, not resolved silently.",
+    "Rows in any ownership or cap table match the source exactly.",
+    "No text box overlaps or runs off a slide.",
+    "The reply shows the build command and its output, and nothing was sent."
+  ],
+  "source": "Investor Research/_circulating-decks/Laurelin-General-Deck-v7.pdf",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "canonical": "",
+  "original": ""
+}

@@ -1,0 +1,3 @@
+The pump test ran for six hours without a fault.
+The seal on the second unit needs a new gasket before the next run.
+We will repeat the test next week with both units.

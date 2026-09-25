@@ -1,0 +1,17 @@
+{
+  "id": "synthetic-2",
+  "name": "A short memo from an outline",
+  "group": "Synthetic",
+  "prompt": "The file {original} holds three sentences, one per line. Write a short markdown memo at {target} with a title line and three sections, one per outline sentence. Each section starts with its outline sentence word for word, then adds one or two plain sentences of your own. No bullet lists, no bold text, no em dashes. Reply with one line that says the memo is written.",
+  "target": "memos/pump-test.md",
+  "original": "tests/fixtures/testset/memo-outline.txt",
+  "claim": "The memo keeps each outline sentence unchanged and adds short plain text under each.",
+  "checks": "A D E",
+  "rubric": [
+    "The memo has a title and three sections, one per outline sentence.",
+    "Each outline sentence appears word for word at the start of its section.",
+    "The added text is short, plain and adds no facts that contradict the outline.",
+    "The memo uses no bullet lists, bold text or em dashes."
+  ],
+  "source": ""
+}

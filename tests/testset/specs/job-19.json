@@ -1,0 +1,20 @@
+{
+  "id": "job-19",
+  "name": "Club application PDF",
+  "group": "Personal",
+  "enabled": false,
+  "prompt": "Fill the application PDF at {root}/form.pdf with the facts in {root}/facts.md, in the order given, and save it at {target}. Use the email of record from the facts. Show the filled fields.",
+  "target": "~/Documents/Members Clubs/ filled PDF",
+  "claim": "The PDF is filled from the facts file in the given order, saved in the clubs folder.",
+  "checks": "D E F",
+  "rubric": [
+    "Schools and dates appear in the order the facts file gives.",
+    "The email of record matches the facts file.",
+    "Every filled field matches the facts file word for word.",
+    "The filled PDF is saved in the members clubs folder.",
+    "The reply lists the filled fields as evidence."
+  ],
+  "source": "~/Documents/Members Clubs/ filled PDF",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "original": ""
+}

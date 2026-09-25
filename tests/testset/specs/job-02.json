@@ -1,0 +1,19 @@
+{
+  "id": "job-02",
+  "name": "Deck numbers pass",
+  "group": "Fundraising",
+  "enabled": false,
+  "prompt": "Go through the live deck, memo and one-pager and check every figure against the canonical numbers in the vault. Replace each retired figure, cite the current source for each, and write the list of changes to {target}.",
+  "target": "Deck Rewrite 2026-08/PLAN.md",
+  "claim": "Every figure in the live documents matches the canonical numbers and cites a current source.",
+  "checks": "B G",
+  "rubric": [
+    "Every figure in the live documents matches the canonical source.",
+    "Each replaced figure cites the current source, not a stale memo.",
+    "The change list names each file, the old figure and the new one.",
+    "No live document still holds a retired figure."
+  ],
+  "source": "Deck Rewrite 2026-08/PLAN.md",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "canonical": ""
+}

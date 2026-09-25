@@ -1,0 +1,18 @@
+{
+  "id": "job-20",
+  "name": "Video script with provenance",
+  "group": "Media",
+  "enabled": false,
+  "prompt": "Write the video script from the brief in {root}/brief.md at {target}, and beside it a provenance file that names the source for every claim in the script. Plain words.",
+  "target": "~/orca/workspaces/Laurelin-PR/video-production/outputs/ script and provenance file",
+  "claim": "The script is written in plain words with a provenance file naming a source for each claim.",
+  "checks": "A F",
+  "rubric": [
+    "The script follows the brief.",
+    "The prose is plain, with no filler.",
+    "The provenance file names a source for every claim in the script.",
+    "The two files sit together in the outputs folder."
+  ],
+  "source": "~/orca/workspaces/Laurelin-PR/video-production/outputs/ script and provenance file",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run."
+}

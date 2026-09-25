@@ -1,0 +1,20 @@
+{
+  "id": "job-15",
+  "name": "Site art refresh and careers page",
+  "group": "Websites",
+  "enabled": false,
+  "prompt": "Refresh the art on the careers page at {target} and add the role text from {root}/roles.md word for word. Keep every existing role. Show the local build passing. Do not promote to production.",
+  "target": "~/laurelin-beautiful-website/app/careers/page.tsx",
+  "claim": "The careers page has the new art and the new roles word for word, keeps existing roles, and was not promoted.",
+  "checks": "A E F H",
+  "rubric": [
+    "Every existing role is still on the page.",
+    "The new role text appears word for word.",
+    "The copy is plain, with no filler.",
+    "The reply shows the build command and its output.",
+    "Nothing was promoted to production."
+  ],
+  "source": "~/laurelin-beautiful-website/app/careers/page.tsx",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "original": ""
+}

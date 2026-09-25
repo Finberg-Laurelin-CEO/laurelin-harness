@@ -1,0 +1,19 @@
+{
+  "id": "job-05",
+  "name": "Investor follow-up answers",
+  "group": "Fundraising",
+  "enabled": false,
+  "prompt": "Draft answers to the investor's follow-up questions in {root}/questions.md. Read the vault first for every number, name and status. Write the draft at {target} in plain words for Joe to edit. Do not send anything.",
+  "target": "investors/<firm>/<partner>/Reply Draft — 2026-09-02 — Joe edits before send.md",
+  "claim": "The reply draft answers each question from vault facts, in plain words, and waits for Joe.",
+  "checks": "A B G H",
+  "rubric": [
+    "Each question in the list gets a direct answer.",
+    "Every number, name and status comes from the vault, not from memory.",
+    "The prose is plain, with no filler or self-praise.",
+    "The draft is saved for Joe's edit and nothing was sent."
+  ],
+  "source": "investors/<firm>/<partner>/Reply Draft — 2026-09-02 — Joe edits before send.md",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "canonical": ""
+}

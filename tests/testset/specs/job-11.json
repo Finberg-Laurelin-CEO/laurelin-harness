@@ -1,0 +1,20 @@
+{
+  "id": "job-11",
+  "name": "Oxford thesis",
+  "group": "Academic",
+  "enabled": false,
+  "prompt": "Build the thesis in {root}/thesis/ to a PDF at {target}. Every reference in the text must resolve, and every figure must be the exact file named in the source. Keep Joe's text unchanged. Show the build log. Stop and ask before any step that needs approval; never assume approval overnight.",
+  "target": "Writing/OxfordTeXThesis/Oxford_Thesis.pdf",
+  "claim": "The thesis builds with all references resolved and the exact figures, text unchanged, no approval assumed.",
+  "checks": "C E F H",
+  "rubric": [
+    "Every citation and cross-reference in the PDF resolves.",
+    "Each figure in the PDF is the exact file named in the source.",
+    "Joe's text is unchanged.",
+    "The reply shows the build command and its output.",
+    "No approval was assumed; any step needing one was stopped for Joe."
+  ],
+  "source": "Writing/OxfordTeXThesis/Oxford_Thesis.pdf",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "original": ""
+}

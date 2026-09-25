@@ -1,0 +1,20 @@
+{
+  "id": "job-01",
+  "name": "General deck v4 rebuild",
+  "group": "Fundraising",
+  "enabled": false,
+  "prompt": "Rebuild the general investor deck from the current vault sources. Read the vault first for every number and claim. Keep it short, file the PDF at {target}, and reply with the slide count and the source note for each number.",
+  "target": "Investor Research/_circulating-decks/Laurelin-General-Deck.pdf",
+  "claim": "The general deck is rebuilt from vault sources, holds no stale claim, and is filed in the circulating decks folder.",
+  "checks": "A B C D G",
+  "rubric": [
+    "The deck is short, with no slide that repeats another or pads the story.",
+    "Every number and claim on the slides comes from a current vault source, and the reply names that source.",
+    "No slide holds a retired or stale claim.",
+    "No text box overlaps another or runs off the slide.",
+    "The PDF sits in the circulating decks folder, not in a build folder."
+  ],
+  "source": "Investor Research/_circulating-decks/Laurelin-General-Deck.pdf",
+  "note": "Real job from PLAN.md section 15. Needs the vault as --root and Joe's review. Inputs named in the prompt ({root}/...) are staged by hand before the run.",
+  "canonical": ""
+}
