@@ -1,6 +1,6 @@
 # Laurelin Harness Plan
 
-Status: BUILD (Joe, 2026-09-25). Build work happens in Orca child worktrees of the `ideation` branch, one per piece, merged in step order after each test passes. A `testing` worktree collects merged pieces for Joe to launch himself. A clean version goes to GitHub only after Joe approves the push.
+Status: BUILD (Joe, 2026-09-25). Build work happens in Orca child worktrees of the `ideation` branch, one per piece, merged in step order after each test passes. A `testing` worktree collects merged pieces for Joe to launch himself. No push to GitHub until it works locally end to end and Joe says push (Joe, 9/25).
 Location: this file is `~/laurelin-harness/PLAN.md` (git repo). The vault note `Laurelin/LaurelinOS/Laurelin Harness Plan.md` is a symlink to it, so there is one copy.
 Related: [[LaurelinOS_RuntimeOS_GBrain_Architecture_Build_Spec]], [[WORK-LOG 2026-09-23 — Laurelin agent harness + gbrain refresh]]
 
@@ -553,3 +553,4 @@ Facts learned in the build: Prime's `-p` and JSON modes report a screen but answ
 - 2026-09-25: Joe said build. Status BUILD. First wave of child branches: pack, launcher (1b plus 1e), interface (1c), workers (2), gates (4), safety (5). Memory (1d) waits for Joe's approval of the VM copy. Briefs in `docs/briefs/`.
 - 2026-09-25: Joe: this is a Prime Agent clone. Recorded soft clone now (package on Prime), hard fork as a later option; Prime's source is public and MIT.
 - 2026-09-25: Wave 1 built and merged (section 20). Review fixes: executable-only gates in the launcher, `/approvals-log` rename, neutral vault pointers, `.jacobian` untracked, `--no-session` in tests, default coordinator model in the launcher, rules extension added.
+- 2026-09-25: Joe: no GitHub push yet; prove it works locally first, then build out wave 2 for Joe to test.
