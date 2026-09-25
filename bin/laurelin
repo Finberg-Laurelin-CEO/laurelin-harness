@@ -226,6 +226,6 @@ fi
 case "${1:-}" in
   -h | --help | help) usage ;;
   keys) shift; keys "$@" ;;
-  agents | schedule | attach | send | list | stop) load_store; prime-agent "$@" ;;
+  agents | schedule | attach | send | list | stop | status | doctor | shutdown | mcp | package | update | model | session | config) load_store; prime-agent "$@" ;;
   *) launch "$@" ;;
 esac
