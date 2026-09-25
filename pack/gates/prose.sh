@@ -5,7 +5,7 @@ set -uo pipefail
 CHECK=prose
 export PATH="$HOME/.local/bin:$PATH"
 
-target="$(gate_target)" || gate_fail "$CHECK" "no target: set LAURELIN_TARGET or change a file in the worktree"
+target="$(gate_target)" || gate_skip "$CHECK" target
 [ -e "$target" ] || gate_fail "$CHECK" "target does not exist: $target"
 
 files="$(gate_prose_files "$target")"

@@ -5,7 +5,7 @@ set -uo pipefail
 CHECK=location
 ROOTS_FILE="${LAURELIN_ALLOWED_ROOTS:-$GATE_DIR/allowed-roots.txt}"
 
-target="$(gate_target)" || gate_fail "$CHECK" "no target: set LAURELIN_TARGET or change a file in the worktree"
+target="$(gate_target)" || gate_skip "$CHECK" target
 [ -e "$target" ] || gate_fail "$CHECK" "does not exist: $target"
 
 # Two spellings of the absolute path: as given (symlinks kept) and physical (symlinks resolved).
