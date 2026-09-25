@@ -177,7 +177,7 @@ launch() {
   local args a g
   load_store
   # Prime loads the pack twice if settings.json already lists it as a package.
-  if ! grep -qs 'laurelin-harness/pack' "${PRIME_AGENT_CODING_AGENT_DIR:-$HOME/.prime/agent}/settings.json"; then
+  if ! grep -qs 'laurelin-harness/pack' "${LAURELIN_CODING_AGENT_DIR:-${PRIME_AGENT_CODING_AGENT_DIR:-$HOME/.prime/agent}}/settings.json"; then
     args=(-e "$PACK")
   else
     args=()
@@ -201,14 +201,31 @@ launch() {
       break
     fi
   done
-  exec prime-agent "${args[@]}" "$@"
+  prime-agent "${args[@]}" "$@"
 }
 
-command -v prime-agent >/dev/null 2>&1 || die "prime-agent is not on PATH. Install Prime Agent first."
+# Prefer the forked agent built in this repo (agent/, a Prime Agent fork named laurelin).
+# Fall back to a system prime-agent when the fork is not built.
+FORK_CLI="$REPO/agent/packages/coding-agent/dist/bundle/cli.js"
+if [ -f "$FORK_CLI" ]; then
+  # The fork keeps its own background service so it never collides with an installed Prime.
+  LAURELIN_SOCK_DIR="${TMPDIR:-/tmp}/laurelin-$(id -u)"
+  mkdir -p "$LAURELIN_SOCK_DIR"
+  # Main command takes --daemon-socket; subcommands (agents, status, ...) do not.
+  prime-agent() {
+    case "${1:-}" in
+      agents|attach|send|list|stop|schedule|status|doctor|shutdown|mcp|package|update|model|session|config|help) node "$FORK_CLI" "$@" ;;
+      *) node "$FORK_CLI" --daemon-socket "$LAURELIN_SOCK_DIR/daemon.sock" "$@" ;;
+    esac
+  }
+  export LAURELIN_USING_FORK=1
+else
+  command -v prime-agent >/dev/null 2>&1 || die "Neither the built fork (agent/) nor prime-agent on PATH. Run: cd agent && npm install && npm run build"
+fi
 
 case "${1:-}" in
   -h | --help | help) usage ;;
   keys) shift; keys "$@" ;;
-  agents | schedule | attach | send | list | stop) load_store; exec prime-agent "$@" ;;
+  agents | schedule | attach | send | list | stop | status | doctor | shutdown | mcp | package | update | model | session | config) load_store; prime-agent "$@" ;;
   *) launch "$@" ;;
 esac
