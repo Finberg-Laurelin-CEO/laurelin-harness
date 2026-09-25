@@ -1,1 +1,0 @@
-{"definition":{"coefficient_field":"QQ","description":"canonical sparse polynomials over QQ in an explicit ordered tuple of variables","maximum_dimension":4,"maximum_exponent":127,"maximum_terms":1024,"monomial_order":"descending lexicographic","zero_terms":"omitted"},"descriptor_version":"1","kind":"semantics","name":"jacobian.sparse-rational-polynomial-ring","version":"1"}

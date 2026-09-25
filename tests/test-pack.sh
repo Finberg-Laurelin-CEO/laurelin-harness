@@ -70,7 +70,7 @@ elif ! command -v prime-agent >/dev/null 2>&1; then
 else
   [ -f "$HOME/.config/agent-keys/env" ] && . "$HOME/.config/agent-keys/env"
   prompt="List the Laurelin skills you have. Print each skill name exactly as given, one per line, nothing else."
-  raw="$(timeout 180 prime-agent -e ./pack -p "$prompt" --mode json 2>/dev/null)"
+  raw="$(timeout 180 prime-agent -e ./pack --no-session -p "$prompt" --mode json 2>/dev/null)"
   rc=$?
   answer="$(printf '%s' "$raw" | python3 -c '
 import json, sys

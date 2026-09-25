@@ -1,1 +1,0 @@
-{"definition":{"additionalProperties":false,"description":"The sign of one integer as -1, 0, or 1.","properties":{"sign":{"enum":[-1,0,1],"title":"Sign","type":"integer"}},"required":["sign"],"title":"IntegerSignResult","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.arithmetic-result.integer.compute.sign","version":"2"}

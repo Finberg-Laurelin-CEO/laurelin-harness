@@ -1,1 +1,0 @@
-{"definition":{"additionalProperties":false,"description":"One bounded positive integer (1 <= n <= 1 000).","properties":{"n":{"maximum":1000,"minimum":1,"title":"N","type":"integer"}},"required":["n"],"title":"PositiveIntegerRequest","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.number-theory-input.PositiveIntegerRequest","version":"1"}

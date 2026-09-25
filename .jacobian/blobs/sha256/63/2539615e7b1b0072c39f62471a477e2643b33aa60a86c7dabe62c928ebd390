@@ -1,1 +1,0 @@
-{"definition":{"coverage":"every canonical scope key appears exactly once","domain":"bounded explicit finite scopes and paged archives","maximum_page_items":1024,"maximum_pages":64,"maximum_scope_items":4096},"descriptor_version":"1","kind":"semantics","name":"jacobian.finite-exactly-once-coverage","version":"1"}

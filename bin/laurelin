@@ -176,14 +176,25 @@ keys() {
 launch() {
   local args a g
   load_store
-  args=(-e "$PACK")
+  # Prime loads the pack twice if settings.json already lists it as a package.
+  if ! grep -qs 'laurelin-harness/pack' "${PRIME_AGENT_CODING_AGENT_DIR:-$HOME/.prime/agent}/settings.json"; then
+    args=(-e "$PACK")
+  else
+    args=()
+  fi
+  # Coordinator model: the ChatGPT sign-in, never Prime's Claude sign-in (PLAN section 11).
+  case " $* " in *" --model "*) ;; *) args+=(--model "${LAURELIN_MODEL:-openai-codex/gpt-6-astra}") ;; esac
+  # gstack keys its state by repo; ~/package.json makes it resolve every repo to one slug.
+  export GSTACK_PROJECT_SLUG="${GSTACK_PROJECT_SLUG:-laurelin-harness}"
   if [ -f "$PACK/themes/laurelin.json" ]; then
     args+=(--theme "$PACK/themes/laurelin.json")
   fi
   for a in "$@"; do
     if [ "$a" = "--autonomous" ]; then
       for g in "$PACK"/gates/*.sh; do
-        if [ -f "$g" ]; then
+        # Only executable gates. lib.sh and other helpers are sourced, not run.
+        case "$(basename "$g")" in lib*|_*) continue ;; esac
+        if [ -x "$g" ]; then
           args+=(--autonomous-gate "$g")
         fi
       done

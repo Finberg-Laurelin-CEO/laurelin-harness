@@ -1,1 +1,0 @@
-{"definition":{"additionalProperties":false,"properties":{"value":{"pattern":"^(?:0|-?[1-9][0-9]*)$","title":"Value","type":"string"}},"required":["value"],"title":"IntegerResult","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.combinatorics-result.combinatorics.compute.factorial","version":"2"}

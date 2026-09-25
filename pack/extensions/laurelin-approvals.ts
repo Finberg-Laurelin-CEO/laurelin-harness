@@ -346,8 +346,8 @@ export default function (pi: ExtensionAPI) {
 		return undefined;
 	});
 
-	pi.registerCommand("approvals", {
-		description: "List outward actions waiting on Joe this session",
+	pi.registerCommand("approvals-log", {
+		description: "List outward actions waiting on Joe this session (log view; /approvals is the panel)",
 		handler: async (_args, ctx) => {
 			const items = listPending(sessionId(ctx));
 			const text = items.length

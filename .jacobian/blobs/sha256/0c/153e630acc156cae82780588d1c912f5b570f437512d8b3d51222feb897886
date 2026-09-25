@@ -1,1 +1,0 @@
-{"definition":{"budget":"wall_seconds is enforced in an isolated SymPy worker","description":"exact bounded rational optimization","failure":"timeouts, backend failures, and missing candidates are non-conclusions","scope":"minimize c^T x subject to A x = b and x >= 0"},"descriptor_version":"1","kind":"semantics","name":"jacobian.optimization","version":"1"}

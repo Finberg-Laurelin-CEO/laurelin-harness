@@ -1,1 +1,0 @@
-{"definition":{"degeneracy":"operation-specific and fail-closed","description":"Euclidean plane geometry over exact rational coordinates, including bounded exact rational-weight convex triangulation"},"descriptor_version":"1","kind":"semantics","name":"jacobian.exact-rational-plane-geometry","version":"3"}

@@ -49,7 +49,7 @@ else
 fi
 
 # 4. Smoke run with the pack loaded, no screen. Informational: passes without a model.
-out="$(timeout 120 prime-agent -e ./pack --mode json -p "reply with the single word ready" </dev/null 2>/dev/null || true)"
+out="$(timeout 120 prime-agent -e ./pack --no-session --mode json -p "reply with the single word ready" </dev/null 2>/dev/null || true)"
 if printf '%s' "$out" | grep -q '"type":"session"'; then
   if printf '%s' "$out" | grep -qi 'ready'; then echo "ok   prime-agent -e ./pack -p answered"; else echo "skip prime-agent -e ./pack ran; no model answer"; fi
 else

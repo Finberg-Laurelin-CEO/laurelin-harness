@@ -503,6 +503,29 @@ Prime only: ACP server mode, daemon and resident workers, `--goal`, the `--auton
 
 Versions: pi 0.79.4 installed, 0.87.1 latest, and 0.87.1 carries the Anthropic sign-in fix and Opus 5.5 that Prime 0.9.5 lacks. Prime gets them when it merges that release.
 
+## 20. Build log (from 2026-09-25)
+
+**Wave 1, 9/25.** Six child branches built in parallel by Claude Code sessions in Orca worktrees, each from a brief in `docs/briefs/`, each with a test, all merged into `ideation` in step order with every test passing on the merged tree (`tests/run-all.sh`). A `testing` worktree is cut for Joe. Nothing outside the repo was changed. No key values and no private content found in review; three vault pointers that named an investor firm and two advisers were made neutral after review.
+
+What each piece does now:
+- **pack** (Step 1): twelve skills as links into `~/.claude/skills`; `bin/link-skills.sh` prints the linking commands and applies them only with `--apply`; `pack/rules/laurelin.md` (generic rules, twelve sections) and `pack/rules/VAULT-RULES.md` (template for the private half, to live at `Laurelin/LaurelinOS/Harness Rules.md`). A `laurelin-rules` extension appends both to the system prompt each turn.
+- **launcher** (Steps 1b, 1e): `bin/laurelin` sources the key store, starts Prime with the pack, the theme and every executable gate on `--autonomous`, defaults the model to `openai-codex/gpt-6-astra` (override with `LAURELIN_MODEL` or `--model`), skips `-e` when Prime's settings already list the pack, and sets `GSTACK_PROJECT_SLUG`. `laurelin keys add|list|check` never shows a value. `PRIME_AGENT_CODING_AGENT_DIR` confirmed to move Prime's settings folder.
+- **interface** (Step 1c): themes `laurelin` (dark) and `laurelin-bone` (light); `laurelin-ui` extension with footer badge, checks widget, approvals overlay, title screen; commands `/checks demo|reset`, `/approvals demo`, `/approvals`, `/classify`, `/title`. Other extensions talk to it through `pi.events` (`laurelin:check`, `laurelin:classification`, `laurelin:worker`, `laurelin:approval`). Image draw in Ghostty unverified; `LAURELIN_NO_IMAGE=1` forces glyphs.
+- **workers** (Step 2): `delegate_worker` over `claude -p --output-format stream-json` (prompt on stdin; outward tools denied) and `codex exec --json` (workspace sandbox); `call_model`; `laurelin-context` prunes old tool results with Jev (drop when score under 0.5 at confidence 0.6 or more, threshold `LAURELIN_CONTEXT_THRESHOLD`).
+- **gates** (Step 4): `prose.sh` (jev-sweep, hits at 0.70 or more fail), `location.sh`, `verbatim.sh`, `evidence.sh` (gstack-evidence row plus one Jev Noul question, fail under 0.6); `numbers.sh` and `layout.sh` are stubs. Output shape `<check>: pass|fail, <why>`; every run appends to `decision-log/gates.jsonl`.
+- **safety** (Step 5): `laurelin-approvals` (`tool_call` handler, patterns in `pack/safety/outward-patterns.txt`, deny by default without a screen, receipts with a hash and a masked preview), `laurelin-scrubber` (`input` handler over gstack-redact), `laurelin-limits` (`LAURELIN_MAX_ACTIONS` 200, `LAURELIN_MAX_SPEND` 5 dollars, `/limits`), `laurelin-refusals` (warns, does not block).
+
+Facts learned in the build: Prime's `-p` and JSON modes report a screen but answer every confirm with "no" in 0 ms, so a fast "no" is logged as `denied:no-ui`; `-p --mode json` hides extension load errors, so tests load extensions directly; Jev Choice questions take `criteria`, not `options`; `gstack-redact` cannot splice a Stripe key, so the scrubber calls its span function; global Claude Code hooks add about 62,000 system-prompt tokens to every worker call.
+
+**Next pieces (wave 2), in order:**
+1. **bridge**: gates and approvals emit the `laurelin:*` events so the panels show real state (a watcher on `decision-log/gates.jsonl`; approvals call `pi.events`). Until then the panels are demo-only.
+2. **worker settings**: a worker-only Claude Code settings file with no hooks, to cut the 62,000 tokens per call.
+3. **numbers and layout gates**: extraction plus `jev-documents` against a canonical file; `pdftoppm` plus overlap detection plus Jev.
+4. **router** (Step 3) and **test set runner** (Step 6).
+5. **Step 1d memory** after Joe approves the VM copy.
+
+**Joe's own commands (rule 17), all optional:** `ln -s <repo>/bin/laurelin ~/.local/bin/laurelin`; `bin/link-skills.sh --apply`; `bin/laurelin keys add CONTEXT_DEV_API_KEY` and `GITLAB_TOKEN`, then drop those lines from `~/.zshrc`; copy `pack/rules/VAULT-RULES.md` to the vault as `Laurelin/LaurelinOS/Harness Rules.md` and fill it; move or delete `~/package.json` (it confuses gstack's repo detection) or keep the launcher's `GSTACK_PROJECT_SLUG`.
+
 ## Change log
 
 - 2026-09-23: Plan created from the 7,237-prompt inventory.
@@ -529,3 +552,4 @@ Versions: pi 0.79.4 installed, 0.87.1 latest, and 0.87.1 carries the Anthropic s
 - 2026-09-25: Four readers went through Prime's docs and source. Section 19 rewritten: about 2,000 to 3,200 lines, smallest useful build about 1,000. Prime facts added to Steps 1b, 1c, 1d, 1e, 2, 3, 4, 5, 6, 10. Workers: `-p` stream mode first, ACP client second. Badge moves to the footer. Hedge to pi weakened and recorded.
 - 2026-09-25: Joe said build. Status BUILD. First wave of child branches: pack, launcher (1b plus 1e), interface (1c), workers (2), gates (4), safety (5). Memory (1d) waits for Joe's approval of the VM copy. Briefs in `docs/briefs/`.
 - 2026-09-25: Joe: this is a Prime Agent clone. Recorded soft clone now (package on Prime), hard fork as a later option; Prime's source is public and MIT.
+- 2026-09-25: Wave 1 built and merged (section 20). Review fixes: executable-only gates in the launcher, `/approvals-log` rename, neutral vault pointers, `.jacobian` untracked, `--no-session` in tests, default coordinator model in the launcher, rules extension added.

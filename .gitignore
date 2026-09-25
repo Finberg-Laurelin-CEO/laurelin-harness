@@ -7,3 +7,4 @@ node_modules/
 decision-log/*.jsonl
 .tmp-agent-dir/
 tests/tmp/
+.jacobian/

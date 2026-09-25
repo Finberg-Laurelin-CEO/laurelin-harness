@@ -1,1 +1,0 @@
-{"definition":{"additionalProperties":false,"properties":{"n":{"maximum":10000,"minimum":0,"title":"N","type":"integer"}},"required":["n"],"title":"FibonacciPairRequest","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.combinatorics-input.FibonacciPairRequest","version":"1"}

@@ -1,1 +1,0 @@
-{"definition":{"additionalProperties":false,"properties":{"graph6":{"maxLength":352,"minLength":1,"title":"Graph6","type":"string"}},"required":["graph6"],"title":"Graph6DecodeRequest","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.graph-invariants-input.Graph6DecodeRequest","version":"1"}

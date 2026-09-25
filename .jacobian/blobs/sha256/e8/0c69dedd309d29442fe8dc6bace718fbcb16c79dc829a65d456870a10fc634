@@ -1,1 +1,0 @@
-{"definition":{"additionalProperties":false,"properties":{"is_eulerian":{"title":"Is Eulerian","type":"boolean"}},"required":["is_eulerian"],"title":"GraphEulerianResult","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.graph-invariants-result.graph.invariant.is_eulerian.compute","version":"1"}

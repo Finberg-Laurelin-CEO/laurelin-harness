@@ -1,1 +1,0 @@
-{"definition":{"additionalProperties":false,"properties":{"triangle_count":{"maximum":4960,"minimum":0,"title":"Triangle Count","type":"integer"}},"required":["triangle_count"],"title":"GraphTriangleCountResult","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.graph-invariants-result.graph.invariant.triangle_count.compute","version":"1"}

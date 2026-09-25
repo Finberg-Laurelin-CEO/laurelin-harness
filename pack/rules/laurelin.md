@@ -8,12 +8,12 @@ A path written as `Laurelin/...` is a note in the Obsidian vault at `/Users/Joe/
 
 1. Read the vault before you act. Search gbrain (the fast search over the safe copy of the vault) first. Then open the notes it names.
 2. For any writing job, read `Laurelin/Style Guide/Writing Rules.md`.
-3. For a deck, also read `Laurelin/Style Guide/Deck Design.md`, `Non-Technical Deck Doctrine.md` and `Deck Design — Cote Rules.md` in the same folder. The Cote rules win where they disagree with the other two.
+3. For a deck, also read `Laurelin/Style Guide/Deck Design.md`, `Non-Technical Deck Doctrine.md` and the advisor deck-rules note in the same folder. The advisor rules win where they disagree with the other two.
 4. For a memo or one-pager, read `Laurelin/Style Guide/Memo Format.md`.
 5. For any description of the company, read `Laurelin/Style Guide/Canonical Company Pitch.md`. Keep its order and its sentences.
 6. Before anything goes to an outside party, read `Laurelin/Classification/_Design Basis.md` and `Laurelin Classification Guide.md` in the same folder.
 7. Before you name a document, read `Laurelin/Classification/Cryptonym Index.md` and take the next serial there.
-8. For the reasoning behind the doctrines, read `Laurelin/comms-strategy/Building a Brand/Paul Bohm Conversation - Go Direct Founder Brand Strategy.md`.
+8. For the reasoning behind the doctrines, read the founder brand strategy conversation note in `Laurelin/comms-strategy/Building a Brand/`.
 
 ## 2. Who writes
 
@@ -40,7 +40,7 @@ Every prose deliverable a person reads goes through the `writing-ste` skill. Its
 ## 4. Numbers and facts
 
 1. Never invent a number, a name, a date, a quote or a result.
-2. Every number comes from a canonical document or from the `laurelin-reactor-calcs` skill. The canonical numbers table is section 1 of the vault note `Laurelin/LaurelinOS/Harness Rules.md`. The reconciliation list for the pitch is in `Laurelin/Style Guide/Canonical Company Pitch.md`. The locked figures for the Founders Fund revisions are in `Laurelin/Investor Research/Founders Fund/17JUN26Pitch/post-practice-revisions/research/NUMBERS-CANONICAL.md`.
+2. Every number comes from a canonical document or from the `laurelin-reactor-calcs` skill. The canonical numbers table is section 1 of the vault note `Laurelin/LaurelinOS/Harness Rules.md`. The reconciliation list for the pitch is in `Laurelin/Style Guide/Canonical Company Pitch.md`. The locked figures for the Founders Fund revisions are in the pitch-revision numbers file named in section 1 of the vault rules note.
 3. Any reactor-physics number is computed through the calcs module, never by hand in a chat window. The skill names the command.
 4. When two sources disagree, the newest engineering document wins. Say which one you used.
 5. A number that has no source gets an [estimate] label or stays out.

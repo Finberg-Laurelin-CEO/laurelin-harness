@@ -10,10 +10,10 @@ Prime loads it with `prime-agent -e ./pack` for one run, or from the `packages` 
 |---|---|---|
 | `skills/` | The always-on Laurelin skill set, one folder per skill, each with a `SKILL.md` | 12 skills, all links (see below) |
 | `rules/` | The generic rules file and the template for the private half in the vault | Written 2026-09-25 |
-| `extensions/` | Prime extensions (`*.ts`): the interface, the router, the safety handlers | Later branches |
-| `themes/` | The Laurelin theme JSON | Later branch |
-| `gates/` | Gate commands. Each exits 0 on pass, 1 on fail, and prints one line why | Later branch |
-| `prompts/` | Prompt templates | Later branch |
+| `extensions/` | Prime extensions (`*.ts`): the interface, the router, the safety handlers | Built |
+| `themes/` | The Laurelin theme JSON | Built |
+| `gates/` | Gate commands. Each exits 0 on pass, 1 on fail, and prints one line why | Built |
+| `prompts/` | Prompt templates | Built |
 
 `package.json` declares `extensions`, `skills` and `prompts` under the `pi` key. Add `themes` and `gates` when those folders land.
 

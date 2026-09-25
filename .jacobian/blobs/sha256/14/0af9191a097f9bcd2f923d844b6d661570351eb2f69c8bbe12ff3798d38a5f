@@ -1,1 +1,0 @@
-{"definition":{"additionalProperties":false,"properties":{"edge_connectivity":{"maximum":31,"minimum":0,"title":"Edge Connectivity","type":"integer"}},"required":["edge_connectivity"],"title":"GraphEdgeConnectivityResult","type":"object"},"descriptor_version":"1","kind":"schema","name":"jacobian.graph-invariants-result.graph.invariant.edge_connectivity.compute","version":"1"}

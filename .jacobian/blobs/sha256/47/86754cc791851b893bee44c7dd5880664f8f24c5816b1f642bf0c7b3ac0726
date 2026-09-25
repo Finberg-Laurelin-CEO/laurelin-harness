@@ -1,1 +1,0 @@
-{"definition":{"description":"finite equations and inequations over QQ with an explicit variable order and canonical sparse coefficients","maximum_equations":64,"maximum_inequations":64,"maximum_variables":4},"descriptor_version":"1","kind":"semantics","name":"jacobian.rational-polynomial-system","version":"1"}
