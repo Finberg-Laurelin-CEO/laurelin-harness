@@ -10,6 +10,8 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | workers (Step 2: delegate_worker, call_model, Jev context pruning) | `tests/test-workers.sh` |
 | gates (Step 4: prose, location, verbatim, evidence) | `tests/test-gates.sh` |
 | gates2 (Step 4: numbers and layout gates) | `tests/test-gates2.sh` |
+| worker settings (Step 2: worker-only Claude Code settings, token cut) | `tests/test-worker-settings.sh` |
+| gates | `tests/test-gates.sh` |
 | safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
 | bridge (task file, gates read it, live check lights, live approvals, worker events) | `tests/test-bridge.sh` |
 

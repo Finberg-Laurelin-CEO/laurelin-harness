@@ -23,9 +23,10 @@
 
 import { spawn } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join, relative, resolve } from "node:path";
+import { homedir, tmpdir } from "node:os";
+import { dirname, join, relative, resolve } from "node:path";
 import { createInterface } from "node:readline";
+import { fileURLToPath } from "node:url";
 import { complete, StringEnum, type UserMessage } from "@earendil-works/pi-ai";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES, truncateHead } from "@earendil-works/pi-coding-agent";
@@ -33,23 +34,34 @@ import { Type } from "typebox";
 
 // ---------- sandbox presets ----------
 
-// Claude Code: tool names and Bash patterns. Anything not listed is denied
-// without a prompt in -p mode.
-const CLAUDE_ALLOWED = [
-	"Read", "Edit", "Write", "MultiEdit", "NotebookEdit", "Glob", "Grep", "LS",
-	"Bash(ls:*)", "Bash(cat:*)", "Bash(npm test:*)", "Bash(npm run test:*)",
-	"Bash(npx vitest:*)", "Bash(npx jest:*)", "Bash(node --test:*)", "Bash(bun test:*)",
-	"Bash(pytest:*)", "Bash(python -m pytest:*)", "Bash(cargo test:*)", "Bash(go test:*)",
-];
-const CLAUDE_DISALLOWED = [
-	"WebFetch", "WebSearch", "Bash(git push:*)", "Bash(curl:*)", "Bash(wget:*)",
-	"Bash(gh:*)", "Bash(ssh:*)", "Bash(scp:*)", "Bash(npm publish:*)", "Bash(vercel:*)",
-];
+const HERE = dirname(fileURLToPath(import.meta.url)); // <repo>/pack/extensions
+
+// Claude Code: the worker's permission rules (allow and deny lists, acceptEdits
+// mode) live in pack/worker/claude-settings.json. Anything not allowed there is
+// denied without a prompt in -p mode. The worker runs with --safe-mode, which
+// keeps the subscription sign-in but drops the user's hooks, plugins, MCP
+// servers, skills and CLAUDE.md files (about 47,000 system-prompt tokens per
+// call on Joe's machine). --settings still applies in that mode.
+const CLAUDE_SETTINGS = join(HERE, "..", "worker", "claude-settings.json");
 const CLAUDE_FILE_TOOLS = new Set(["Edit", "Write", "MultiEdit", "NotebookEdit"]);
 
 const DEFAULT_TIMEOUT_SECONDS = 1200;
 const SNAPSHOT_SKIP = new Set([".git", "node_modules", ".venv", "__pycache__", ".jacobian"]);
 const SNAPSHOT_MAX_ENTRIES = 20000;
+
+// Codex: the worker runs with --ignore-user-config, so the user's MCP servers,
+// plugins, hooks and skills stay out of the call. That config also names where
+// the sign-in is kept (cli_auth_credentials_store); without it Codex answers
+// 401. This carries that one setting over. It reads a setting name, never a key.
+function codexAuthStoreOverride(): string[] {
+	try {
+		const toml = readFileSync(join(process.env.CODEX_HOME ?? join(homedir(), ".codex"), "config.toml"), "utf8");
+		const m = toml.match(/^cli_auth_credentials_store\s*=\s*("[^"]*")/m);
+		return m ? ["-c", `cli_auth_credentials_store=${m[1]}`] : [];
+	} catch {
+		return [];
+	}
+}
 
 // ---------- helpers ----------
 
@@ -98,11 +110,18 @@ function shortArgs(input: unknown): string {
 	return s.length > 120 ? `${s.slice(0, 117)}...` : s;
 }
 
+interface WorkerUsage {
+	input_tokens: number;
+	output_tokens: number;
+	turns?: number;
+}
+
 interface WorkerRun {
 	text: string;
 	filesFromEvents: string[];
 	isError: boolean;
 	errorText: string;
+	usage?: WorkerUsage;
 }
 
 /**
@@ -121,7 +140,7 @@ async function runJsonLines(
 	onEvent: (ev: Record<string, unknown>, run: WorkerRun) => string | undefined,
 	progress: (line: string) => void,
 ): Promise<WorkerRun> {
-	const run: WorkerRun = { text: "", filesFromEvents: [], isError: false, errorText: "" };
+	const run: WorkerRun = { text: "", filesFromEvents: [], isError: false, errorText: "", usage: undefined };
 	const child = spawn(cmd, args, { cwd, env, stdio: ["pipe", "pipe", "pipe"] });
 	let timedOut = false;
 	let aborted = false;
@@ -204,6 +223,15 @@ function claudeEvent(ev: Record<string, unknown>, run: WorkerRun, names: Map<str
 	if (type === "result") {
 		run.text = typeof ev.result === "string" ? ev.result : "";
 		run.isError = ev.is_error === true;
+		const u = ev.usage as Record<string, number> | undefined;
+		if (u) {
+			// Input counts every token sent, cached or not; that is what the subscription pays for.
+			run.usage = {
+				input_tokens: (u.input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0),
+				output_tokens: u.output_tokens ?? 0,
+				turns: typeof ev.num_turns === "number" ? ev.num_turns : undefined,
+			};
+		}
 		if (run.isError) run.errorText = `${ev.subtype ?? ""} ${run.text}`.trim();
 		return undefined;
 	}
@@ -232,6 +260,10 @@ function codexEvent(ev: Record<string, unknown>, run: WorkerRun): string | undef
 		}
 		if (kind === "error") return `! ${String(item.message ?? "")}`;
 	}
+	if (type === "turn.completed") {
+		const u = ev.usage as Record<string, number> | undefined;
+		if (u) run.usage = { input_tokens: u.input_tokens ?? 0, output_tokens: u.output_tokens ?? 0 };
+	}
 	if (type === "turn.failed" || type === "error") {
 		run.isError = true;
 		run.errorText = String((ev.error as { message?: string } | undefined)?.message ?? ev.message ?? "turn failed");
@@ -248,7 +280,7 @@ export default function (pi: ExtensionAPI) {
 		description:
 			"Hand one self-contained task to a foreign coding worker: 'claude' (Claude Code on the Claude subscription) " +
 			"or 'codex' (Codex on the ChatGPT subscription). The worker may read and edit files under cwd and run tests. " +
-			"It cannot reach the network, push, or run outward commands. Returns the worker's final text and the files it changed. " +
+			"It cannot reach the network, push, or run outward commands. Returns the worker's final text, the files it changed and its token usage. " +
 			"Output is truncated at 50KB.",
 		promptGuidelines: [
 			"Use delegate_worker for a task that needs many file edits or a long piece of writing; give it the full task in one message, since the worker cannot ask questions.",
@@ -288,15 +320,14 @@ export default function (pi: ExtensionAPI) {
 					"claude",
 					[
 						"-p", "--output-format", "stream-json", "--verbose",
+						"--safe-mode", "--settings", CLAUDE_SETTINGS,
+						// Also in the settings file; repeated here so the mode holds even if
+						// -p mode silently drops a settings file that fails validation.
 						"--permission-mode", "acceptEdits",
-						"--allowedTools", CLAUDE_ALLOWED.join(","),
-						"--disallowedTools", CLAUDE_DISALLOWED.join(","),
 					],
 					cwd,
 					prompt,
-					// ECC's GateGuard hook blocks the first shell command of any Claude Code session.
-					// The worker has no one to answer it, so it is switched off for the child only.
-					{ ...process.env, ECC_GATEGUARD: "off" },
+					process.env,
 					timeoutMs,
 					signal,
 					(ev, r) => claudeEvent(ev, r, names),
@@ -308,6 +339,7 @@ export default function (pi: ExtensionAPI) {
 					"codex",
 					[
 						"exec", "--json", "--sandbox", "workspace-write", "--skip-git-repo-check",
+						"--ignore-user-config", ...codexAuthStoreOverride(),
 						"-C", cwd, "-o", lastFile, "-",
 					],
 					cwd,
@@ -338,7 +370,7 @@ export default function (pi: ExtensionAPI) {
 			if (t.truncated) text = `${t.content}\n\n[Output truncated to ${DEFAULT_MAX_LINES} lines / 50KB]`;
 			return {
 				content: [{ type: "text", text }],
-				details: { worker: params.worker, cwd, files, events: progressLines.length },
+				details: { worker: params.worker, cwd, files, events: progressLines.length, usage: run.usage },
 			};
 		},
 	});
