@@ -17,7 +17,7 @@ Working idea (Joe, 9/24): a "co-founder in a box" for fundraising and design. It
 | Scope | All work from the past year (see section 4) |
 | Models | Any: subscriptions, API keys, Venice, OpenRouter, local, and model plugins |
 | Where it runs | Mac. pi and Prime run on the Mac. Hermes stays on the GCP VM |
-| Base | Prime Agent (MIT, pi derivative), extended by a package. No fork. Reviewed 9/24, see "Why Prime" below |
+| Base | Prime Agent (MIT, pi derivative). Joe (9/25): the harness is a Prime Agent clone, Prime plus the Laurelin pack. Two ways to be one: a soft clone (a package on top of Prime, Prime's updates for free; the current build) or a hard fork (own name and binary, upstream merged by hand; what Prime itself did to pi). Prime's source is public at github.com/PrimeIntellect-ai/prime-agent. The pieces are the same code either way. Hard fork is Joe's call, likely at spin-out time or if a core change is needed |
 | Claude subscription | Use it through the real Claude Code, connected over ACP (decided 9/24). `claude -p` is the fallback. Do not spoof Claude Code from Prime |
 | ChatGPT subscription | Use it through the real Codex, connected over ACP (decided 9/24). `codex exec` is the fallback |
 | Worker connection | Version 1: `claude -p --output-format stream-json` and `codex exec --json` inside a `delegate_worker` tool, with permissions preset per task; every tool call still streams. ACP client second (Step 2b), for live permission forwarding, since Prime has no ACP client and the outward gate lives in the harness anyway (revised 9/25) |
@@ -528,3 +528,4 @@ Versions: pi 0.79.4 installed, 0.87.1 latest, and 0.87.1 carries the Anthropic s
 - 2026-09-25: ACP adapters confirmed (Zed's claude-code-acp and codex-acp). Model swap defined three ways in Step 2. Added section 19, build size: about 3,000 to 5,000 lines, smallest useful build about 1,500; risk in Step 2 and the layout check.
 - 2026-09-25: Four readers went through Prime's docs and source. Section 19 rewritten: about 2,000 to 3,200 lines, smallest useful build about 1,000. Prime facts added to Steps 1b, 1c, 1d, 1e, 2, 3, 4, 5, 6, 10. Workers: `-p` stream mode first, ACP client second. Badge moves to the footer. Hedge to pi weakened and recorded.
 - 2026-09-25: Joe said build. Status BUILD. First wave of child branches: pack, launcher (1b plus 1e), interface (1c), workers (2), gates (4), safety (5). Memory (1d) waits for Joe's approval of the VM copy. Briefs in `docs/briefs/`.
+- 2026-09-25: Joe: this is a Prime Agent clone. Recorded soft clone now (package on Prime), hard fork as a later option; Prime's source is public and MIT.
