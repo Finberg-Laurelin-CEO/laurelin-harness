@@ -1,12 +1,15 @@
 # Tests
 
-One command per piece. Each branch adds its line.
+One command per piece, run from the repo root. `tests/run-all.sh` runs every one.
 
 | Piece | Command |
 |---|---|
 | pack | `tests/test-pack.sh` |
 | launcher (`bin/laurelin`, Steps 1b and 1e) | `tests/test-launcher.sh` |
 | interface (theme and `laurelin-ui` extension) | `tests/test-interface.sh` |
+| workers (Step 2: delegate_worker, call_model, Jev context pruning) | `tests/test-workers.sh` |
+| gates | `tests/test-gates.sh` |
+| safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
 
 ## Manual test: interface (Joe, in Ghostty)
 
@@ -26,6 +29,3 @@ prime-agent -e ./pack
 6. `/classify red`: the badge turns red. `/classify green` turns it back.
 7. `/title` shows the title screen again. `LAURELIN_NO_IMAGE=1 prime-agent -e ./pack` forces the glyph mark.
 8. Repeat steps 1 to 6 with the other terminal background and the matching theme.
-| workers (Step 2: delegate_worker, call_model, Jev context pruning) | `tests/test-workers.sh` |
-| gates | `tests/test-gates.sh` |
-| safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
