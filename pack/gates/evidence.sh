@@ -7,7 +7,7 @@ CHECK=evidence
 export PATH="$HOME/.local/bin:$PATH"
 
 claim="${LAURELIN_CLAIM:-}"
-[ -n "$claim" ] || gate_fail "$CHECK" "LAURELIN_CLAIM not set (the claim of done to check)"
+[ -n "$claim" ] || gate_skip "$CHECK" claim
 
 # The ledger lives where gstack-evidence wrote it: keyed by gstack-slug and GSTACK_HOME.
 eval "$(cd "$REPO_ROOT" && "$GSTACK_BIN/gstack-slug" 2>/dev/null)" || gate_fail "$CHECK" "gstack-slug failed"

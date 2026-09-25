@@ -15,6 +15,10 @@
  *   Prime's qna and summarize examples.
  *
  * Prime-model fan-out is not here: Prime's own `rlm.spawn` does that.
+ *
+ * While delegate_worker runs it emits `laurelin:worker` with the worker's
+ * name on the shared bus, and "coordinator" when it returns, so the footer
+ * badge (laurelin-ui) shows who is working.
  */
 
 import { spawn } from "node:child_process";
@@ -275,7 +279,9 @@ export default function (pi: ExtensionAPI) {
 			};
 
 			const before = snapshotDir(cwd);
+			pi.events.emit("laurelin:worker", params.worker);
 			let run: WorkerRun;
+			try {
 			if (params.worker === "claude") {
 				const names = new Map<string, string>();
 				run = await runJsonLines(
@@ -316,6 +322,9 @@ export default function (pi: ExtensionAPI) {
 					const last = readFileSync(lastFile, "utf8").trim();
 					if (last) run.text = last;
 				}
+			}
+			} finally {
+				pi.events.emit("laurelin:worker", "coordinator");
 			}
 			const after = snapshotDir(cwd);
 			const changed = new Set(diffSnapshots(before, after));

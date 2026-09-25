@@ -10,6 +10,14 @@
  * receipt shape borrowed from gstack-egress: hashed payload, hash chain, a
  * status, never the full command text.
  *
+ * The approvals panel (laurelin-ui) mirrors the wait through the shared bus:
+ * `laurelin:approval` { id, kind, title, preview } when Joe is asked, and
+ * `laurelin:approval-decided` { id, decision, source } when it is settled.
+ * If the panel answers first (the same event, from laurelin-ui), that answer
+ * is used and the confirm dialog is closed through its abort signal. In
+ * practice the confirm dialog takes the editor's place and the focus, so it
+ * stays the decision point; the panel shows the state.
+ *
  * The pure functions are exported so tests and the interface branch can call
  * them without Prime: loadPatterns, classifyCall, decideCall, listPending.
  */
@@ -232,8 +240,16 @@ export function listPending(session?: string, logPath = approvalsLogPath()): Pen
 
 // ---------- the decision ----------
 
+/** The shared bus (pi.events): only emit and on are needed. */
+export interface ApprovalBus {
+	emit(channel: string, data: unknown): void;
+	on(channel: string, handler: (data: unknown) => void): () => void;
+}
+
 export interface DecideOptions {
 	hasUI: boolean;
+	/** The shared bus, so the approvals panel can mirror and answer the wait. */
+	bus?: ApprovalBus;
 	/** Ask Joe. Resolves true on approve, false on deny; must honour `signal` for the timeout. */
 	confirm?: (title: string, message: string, opts: { signal: AbortSignal }) => Promise<boolean>;
 	timeoutMs?: number;
@@ -279,29 +295,55 @@ export async function decideCall(toolName: string, input: unknown, opts: DecideO
 
 	const key = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 	awaiting.set(key, { id: key, ts: new Date().toISOString(), tool: toolName, pattern: pattern.name, preview: maskPreview(text), state: "awaiting-joe" });
+	opts.bus?.emit("laurelin:approval", {
+		id: key,
+		kind: pattern.name,
+		title: `${toolName}: ${pattern.name}`,
+		preview: text.slice(0, 2000),
+	});
+	// The panel may answer first: laurelin-ui emits approval-decided with our id.
+	let panel: "approve" | "reject" | undefined;
+	let settlePanel: (ok: boolean) => void = () => {};
+	const fromPanel = new Promise<boolean>((r) => (settlePanel = r));
+	const offPanel = opts.bus?.on("laurelin:approval-decided", (data) => {
+		const d = data as { id?: string; decision?: "approve" | "reject" };
+		if (d?.id !== key || panel) return;
+		panel = d.decision === "approve" ? "approve" : "reject";
+		settlePanel(panel === "approve");
+	});
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? approvalTimeoutMs());
 	const asked = Date.now();
 	let ok = false;
 	try {
-		ok = await opts.confirm(
-			`Outward action: ${pattern.name}`,
-			`${toolName} wants to run:\n\n${text.slice(0, 2000)}\n\nApprove?`,
-			{ signal: controller.signal },
-		);
+		ok = await Promise.race([
+			opts.confirm(
+				`Outward action: ${pattern.name}`,
+				`${toolName} wants to run:\n\n${text.slice(0, 2000)}\n\nApprove?`,
+				{ signal: controller.signal },
+			),
+			fromPanel,
+		]);
+		if (panel) controller.abort(); // the panel answered: close the dialog
 	} catch {
 		ok = false;
 	} finally {
 		clearTimeout(timer);
+		offPanel?.();
 		awaiting.delete(key);
 	}
-	const timedOut = controller.signal.aborted;
+	const timedOut = controller.signal.aborted && !panel;
 	// Prime's JSON and print modes report hasUI=true but their confirm() is a
 	// no-op that returns false at once (measured 0 ms). Nobody was asked, so
 	// an instant "no" is recorded as no-ui, not as Joe's decision.
-	const nobodyAsked = !ok && !timedOut && Date.now() - asked < NOOP_CONFIRM_MS;
+	const nobodyAsked = !ok && !timedOut && !panel && Date.now() - asked < NOOP_CONFIRM_MS;
 	const status: ApprovalStatus = ok ? "approved" : timedOut ? "denied:timeout" : nobodyAsked ? "denied:no-ui" : "denied:user";
 	const receipt = writeReceipt({ ...common, ui: !nobodyAsked, consent: ok ? "joe" : "none", status }, logPath);
+	opts.bus?.emit("laurelin:approval-decided", {
+		id: key,
+		decision: ok ? "approve" : "reject",
+		source: panel ? "panel" : timedOut ? "timeout" : nobodyAsked ? "no-ui" : "dialog",
+	});
 	if (ok) return { block: false, receipt, pattern };
 	return {
 		block: true,
@@ -336,6 +378,7 @@ export default function (pi: ExtensionAPI) {
 		const decision = await decideCall(event.toolName, event.input, {
 			hasUI: ctx.hasUI,
 			confirm: ctx.hasUI ? (t, m, o) => ctx.ui.confirm(t, m, o) : undefined,
+			bus: pi.events,
 			session: sessionId(ctx),
 			patterns,
 		});

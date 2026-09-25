@@ -14,11 +14,12 @@
  *   /title                       show the title screen again
  *
  * API for other extensions (pi.events, the shared bus):
- *   emit "laurelin:check"          { name, state: "pass"|"fail"|"none", detail? }
+ *   emit "laurelin:check"          { name, state: "pass"|"fail"|"skipped"|"none", detail? }
  *   emit "laurelin:classification" "green" | "yellow" | "red"
  *   emit "laurelin:worker"         "coordinator" | any worker name
  *   emit "laurelin:approval"       { id, kind, title, preview }
  *   on   "laurelin:approval-decided" { id, decision: "approve"|"reject" }
+ *   (the same event from another extension removes the item from the panel)
  */
 
 import { readFileSync } from "node:fs";
@@ -38,7 +39,7 @@ import {
 // ---------------------------------------------------------------- state
 
 type Level = "green" | "yellow" | "red";
-type CheckState = "pass" | "fail" | "none";
+type CheckState = "pass" | "fail" | "skipped" | "none";
 interface Check {
 	state: CheckState;
 	detail?: string;
@@ -267,7 +268,13 @@ export default function laurelinUi(pi: ExtensionAPI) {
 				const lines = CHECK_NAMES.map((name) => {
 					const c = checks.get(name) ?? { state: "none" as CheckState };
 					const light =
-						c.state === "pass" ? theme.fg("success", "●") : c.state === "fail" ? theme.fg("error", "●") : theme.fg("dim", "○");
+						c.state === "pass"
+							? theme.fg("success", "●")
+							: c.state === "fail"
+								? theme.fg("error", "●")
+								: c.state === "skipped"
+									? theme.fg("warning", "○")
+									: theme.fg("dim", "○");
 					const label = c.state === "none" ? theme.fg("dim", name) : name;
 					const detail = c.detail ? "  " + theme.fg(c.state === "fail" ? "error" : "muted", c.detail) : "";
 					return ` ${light} ${label}${detail}`;
@@ -337,6 +344,15 @@ export default function laurelinUi(pi: ExtensionAPI) {
 	pi.events.on("laurelin:approval", (data) => {
 		const item = data as Approval;
 		if (!approvals.some((a) => a.id === item.id)) approvals.push(item);
+		approvalsWidget();
+	});
+	// Decided elsewhere (the confirm dialog, a timeout): drop it from the panel. Our own
+	// decide() removes the item before it emits, so this stays idempotent.
+	pi.events.on("laurelin:approval-decided", (data) => {
+		const { id } = data as { id: string };
+		const i = approvals.findIndex((a) => a.id === id);
+		if (i < 0) return;
+		approvals.splice(i, 1);
 		approvalsWidget();
 	});
 

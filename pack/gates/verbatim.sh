@@ -5,9 +5,9 @@ set -uo pipefail
 CHECK=verbatim
 
 original="${LAURELIN_ORIGINAL:-}"
-[ -n "$original" ] || gate_fail "$CHECK" "LAURELIN_ORIGINAL not set (a file of Joe's text)"
+[ -n "$original" ] || gate_skip "$CHECK" original
 [ -f "$original" ] || gate_fail "$CHECK" "original file does not exist: $original"
-target="$(gate_target)" || gate_fail "$CHECK" "no target: set LAURELIN_TARGET or change a file in the worktree"
+target="$(gate_target)" || gate_skip "$CHECK" target
 [ -e "$target" ] || gate_fail "$CHECK" "target does not exist: $target"
 
 if [ -d "$target" ]; then

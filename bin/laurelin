@@ -43,6 +43,12 @@ Usage:
   laurelin -p "question"        Print one answer and exit. Good for scripts.
   laurelin --autonomous "task"  Run until every gate in pack/gates passes,
                                 or Prime's limits stop it.
+  laurelin --target <path> --claim "<text>" ...
+                                Record the file the task produces and the claim
+                                of done in .laurelin/task.json (in the current
+                                folder) before Prime starts, so the gates read
+                                them. Either flag alone is fine. The agent can
+                                also set them with the set_task tool.
   laurelin agents               See running and saved sessions, and reattach.
   laurelin list                 List agents.
   laurelin attach <agent>       Attach the screen to a running agent.
@@ -172,10 +178,35 @@ keys() {
   esac
 }
 
+# Write target and claim into .laurelin/task.json in the current folder (gitignored).
+# Other keys in the file are kept. pack/gates/lib.sh reads this file.
+write_task() {
+  local target="$1" claim="$2" file="$PWD/.laurelin/task.json" existing='{}'
+  mkdir -p "$PWD/.laurelin"
+  if [ -s "$file" ]; then existing="$(jq -c . "$file" 2>/dev/null || echo '{}')"; fi
+  case "$target" in ''|/*) ;; *) target="$PWD/$target" ;; esac
+  printf '%s' "$existing" | jq --arg t "$target" --arg c "$claim" \
+    '(if $t != "" then .target = $t else . end) | (if $c != "" then .claim = $c else . end)' > "$file.tmp" \
+    && mv "$file.tmp" "$file"
+}
+
 # Start Prime with the pack, the theme if it exists, and the gates on autonomous runs.
 launch() {
-  local args a g
+  local args a g fwd target="" claim=""
   load_store
+  # Take --target and --claim out of the arguments; everything else goes to Prime.
+  fwd=()
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --target) [ $# -ge 2 ] || die "--target needs a path"; target="$2"; shift 2 ;;
+      --target=*) target="${1#--target=}"; shift ;;
+      --claim) [ $# -ge 2 ] || die "--claim needs a text"; claim="$2"; shift 2 ;;
+      --claim=*) claim="${1#--claim=}"; shift ;;
+      *) fwd+=("$1"); shift ;;
+    esac
+  done
+  set -- ${fwd[@]+"${fwd[@]}"}
+  if [ -n "$target" ] || [ -n "$claim" ]; then write_task "$target" "$claim"; fi
   # Prime loads the pack twice if settings.json already lists it as a package.
   if ! grep -qs 'laurelin-harness/pack' "${PRIME_AGENT_CODING_AGENT_DIR:-$HOME/.prime/agent}/settings.json"; then
     args=(-e "$PACK")

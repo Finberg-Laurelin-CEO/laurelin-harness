@@ -10,6 +10,7 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | workers (Step 2: delegate_worker, call_model, Jev context pruning) | `tests/test-workers.sh` |
 | gates | `tests/test-gates.sh` |
 | safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
+| bridge (task file, gates read it, live check lights, live approvals, worker events) | `tests/test-bridge.sh` |
 
 ## Manual test: interface (Joe, in Ghostty)
 
