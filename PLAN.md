@@ -346,7 +346,8 @@ Direction added later on 9/24 (Joe): this is likely to spin out as a **Jev-nativ
 
 ## 14. Open questions
 
-- None open. Joe approves the first copy of the safe vault set to the GCP machine when Step 1d runs.
+- Is Jev (TypeSafe's hosted API) an approved vendor for Yellow text, and should Red be redacted before a Jev call rather than skipped? (Section 20, from the wave 2 review.)
+- Joe approves the first copy of the safe vault set to the GCP machine when Step 1d runs.
 
 Closed 9/24: approval list (all outward actions wait), scope (academic writing in, Dynamo out), model funding (none, ChatGPT sign-in runs the coordinator), secret rotation (declined), no Ollama chat model, gbrain in version 1 pinned at 0.54.1 as one shared server with thin clients, Polygres skipped, no separate prompt-inventory copy, gstack pieces adopted (section 17), outside services placed (section 16), test set chosen (section 15).
 
@@ -517,12 +518,23 @@ What each piece does now:
 
 Facts learned in the build: Prime's `-p` and JSON modes report a screen but answer every confirm with "no" in 0 ms, so a fast "no" is logged as `denied:no-ui`; `-p --mode json` hides extension load errors, so tests load extensions directly; Jev Choice questions take `criteria`, not `options`; `gstack-redact` cannot splice a Stripe key, so the scrubber calls its span function; global Claude Code hooks add about 62,000 system-prompt tokens to every worker call.
 
-**Next pieces (wave 2), in order:**
-1. **bridge**: gates and approvals emit the `laurelin:*` events so the panels show real state (a watcher on `decision-log/gates.jsonl`; approvals call `pi.events`). Until then the panels are demo-only.
-2. **worker settings**: a worker-only Claude Code settings file with no hooks, to cut the 62,000 tokens per call.
-3. **numbers and layout gates**: extraction plus `jev-documents` against a canonical file; `pdftoppm` plus overlap detection plus Jev.
-4. **router** (Step 3) and **test set runner** (Step 6).
-5. **Step 1d memory** after Joe approves the VM copy.
+**Wave 2, 9/25, merged the same day.** Five more branches, all tests passing on the merged tree (eleven tests, `tests/run-all.sh`):
+- **bridge**: `.laurelin/task.json` in the working folder holds target, claim, original, canonical, classification; `set_task` tool and `/task` command write it; `bin/laurelin --target --claim` write it before start; gates read it when their variables are unset and skip (exit 0) when an input is missing; `laurelin-bridge` polls the gate log and lights the checks panel; approvals and worker events are live. The confirm dialog stays the decision point.
+- **worker-settings**: Claude Code workers run with `--safe-mode` plus `pack/worker/claude-settings.json`: 134,446 to 34,697 input tokens on the same task (74 percent cut). `--bare` and a separate config folder both lose the subscription sign-in. Codex workers run with `--ignore-user-config` (83,133 to 39,044) and no longer start `gbrain serve` through the user MCP config.
+- **gates2**: `numbers.sh` (Jev per number against a canonical file, unverified numbers fail unless allowed) and `layout.sh` (`pdftotext -bbox-layout` overlap and overflow, Jev confirms flagged pages).
+- **router**: one Jev call per message with five parallel questions (worker, skill, class, outward, intent), abstain under threshold, allowed-choice check, three logs including Prime session entries and gstack's decision log, 20 of 20 on the fixture cases. Runs in `before_agent_start` so the scrubber sees the text first.
+- **testset**: 23 specs (3 synthetic enabled, the 20 from section 15 disabled until Joe stages their inputs), `run.sh` through `-p --mode json` with gates, Jev rubric scoring and cost from the session, `baseline.md` committed, `calibrate.sh` prints confidence tables.
+
+**Hard fork, 9/25.** Prime's source is in this repo under `agent/` as a git subtree (0.9.6), manifest name `laurelin`, own background-service socket, built by `bin/build-agent.sh` in about ten seconds. The launcher prefers the built fork. First fork change: gates always rerun when a task file exists (Prime skipped reruns while the git tree was unchanged, which blocked every target outside git, including the vault).
+
+**Open policy point from review (Joe):** the router and the test-set scorer send message text and up to 6,000 characters of a target file to Jev, which is TypeSafe's hosted API, before the material is classified. Section 8 item 7 says Red stays local and Yellow goes to approved vendors only. Interim rule in code: when the task file says `red`, the router does not call Jev and uses the defaults. Decision needed: is Jev an approved vendor for Yellow text, and should Red be redacted before any Jev call rather than skipped.
+
+**Next pieces (wave 3), in order:**
+1. **Step 1d memory** after Joe approves the VM copy.
+2. **Step 7**: the first real fundraising document through the whole loop, with the private rules note filled in the vault.
+3. **Step 2b**: the ACP client for live permission forwarding, if the print-mode workers prove limiting.
+4. **Learning loop** (Step 10) on top of Prime's refine store.
+5. Fork branding: the fork still says "Prime Agent" in its help text and prompts; a rename pass through `agent/` when the spin-out needs it.
 
 **Joe's own commands (rule 17), all optional:** `ln -s <repo>/bin/laurelin ~/.local/bin/laurelin`; `bin/link-skills.sh --apply`; `bin/laurelin keys add CONTEXT_DEV_API_KEY` and `GITLAB_TOKEN`, then drop those lines from `~/.zshrc`; copy `pack/rules/VAULT-RULES.md` to the vault as `Laurelin/LaurelinOS/Harness Rules.md` and fill it; move or delete `~/package.json` (it confuses gstack's repo detection) or keep the launcher's `GSTACK_PROJECT_SLUG`.
 
@@ -555,3 +567,5 @@ Facts learned in the build: Prime's `-p` and JSON modes report a screen but answ
 - 2026-09-25: Wave 1 built and merged (section 20). Review fixes: executable-only gates in the launcher, `/approvals-log` rename, neutral vault pointers, `.jacobian` untracked, `--no-session` in tests, default coordinator model in the launcher, rules extension added.
 - 2026-09-25: Joe: no GitHub push yet; prove it works locally first, then build out wave 2 for Joe to test.
 - 2026-09-25: Hard fork started on branch `fork`: Prime source (0.9.6, MIT) as `agent/` subtree, manifest name `laurelin`, builds in 8 seconds, launcher prefers the built fork. Settings folder stays `~/.prime/agent` for now so the sign-ins keep working.
+- 2026-09-25: Wave 2 merged (bridge, worker-settings, gates2, router, testset) and the hard fork landed; fork change so gates rerun for targets outside git. New open question on Jev as a vendor for Yellow and Red text.
+- 2026-09-25: End-to-end proof through the fork: evidence gate failed, agent recorded evidence, gates reran; prose gate caught slop, agent rewrote, gates reran; all passed before done. Router skips Jev for RED tasks.

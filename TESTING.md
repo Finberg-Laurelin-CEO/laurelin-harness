@@ -61,7 +61,25 @@ To run "laurelin" from anywhere, make one symlink:
 
 Follow "Manual test: interface" in `tests/README.md`. In short: title screen, then `/checks demo`, `/approvals demo` and `/approvals`, `/classify red`. Try both a dark and a light Ghostty background with the matching theme. Say whether the title screen drew the mark as an image or as glyphs.
 
-## 4. Try one real job
+## 4. Try one real job, the whole loop
+
+The task file tells the gates what to check. Give it on the command line:
+
+```
+bin/laurelin --target tests/tmp/fog.md --claim "tests/tmp/fog.md has three plain sentences about fog" --autonomous "Create tests/tmp/fog.md with three short plain sentences about morning fog in Simplified Technical English, record evidence for the claim, then say done."
+```
+
+Watch the checks panel below the editor: the lights change as each gate runs. `/task` shows the task file. `/route` shows the last routing decision (worker, skill, class, outward, intent, with confidence). If the run needs an outward action, a confirm dialog appears and `/approvals` lists what waited.
+
+## 4b. The test set
+
+```
+tests/testset/run.sh --only synthetic-1
+```
+
+One synthetic job through Prime with gates, a Jev rubric score and the cost, in about a minute. `tests/testset/baseline.md` has the committed baseline for the three synthetic jobs.
+
+## 4c. Old way: one worker, one gate
 
 In the running session, ask for something small that touches a worker, for example:
 

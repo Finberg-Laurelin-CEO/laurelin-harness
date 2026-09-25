@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import { createReadStream } from "node:fs";
+import { createReadStream, existsSync } from "node:fs";
 import { lstat, readlink } from "node:fs/promises";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 import type { AssistantMessage, Usage, UserMessage } from "@earendil-works/pi-ai";
 import { spawnHidden, waitForChildProcess } from "../utils/child-process.js";
 import { killProcessTree, trackDetachedChildPid, untrackDetachedChildPid } from "../utils/shell.js";
@@ -456,7 +456,13 @@ async function runAutonomousQualityGates(
 	for (const command of state.gates.commands) {
 		const currentSnapshot = await captureGitWorktreeSnapshot(cwd, signal);
 		signal?.throwIfAborted();
+		// laurelin fork: gates may depend on inputs git does not see (a task file, a
+		// target outside the tree, an evidence ledger). When a task file exists or
+		// LAURELIN_GATES_ALWAYS_RERUN is set, always rerun; maxRetries still bounds it.
+		const alwaysRerun =
+			process.env.LAURELIN_GATES_ALWAYS_RERUN === "1" || existsSync(join(cwd, ".laurelin", "task.json"));
 		if (
+			!alwaysRerun &&
 			state.lastGateFailure?.command === command &&
 			state.lastGateFailureSnapshot &&
 			gitWorktreeSnapshotsEqual(currentSnapshot, state.lastGateFailureSnapshot)
