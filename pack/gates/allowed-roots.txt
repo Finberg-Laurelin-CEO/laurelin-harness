@@ -1,0 +1,4 @@
+# One allowed root per line. `$REPO` is this repo; `~` is the home folder.
+# Lines that start with # are ignored.
+$REPO
+~/Documents/Obsidian Vault/Laurelin
