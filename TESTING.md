@@ -2,6 +2,16 @@
 
 Status 2026-09-25: the first six pieces are merged and their tests pass. This guide is for the `testing` worktree. Open it in an Orca terminal and run the commands from its root.
 
+## 0. Build the forked agent (once per worktree)
+
+The harness is now a fork of Prime Agent, named `laurelin`, whose source lives under `agent/`. Build it once:
+
+```
+bin/build-agent.sh
+```
+
+It installs dependencies inside `agent/` and builds in about ten seconds. After that `bin/laurelin` uses the fork, with its own background service, so your installed `prime-agent` is untouched. `bin/laurelin status` shows both services.
+
 ## 1. Run the automatic tests
 
 ```
