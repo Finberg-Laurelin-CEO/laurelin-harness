@@ -136,6 +136,7 @@ Each step ends with a test that proves it works before the next one starts.
 - Rotate the secrets found in chat history. Joe declined on 9/24; the keys stay live and stay in `~/.claude/history.jsonl`.
 - Model accounts: fund none (9/24). Version 1 runs on subscriptions, the Jev key and local models. See "Subscription-only" in section 11.
 - Approval list: everything outward waits for Joe (9/24).
+- **Vault access (found 9/25 evening).** macOS privacy protection on `~/Documents` blocks the Obsidian vault for the processes the harness and its build agents run under: shell and file reads return "Operation not permitted", even for notes read earlier the same day. Three build branches hit it and wrote their methods from copies. Joe grants access once: System Settings, Privacy and Security, Full Disk Access (or Files and Folders, Documents) for the terminal app that runs `laurelin-agent` (Ghostty) and for Orca, which runs the build agents. Until then, the rules extension, the memory retrieval and the vault-based skills read nothing from the vault, and the deck skill's rule sections could not be checked against the three vault notes.
 
 **Step 1: One home for skills and rules**
 - Make `~/laurelin-harness/pack` the single source for all Laurelin and Jev skills, and link every tool (Claude Code, Codex, pi, Prime, Hermes VM) to it.
@@ -647,3 +648,4 @@ Supporting, not decisive: subscription-only cost with Jev at cents per thousand 
 - 2026-09-25: Deck workflow mapped; current deck's generator rescued from a temp folder into the deck kit; LRL-DS declared current; deck-design brief written and branch started.
 - 2026-09-25: Joe confirmed the cream deck system is legacy. Karpathy guidelines added to the pack as an always-on skill (copied from the installed Claude Code plugin, MIT); the harness lists it and Claude Code loads its own copy.
 - 2026-09-25: metrics and deck-design merged. Baseline correction share measured at 14 percent by Jev over a sample, against 35 percent from the manual read; recorded both with the reason they differ.
+- 2026-09-25: Vault reads blocked by macOS privacy for the harness's process tree; added to Step 0 for Joe. Deck skill's rule sections unchecked against the vault until then.
