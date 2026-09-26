@@ -118,18 +118,25 @@ function center(line: string, width: number): string {
 	return " ".repeat(pad) + line;
 }
 
-/** Eight rings on a circle, the Laurelin mark, in block glyphs. */
+/** The Laurelin mark: one large ring carrying eight small rings, in block glyphs. */
+const MARK_LINES = [
+	"             ▄▄",
+	"           ▄█▀▀█▄",
+	"     ▄██▄▄███▄▄███▄▄██▄",
+	"    ██  ██   ▀▀   ██  ██",
+	"     ███▀          ▀███",
+	"   ▄██                ██▄",
+	" ▄█▀▀█▄              ▄█▀▀█▄",
+	" ▀█▄▄█▀              ▀█▄▄█▀",
+	"   ▀██                ██▀",
+	"     ███▄          ▄███",
+	"    ██  ██   ▄▄   ██  ██",
+	"     ▀██▀▀███▀▀███▀▀██▀",
+	"           ▀█▄▄█▀",
+	"             ▀▀"
+];
 function glyphMark(theme: Theme): string[] {
-	const ring = theme.fg("accent", "◯");
-	return [
-		`        ${ring}        `,
-		`    ${ring}       ${ring}    `,
-		"                 ",
-		` ${ring}             ${ring} `,
-		"                 ",
-		`    ${ring}       ${ring}    `,
-		`        ${ring}        `,
-	];
+	return MARK_LINES.map((l) => theme.fg("accent", l));
 }
 
 function loadMark(theme: Theme): Image | undefined {

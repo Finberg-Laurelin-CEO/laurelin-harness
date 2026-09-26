@@ -27,14 +27,13 @@
     "warning": "amber",
     "muted": "muted",
     "dim": "dim",
-    "text": "",
+    "text": "ink",
     "thinkingText": "dim",
-
     "selectedBg": "bone3",
     "userMessageBg": "bone2",
-    "userMessageText": "",
+    "userMessageText": "ink",
     "customMessageBg": "#ECE8E0",
-    "customMessageText": "",
+    "customMessageText": "ink",
     "customMessageLabel": "orangeInk",
     "toolPendingBg": "bone2",
     "toolSuccessBg": "#E4EEDF",
@@ -42,10 +41,9 @@
     "toolDiffAddedBg": "#DAFBE1",
     "toolDiffRemovedBg": "#FFEBE9",
     "toolPanelBg": "bone2",
-    "toolTitle": "",
+    "toolTitle": "ink",
     "toolOutput": "muted",
-
-    "mdBody": "",
+    "mdBody": "ink",
     "mdHeading": "orangeInk",
     "mdLink": "inkSoft",
     "mdLinkUrl": "dim",
@@ -56,12 +54,10 @@
     "mdQuoteBorder": "lightGray",
     "mdHr": "lightGray",
     "mdListBullet": "orange",
-
     "toolDiffAdded": "sage",
     "toolDiffRemoved": "crimson",
     "toolDiffText": "#57606A",
     "toolDiffContext": "muted",
-
     "syntaxComment": "dim",
     "syntaxKeyword": "orangeInk",
     "syntaxFunction": "ink",
@@ -71,14 +67,12 @@
     "syntaxType": "sand",
     "syntaxOperator": "muted",
     "syntaxPunctuation": "muted",
-
     "thinkingOff": "lightGray",
     "thinkingMinimal": "dim",
     "thinkingLow": "muted",
     "thinkingMedium": "inkSoft",
     "thinkingHigh": "sand",
     "thinkingXhigh": "orange",
-
     "bashMode": "sage"
   },
   "export": {
