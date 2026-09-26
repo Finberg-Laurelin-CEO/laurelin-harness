@@ -529,13 +529,36 @@ Facts learned in the build: Prime's `-p` and JSON modes report a screen but answ
 **Policy point from review, closed 9/25 (Joe):** Jev is an approved vendor for every classification. The router and the scorer send text to Jev regardless of label. The earlier interim bypass for red tasks is removed. Section 8 item 7 now reads as a label, with the endpoint setting as the plug-in point for a restricted Jev later.
 
 **Next pieces (wave 3), in order:**
-1. **Step 1d memory** after Joe approves the VM copy.
+0. **Fork isolation and rebrand** (9/25, in progress): the fork gets its own settings folder so the installed Prime is never touched, and calls itself Laurelin Agent everywhere.
+1. **Investor skills** (Joe, 9/25; Step 8.1): a skill set that finds investors and partners, researches them (context.dev, fastbrowse), scores fit with Jev, and builds and keeps the investor database in the vault (`Laurelin/investors`, `Laurelin/Investor Research`), with follow-up triage. Private data stays in the vault; the skill holds only the method.
+2. **`laurelin graph`** runner (section 21).
+3. **Step 1d memory** after Joe approves the VM copy.
 2. **Step 7**: the first real fundraising document through the whole loop, with the private rules note filled in the vault.
 3. **Step 2b**: the ACP client for live permission forwarding, if the print-mode workers prove limiting.
 4. **Learning loop** (Step 10) on top of Prime's refine store.
 5. Fork branding: the fork still says "Prime Agent" in its help text and prompts; a rename pass through `agent/` when the spin-out needs it.
 
 **Joe's own commands (rule 17), all optional:** `ln -s <repo>/bin/laurelin ~/.local/bin/laurelin`; `bin/link-skills.sh --apply`; `bin/laurelin keys add CONTEXT_DEV_API_KEY` and `GITLAB_TOKEN`, then drop those lines from `~/.zshrc`; copy `pack/rules/VAULT-RULES.md` to the vault as `Laurelin/LaurelinOS/Harness Rules.md` and fill it; move or delete `~/package.json` (it confuses gstack's repo detection) or keep the launcher's `GSTACK_PROJECT_SLUG`.
+
+## 21. Graph rules for multi-agent runs (from Joe, 9/25)
+
+From an essay on "graph engineering" Joe passed on. These rules govern any run in the harness that uses more than one agent (Prime's `rlm.spawn` children, `delegate_worker` calls, the test-set runner, the check ladder).
+
+1. **Draw the graph, then cut the fake edges.** For every "and then", ask whether the step needs the previous step's result. If not, the wait is fake; run them at once. The remaining real edges set the speed limit (Amdahl: at 95 percent independent work, sixteen agents give about nine times, not sixteen).
+2. **One node, one job, one contract.** A node does one bounded job and returns a fixed shape enforced by a schema, never free text the next node has to guess at. Prime's `rlm.spawn` children and `delegate_worker` results get schemas.
+3. **Fan out, reduce in code, verify fresh, synthesize once.** Reduce (flatten, dedupe, filter) is plain code and costs no tokens. Verify with a separate node that never saw the worker's context, and with more than one lens; a worker grading its own work favours itself. This is the check ladder, and rung 1 is the anchor.
+4. **Anchors that cannot be argued with.** A test that ran, a file that exists, a ledger row, a frozen rule. A graph is only as honest as the parts that refuse to move. The gates are anchors; Jev judges evidence, never claims.
+5. **Route in code.** A model classifies; the branch taken is plain code, the same branch every time for the same input. That is the Jev router: the decision is logged, the routing is deterministic.
+6. **Cheap nodes, strong nodes.** Repetitive high-volume nodes on the cheap tier; the reviewer and anything that writes rules or prose on the strong tier (section 18, Step 2). Fast checks run inline after every node; slow checks run once at the end, with errors grouped by cause.
+7. **Layer the fan-in.** Never pour a thousand raw results into one synthesis; batch, summarize each batch, synthesize from summaries.
+8. **Loops must go dry.** Loop-until-dry with three stop conditions stacked: consecutive dry rounds, a token budget, a max iteration count. Dedupe against everything ever seen the moment it is found, not after it is judged.
+9. **Disk-first.** State lives in files, not in a conversation: the queue rebuilds from the filesystem, a crash resumes where it stopped. Prime's session files, `.laurelin/task.json`, the decision logs and the gate log are that state.
+10. **Test the judge by breaking it.** Every gate has a bad fixture that must fail before the good one counts (Steps 4 and 6 already do this). Never hand-patch an output to match what a rule should have said; fix the rule and regenerate.
+11. **Findings cite a rule.** A reviewer output names the rule violated. The same rule cited across three files is one badly written rule, not three problems.
+12. **Shard by worktree.** Parallel agents write in separate git worktrees, and a worker's rules forbid `git stash` and `git reset` (Orca already does this; AGENTS rule 17 says the rest).
+13. **Earn the fan-out.** Cap the first run small, read the usage, and ask three questions: did the fan-out find what one agent could not, did the verifier catch what the worker missed, did the result justify the cost. Only three yeses double the cap. Skip the graph for small, exploratory or step-by-step work; a single steerable agent is right there.
+
+Where this lands: a `laurelin graph` runner in wave 3 that expresses a job as nodes with schemas over Prime's native subagents, with the reduce steps in code, the verifiers on the check ladder, and the gates as anchors.
 
 ## Change log
 
@@ -569,3 +592,5 @@ Facts learned in the build: Prime's `-p` and JSON modes report a screen but answ
 - 2026-09-25: Wave 2 merged (bridge, worker-settings, gates2, router, testset) and the hard fork landed; fork change so gates rerun for targets outside git. New open question on Jev as a vendor for Yellow and Red text.
 - 2026-09-25: End-to-end proof through the fork: evidence gate failed, agent recorded evidence, gates reran; prose gate caught slop, agent rewrote, gates reran; all passed before done. Router skips Jev for RED tasks.
 - 2026-09-25: Joe: Jev is approved for all material; classification is a label, not a gate; endpoint settings are the plug-in point for a GovCloud Jev or local model later. Red bypass removed from the router.
+- 2026-09-25: Added section 21, graph rules for multi-agent runs, and the investor skill set and graph runner to wave 3. Joe: the fork must never touch the installed Prime Agent.
+- 2026-09-25: Fork isolated: own folder `~/.laurelin/agent` (sign-in linked, nothing else shared), own service socket keyed to the build. Before this the fork had written five sessions, a kernel rebuild and a default-model change into `~/.prime/agent`; the default model was restored (backup kept) and Prime verified working. Rebrand: Laurelin rings logo, "Laurelin Agent" in 41 files, `laurelin` in command hints. Launcher always loads this repo's pack (Prime's settings pointed at the old checkout).

@@ -784,7 +784,7 @@ function parseListArgs(args: string[]): { all: boolean } {
 	return { all };
 }
 
-// The same list RPC as `prime-agent list`, rendered as a one-line-per-agent table.
+// The same list RPC as `laurelin list`, rendered as a one-line-per-agent table.
 async function runSessions(client: DaemonClient, args: string[], json: boolean): Promise<void> {
 	const { all } = parseSessionsArgs(args);
 	const response = await client.request({ type: "list", all });
@@ -1013,11 +1013,11 @@ function parseSendArgs(args: string[]): ParsedSendArgs {
 	}
 
 	if (explicitMessage !== undefined && messageParts.length > 0) {
-		throw new Error("Usage: prime-agent send [--from <agent>] <agent> [--message <message>|<message>]");
+		throw new Error("Usage: laurelin send [--from <agent>] <agent> [--message <message>|<message>]");
 	}
 	const message = (explicitMessage ?? messageParts.join(" ")).trim();
 	if (!targetActiveSessionId || !message) {
-		throw new Error("Usage: prime-agent send [--from <agent>] <agent> [--message <message>|<message>]");
+		throw new Error("Usage: laurelin send [--from <agent>] <agent> [--message <message>|<message>]");
 	}
 	return {
 		targetActiveSessionId,
@@ -1071,11 +1071,11 @@ async function runCron(client: DaemonClient, args: string[], json: boolean): Pro
 	if (subcommand === "add" || subcommand === "schedule") {
 		const separator = args.indexOf("--");
 		if (separator < 0) {
-			throw new Error("Usage: prime-agent schedule add <agent> <schedule> -- <message>");
+			throw new Error("Usage: laurelin schedule add <agent> <schedule> -- <message>");
 		}
 		const activeSessionId = args[1];
 		if (!activeSessionId) {
-			throw new Error("Usage: prime-agent schedule add <agent> <schedule> -- <message>");
+			throw new Error("Usage: laurelin schedule add <agent> <schedule> -- <message>");
 		}
 		const schedule = args.slice(2, separator).join(" ").trim();
 		const message = args
@@ -1083,7 +1083,7 @@ async function runCron(client: DaemonClient, args: string[], json: boolean): Pro
 			.join(" ")
 			.trim();
 		if (!schedule || !message) {
-			throw new Error("Usage: prime-agent schedule add <agent> <schedule> -- <message>");
+			throw new Error("Usage: laurelin schedule add <agent> <schedule> -- <message>");
 		}
 		const response = await client.request({ type: "cron_add", activeSessionId, schedule, prompt: message });
 		const data = requireSuccess(response);
@@ -1099,7 +1099,7 @@ async function runCron(client: DaemonClient, args: string[], json: boolean): Pro
 	if (subcommand === "cancel" || subcommand === "delete" || subcommand === "remove") {
 		const jobId = args[1];
 		if (!jobId) {
-			throw new Error("Usage: prime-agent schedule cancel <job-id>");
+			throw new Error("Usage: laurelin schedule cancel <job-id>");
 		}
 		const response = await client.request({ type: "cron_cancel", jobId });
 		const data = requireSuccess(response);

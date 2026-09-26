@@ -47,7 +47,7 @@ export type AuthenticationResult =
 export const BEDROCK_PROVIDER_ID = "amazon-bedrock";
 
 export const ANTHROPIC_SUBSCRIPTION_AUTH_WARNING =
-	"Anthropic subscription auth is active. Usage draws from your plan limits, but Prime Agent identifies as Claude Code and this may violate Anthropic's terms — your account can be restricted or banned. An Anthropic API key avoids the risk. Manage usage at https://claude.ai/settings/usage.";
+	"Anthropic subscription auth is active. Usage draws from your plan limits, but Laurelin Agent identifies as Claude Code and this may violate Anthropic's terms — your account can be restricted or banned. An Anthropic API key avoids the risk. Manage usage at https://claude.ai/settings/usage.";
 
 function isAnthropicSubscriptionAuthKey(apiKey: string | undefined): boolean {
 	return typeof apiKey === "string" && apiKey.startsWith("sk-ant-oat");
@@ -485,7 +485,7 @@ export class ProviderAuthFlows {
 						resolve(undefined);
 					},
 					{
-						prompt: "Which account should Prime Agent use?",
+						prompt: "Which account should Laurelin Agent use?",
 						selectedIndex: current >= 0 ? current + 1 : 0,
 						requestRender: () => this.host.ui.requestRender(),
 						onExit: () => this.host.exitApp?.(),
@@ -810,7 +810,7 @@ export class ProviderAuthFlows {
 
 			if (result.source === "manual") {
 				browserAbort.abort();
-				dialog.showProgress("Checking Prime Agent trace access...");
+				dialog.showProgress("Checking Laurelin Agent trace access...");
 				const access = await checkPrimeAgentTracesAccess(result.apiKey, resolvePrimeAgentTracesBaseUrl(), {
 					signal: dialog.signal,
 				});
@@ -820,7 +820,7 @@ export class ProviderAuthFlows {
 				}
 				if (!access.ok) {
 					const status = access.status === undefined ? "" : `HTTP ${access.status}: `;
-					throw new Error(`Prime API key does not have Prime Agent trace access (${status}${access.message})`);
+					throw new Error(`Prime API key does not have Laurelin Agent trace access (${status}${access.message})`);
 				}
 			}
 

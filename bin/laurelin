@@ -35,7 +35,7 @@ die() { echo "laurelin: $*" >&2; exit 1; }
 
 usage() {
   cat <<EOF
-laurelin: Prime Agent with the Laurelin package.
+laurelin: Laurelin Agent, a Prime Agent fork, with the Laurelin pack.
 
 Usage:
   laurelin                      Open an interactive session.
@@ -207,11 +207,12 @@ launch() {
   done
   set -- ${fwd[@]+"${fwd[@]}"}
   if [ -n "$target" ] || [ -n "$claim" ]; then write_task "$target" "$claim"; fi
-  # Prime loads the pack twice if settings.json already lists it as a package.
-  if ! grep -qs 'laurelin-harness/pack' "${LAURELIN_CODING_AGENT_DIR:-${PRIME_AGENT_CODING_AGENT_DIR:-$HOME/.prime/agent}}/settings.json"; then
-    args=(-e "$PACK")
-  else
-    args=()
+  # Always load this repo's pack. Prime's settings may list another copy of the
+  # pack by a relative path that resolves elsewhere; this repo's copy wins.
+  args=(-e "$PACK")
+  SETTINGS="${LAURELIN_CODING_AGENT_DIR:-$HOME/.prime/agent}/settings.json"
+  if grep -qs 'laurelin-harness/pack' "$SETTINGS"; then
+    echo "note: $SETTINGS also lists a laurelin-harness pack; this repo's pack at $PACK is loaded as well." >&2
   fi
   # Coordinator model: the ChatGPT sign-in, never Prime's Claude sign-in (PLAN section 11).
   case " $* " in *" --model "*) ;; *) args+=(--model "${LAURELIN_MODEL:-openai-codex/gpt-6-astra}") ;; esac
@@ -244,8 +245,21 @@ launch() {
 # Fall back to a system prime-agent when the fork is not built.
 FORK_CLI="$REPO/agent/packages/coding-agent/dist/bundle/cli.js"
 if [ -f "$FORK_CLI" ]; then
+  # The fork keeps its own settings folder, ~/.laurelin/agent, so the installed Prime
+  # Agent's folder (~/.prime/agent) is never read or written by it. Only the sign-in
+  # file is linked, so the ChatGPT and Claude subscriptions work without a new login.
+  LAURELIN_AGENT_DIR="${LAURELIN_CODING_AGENT_DIR:-$HOME/.laurelin/agent}"
+  if [ ! -d "$LAURELIN_AGENT_DIR" ]; then
+    mkdir -p "$LAURELIN_AGENT_DIR"
+    [ -f "$HOME/.prime/agent/auth.json" ] && ln -s "$HOME/.prime/agent/auth.json" "$LAURELIN_AGENT_DIR/auth.json"
+    [ -f "$HOME/.prime/agent/models.json" ] && cp "$HOME/.prime/agent/models.json" "$LAURELIN_AGENT_DIR/models.json"
+    printf '{\n  "theme": "laurelin"\n}\n' > "$LAURELIN_AGENT_DIR/settings.json"
+    echo "laurelin: created $LAURELIN_AGENT_DIR (sign-in linked from ~/.prime/agent, settings fresh)" >&2
+  fi
+  export LAURELIN_CODING_AGENT_DIR="$LAURELIN_AGENT_DIR"
   # The fork keeps its own background service so it never collides with an installed Prime.
-  LAURELIN_SOCK_DIR="${TMPDIR:-/tmp}/laurelin-$(id -u)"
+  # Socket keyed to the build, so a rebuilt fork never attaches to a service running old code.
+  LAURELIN_SOCK_DIR="${TMPDIR:-/tmp}/laurelin-$(id -u)-$(stat -f %m "$FORK_CLI" 2>/dev/null || stat -c %Y "$FORK_CLI")"
   mkdir -p "$LAURELIN_SOCK_DIR"
   # Main command takes --daemon-socket; subcommands (agents, status, ...) do not.
   prime-agent() {

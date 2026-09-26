@@ -406,9 +406,9 @@ function parsePackageCommand(args: string[]): PackageCommandOptions | undefined 
 	}
 
 	if (rollback && (extensionsFlag || extensionFlagSource || (source && !isSelfUpdateSource(source))))
-		conflictingOptions = "--rollback only applies to Prime Agent itself";
+		conflictingOptions = "--rollback only applies to Laurelin Agent itself";
 	if (channel && (extensionsFlag || extensionFlagSource || (source && !isSelfUpdateSource(source))))
-		conflictingOptions = conflictingOptions ?? "--nightly and --stable only apply to Prime Agent itself";
+		conflictingOptions = conflictingOptions ?? "--nightly and --stable only apply to Laurelin Agent itself";
 	return {
 		command,
 		source,
@@ -593,15 +593,15 @@ async function runSelfUpdate(command: SelfUpdateCommand): Promise<void> {
 }
 
 const UPDATE_RESTART_CONTINUATION_PROMPT =
-	"Prime Agent restarted after an update. Continue the interrupted task from the saved transcript and restored tool/kernel state. Inspect current state before retrying commands when needed.";
+	"Laurelin Agent restarted after an update. Continue the interrupted task from the saved transcript and restored tool/kernel state. Inspect current state before retrying commands when needed.";
 
 const UPDATE_SESSION_LOSS_COPY: DaemonSessionLossCopy = {
 	busyDetail(count) {
 		const { noun, pronoun } = pluralizeSessions(count);
-		return `Prime Agent has ${count} busy ${noun}. After the update installs, it will stop ${pronoun}, restart its background service, and resume interrupted work.`;
+		return `Laurelin Agent has ${count} busy ${noun}. After the update installs, it will stop ${pronoun}, restart its background service, and resume interrupted work.`;
 	},
 	unlistableDetail:
-		"Running agents could not be listed. After the update installs, Prime Agent will stop resident agents, restart its background service, and resume interrupted work where possible.",
+		"Running agents could not be listed. After the update installs, Laurelin Agent will stop resident agents, restart its background service, and resume interrupted work where possible.",
 	question: "Continue?",
 	nonTtyHint: "Re-run with --force to proceed.",
 };
@@ -1121,7 +1121,7 @@ async function restoreDaemonUpdateRestartSession(
 					activeSessionId,
 					message: {
 						customType: "prime-agent.update_complete",
-						content: `[update-complete]\n\nPrime Agent updated to v${VERSION}. This daemon session was restored after the update.`,
+						content: `[update-complete]\n\nLaurelin Agent updated to v${VERSION}. This daemon session was restored after the update.`,
 						display: true,
 						details: { version: VERSION },
 					},
@@ -1709,7 +1709,7 @@ export async function handlePackageCommand(args: string[]): Promise<boolean> {
 					const selfUpdatePlan = await getSelfUpdatePlan(options.force, options.rollback, updateChannel);
 					if (selfUpdatePlan.unavailable) {
 						// With an all target the extension half already succeeded; the message above
-						// says Prime Agent itself was not updated, so do not fail the whole run for it.
+						// says Laurelin Agent itself was not updated, so do not fail the whole run for it.
 						if (updateTargetIncludesExtensions(target)) setSelfUpdateNoChangeExitCode();
 						else setSelfUpdateAbortedExitCode();
 						return true;

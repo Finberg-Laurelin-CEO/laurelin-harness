@@ -4,7 +4,7 @@ import type { PrimeAgentIpythonMeta, PrimeAgentSessionMeta } from "./acp-meta.js
 import { primeAgentMeta } from "./acp-meta.js";
 
 /**
- * Translate prime-agent session events into ACP `session/update` payloads.
+ * Translate laurelin session events into ACP `session/update` payloads.
  *
  * Kept as a pure function so the mapping is testable without a live ACP client
  * or a running agent. Returning an array lets one prime-agent event fan out to

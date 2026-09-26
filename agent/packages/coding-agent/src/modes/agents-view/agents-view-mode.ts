@@ -390,15 +390,15 @@ function isDaemonUpdateRestartTransientError(error: unknown): boolean {
 	if (typeof code === "string" && DAEMON_UPDATE_RESTART_TRANSIENT_ERROR_CODES.has(code)) return true;
 	return (
 		// Socket closed while the daemon exits for the restart.
-		error.message.startsWith("Connection to the Prime Agent daemon closed.") ||
+		error.message.startsWith("Connection to the Laurelin Agent daemon closed.") ||
 		// Connect failures while the successor socket is not listening yet.
-		error.message.startsWith("Failed to connect to the Prime Agent daemon:") ||
+		error.message.startsWith("Failed to connect to the Laurelin Agent daemon:") ||
 		// A request attempted while the transport is down between daemon processes.
 		error.message.startsWith("Cannot send daemon command") ||
 		// Transport timeouts while the daemon exits and its successor boots:
 		// connect, handshake, and in-flight requests (e.g. create) that cannot
 		// get a response until the successor is ready.
-		/^Timed out after \d+ms (connecting to the Prime Agent daemon|waiting for the Prime Agent daemon handshake|waiting for the Prime Agent daemon response to)/.test(
+		/^Timed out after \d+ms (connecting to the Laurelin Agent daemon|waiting for the Laurelin Agent daemon handshake|waiting for the Laurelin Agent daemon response to)/.test(
 			error.message,
 		)
 	);
@@ -408,7 +408,7 @@ function daemonUpdateRestartDeadlineError(waitMs: number, lastError: unknown): E
 	const lastErrorText =
 		lastError === undefined ? "none yet" : lastError instanceof Error ? lastError.message : String(lastError);
 	return new Error(
-		`The Prime Agent daemon did not finish its update restart within ${Math.round(waitMs / 1000)} seconds. Try opening this agent again once the update finishes. Last error: ${lastErrorText}`,
+		`The Laurelin Agent daemon did not finish its update restart within ${Math.round(waitMs / 1000)} seconds. Try opening this agent again once the update finishes. Last error: ${lastErrorText}`,
 	);
 }
 
@@ -671,7 +671,7 @@ async function runAgentsViewLoop(
 				opened = {
 					...opened,
 					updateRestartWaitNotice:
-						"Waited for the Prime Agent daemon update restart to finish before opening this agent",
+						"Waited for the Laurelin Agent daemon update restart to finish before opening this agent",
 				};
 			}
 			const openStartupNotice = combineAgentsViewStartupNotices(
@@ -2688,7 +2688,7 @@ export class AgentsViewMode implements Component, Focusable {
 		}
 		this.daemonShutdownReceived = true;
 		this.reconnectTimedOut = false;
-		this.setStatusMessage(`Prime Agent daemon shut down. Restart Prime Agent to reconnect. ${error.message}`, {
+		this.setStatusMessage(`Laurelin Agent daemon shut down. Restart Laurelin Agent to reconnect. ${error.message}`, {
 			tone: "error",
 			sticky: true,
 		});

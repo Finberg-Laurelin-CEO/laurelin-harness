@@ -169,7 +169,7 @@ export const COMMAND_SPECS: readonly CommandSpec[] = [
 	{
 		path: ["update"],
 		usage: "update [--force] [--rollback] [--nightly|--stable]",
-		summary: "Update Prime Agent",
+		summary: "Update Laurelin Agent",
 		options: [
 			"--force     Reinstall even if the current version is the latest on the channel",
 			"--rollback  Restore the previous compiled release",
@@ -328,7 +328,7 @@ export function formatTopLevelHelp(): string {
 	const commands = COMMAND_SPECS.filter((spec) => spec.path.length === 1);
 	const commandWidth = Math.max(...commands.map((spec) => spec.path[0]!.length));
 	const options = TOP_LEVEL_OPTION_GROUPS.map((group) => formatOptionGroup(group.heading, group.options)).join("\n\n");
-	return `${APP_NAME} - AI coding assistant with a Python REPL tool
+	return `${APP_NAME} - Laurelin Agent: Laurelin's harness, a fork of Prime Agent
 
 Usage:
   ${APP_NAME} [options] [@files...] [message...]

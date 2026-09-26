@@ -24,7 +24,7 @@ type SessionsRow = {
 };
 
 /**
- * One-line-per-agent operator table for `prime-agent sessions`.
+ * One-line-per-agent operator table for `laurelin sessions`.
  */
 export function formatSessionsTable(sessions: readonly SessionSummary[], nowMs = Date.now()): string {
 	const rows = sortSessionsForTable(sessions).map((summary) => ({

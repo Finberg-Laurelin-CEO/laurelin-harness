@@ -38,7 +38,7 @@ import { promptYesNo } from "./daemon-stop-confirm.js";
  *     APP_NAME and carry nothing useful in argv, so the socket→pid mapping the
  *     kernel keeps is the only reliable way to find daemons on arbitrary
  *     `--daemon-socket` paths. This is the same data as `ss -lxp | grep
- *     prime-agent`, just parsed. The kernel list is machine-wide, so it is
+ *     laurelin`, just parsed. The kernel list is machine-wide, so it is
  *     filtered to our state root (see createDaemonStateRootMatcher): a daemon
  *     started under a different HOME or agent dir is another root's business,
  *     and stopping it from here would kill unrelated live sessions.
@@ -475,7 +475,7 @@ export function planReap(daemons: readonly DaemonInfo[], force: boolean): ReapAc
 		}
 		if (daemon.status === "unreachable") {
 			if (!force || daemon.pid === undefined) {
-				return { kind: "skip", daemon, reason: 'unreachable; use "prime-agent shutdown --force" to stop it' };
+				return { kind: "skip", daemon, reason: 'unreachable; use "laurelin shutdown --force" to stop it' };
 			}
 			if ((pidCounts.get(daemon.pid) ?? 0) > 1) {
 				return {
@@ -541,7 +541,7 @@ export async function runShutdownAll(json: boolean, force: boolean): Promise<voi
 						stopped: [],
 						failed: daemons.map(({ socketPath }) => ({
 							socketPath,
-							reason: 'confirmation required; use "prime-agent shutdown --force --json"',
+							reason: 'confirmation required; use "laurelin shutdown --force --json"',
 						})),
 					},
 					null,
@@ -551,7 +551,7 @@ export async function runShutdownAll(json: boolean, force: boolean): Promise<voi
 			return;
 		case "tty-error":
 			throw new Error(
-				'Shutdown requires confirmation in an interactive terminal. Use "prime-agent shutdown --force".',
+				'Shutdown requires confirmation in an interactive terminal. Use "laurelin shutdown --force".',
 			);
 		case "prompt": {
 			const confirmed = await promptYesNo(

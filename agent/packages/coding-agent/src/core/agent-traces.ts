@@ -808,7 +808,7 @@ export async function getPrimeAgentTraceCredential(
 
 	const traceKey = await authStorage.getApiKey(PRIME_AGENT_TRACES_PROVIDER_ID, { includeFallback: false });
 	if (traceKey) {
-		return { apiKey: traceKey, source: "stored", label: "Prime Agent Traces credential" };
+		return { apiKey: traceKey, source: "stored", label: "Laurelin Agent Traces credential" };
 	}
 
 	const primeEnvKey = stringEnv("PRIME_API_KEY");

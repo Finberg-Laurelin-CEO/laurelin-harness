@@ -43,7 +43,7 @@ export async function getNativeUpdatePlan(options: {
 	const current = getNativeInstallationTarget(options.executable);
 	if (!current)
 		throw new Error(
-			"This compiled application is not owned by the Prime Agent installer. Update it using its original installer.",
+			"This compiled application is not owned by the Laurelin Agent installer. Update it using its original installer.",
 		);
 	const active = readNativeInstallation(current.root);
 	const installation = active ?? readNativeInstallation(current.root, "previous");

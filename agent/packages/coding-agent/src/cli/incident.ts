@@ -392,7 +392,7 @@ function classifyWorkerStderrBody(
 		return undefined;
 	}
 	const line = firstLine(body);
-	if (/^Prime Agent daemon listening on \S+$/.test(line)) {
+	if (/^Laurelin Agent daemon listening on \S+$/.test(line)) {
 		return {
 			severity: "info",
 			eventClass: "worker-start",
@@ -553,7 +553,7 @@ export function classifyIncidentEntry(entry: IncidentLogEntry, workerPids: Worke
 		return { ...body, timeMs: entry.timeMs, category: "supervisor" };
 	}
 
-	if (/^Prime Agent daemon supervisor \S+ listening on \S+$/.test(msg)) {
+	if (/^Laurelin Agent daemon supervisor \S+ listening on \S+$/.test(msg)) {
 		return event(
 			entry,
 			"info",
@@ -1087,7 +1087,7 @@ export function buildIncidentReport(
 		sections.push({ title, lines });
 	}
 
-	const header = ["Prime Agent incident timeline"];
+	const header = ["Laurelin Agent incident timeline"];
 	const windowText = `Window: ${formatIncidentTime(options.sinceMs)} → ${formatIncidentTime(options.untilMs)} UTC (${formatIncidentDuration(options.untilMs - options.sinceMs)})`;
 	header.push(windowText);
 	if (options.source !== undefined) {

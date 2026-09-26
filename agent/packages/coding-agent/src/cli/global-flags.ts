@@ -3,7 +3,7 @@
  *
  * Both the early daemon-launch decision and public command routing must agree
  * on which token is the subcommand. When they disagreed, a management command
- * written as `prime-agent --offline model list` was routed to the model as a
+ * written as `laurelin --offline model list` was routed to the model as a
  * chat message. Keep this module dependency-free apart from the command
  * registry: daemon-launch.ts loads it before the heavy module graph.
  */
@@ -156,7 +156,7 @@ export function isCommandPositional(positional: FirstPositionalArgument | undefi
 
 /**
  * Move leading global flags behind the subcommand they were written in front of,
- * so `prime-agent --offline model list` runs the command instead of chatting.
+ * so `laurelin --offline model list` runs the command instead of chatting.
  * Arguments are returned unchanged when no known command is present, when `--`
  * already escaped the token, and for one-shot prompt runs, whose positional is
  * the message. Moved flags stay ahead of any `--` separator: arguments behind
@@ -189,7 +189,7 @@ export function rotateGlobalFlagsBeforeCommand(args: readonly string[]): string[
 /**
  * The command path a `help` request names, with global run flags (and their
  * values) excluded: they are run options, not help arguments, so
- * `prime-agent --offline help status` asks about `status`. Flag values
+ * `laurelin --offline help status` asks about `status`. Flag values
  * parseArgs consumes are excluded the same way, so `help --resume status`
  * asks about nothing (status is the resume selector) and `help --print hi`
  * asks about nothing (hi is the print message). Returns undefined when the

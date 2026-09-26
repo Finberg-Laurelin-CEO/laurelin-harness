@@ -5,7 +5,7 @@
 	"type": "module",
 	"piConfig": {
 		"name": "laurelin",
-		"configDir": ".prime/agent"
+		"configDir": ".laurelin/agent"
 	},
 	"bin": {
 		"laurelin": "dist/bundle/cli.js",
