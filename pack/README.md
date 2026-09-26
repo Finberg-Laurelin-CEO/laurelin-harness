@@ -8,7 +8,7 @@ Prime loads it with `prime-agent -e ./pack` for one run, or from the `packages` 
 
 | Folder | Holds | Status |
 |---|---|---|
-| `skills/` | The always-on Laurelin skill set, one folder per skill, each with a `SKILL.md` | 12 skills, all links (see below) |
+| `skills/` | The always-on Laurelin skill set, one folder per skill, each with a `SKILL.md` | 12 linked skills plus `investor-research` (see below) |
 | `rules/` | The generic rules file and the template for the private half in the vault | Written 2026-09-25 |
 | `extensions/` | Prime extensions (`*.ts`): the interface, the router, the safety handlers | Built |
 | `themes/` | The Laurelin theme JSON | Built |
@@ -35,6 +35,7 @@ Each entry in `skills/` is a symlink to the canonical copy in `~/.claude/skills/
 | `jev-patterns` | Worked patterns for Jev workflows |
 | `building-with-jev` | How to write Jev questions, structure state and set thresholds |
 | `sync-gbrain` | Keeps gbrain, the search over the safe vault copy, current with a repo |
+| `investor-research` | Researches investors to the vault's own playbook: firm hubs, person notes, deck guidance, Jev fit grade, validator, follow-up triage. Lives in this repo, not linked (Step 8.1) |
 
 ### Linking the skills into every tool
 

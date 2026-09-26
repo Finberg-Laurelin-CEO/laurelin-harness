@@ -1,0 +1,37 @@
+{
+  "laurelin_fit": {
+    "type": "score",
+    "instructions": {
+      "question": "How well does the investor described in `firm_description` fit an early-stage fusion hardware company that seeks a first institutional check of seed size?",
+      "inspect": "firm_description",
+      "focus": "Judge from what the description states: stage, check size, thesis words, comfort with defense or dual-use work, portfolio precedent in energy or fusion hardware, and any warm path. Treat a missing fact as absent, not as a guess in either direction."
+    },
+    "criteria": [
+      "The description rules the company out. The firm invests only at growth or late stage, or only in software, or states that it does not invest in hardware or energy, or writes checks far above or far below a seed round, or holds a competing fusion or pulsed-power company with a board seat.",
+      "Nothing in the description rules the company out, and nothing points to it. A generalist early-stage firm with no energy, hardware, deep-tech or defense language, no relevant portfolio company, and no warm path.",
+      "The firm writes early-stage checks of seed size and names deep tech, hardware, energy or dual use as a theme, or holds one energy or hardware portfolio company. It names no fusion or nuclear precedent and no warm path.",
+      "The firm writes early-stage checks of seed size, names fusion, nuclear, energy hardware or national-security hardware in its own words, holds at least one fusion, nuclear or pulsed-power portfolio company or states comfort with defense work, and has a warm path or a stated first-check habit."
+    ]
+  },
+  "fee_for_intro": {
+    "type": "noul",
+    "instructions": {
+      "question": "Does `firm_description` state that founders pay a fee, retainer or subscription to get an introduction, a meeting or access to investors?",
+      "inspect": "firm_description"
+    }
+  },
+  "placement_agent": {
+    "type": "noul",
+    "instructions": {
+      "question": "Does `firm_description` describe a placement agent, finder or advisory firm that raises money for companies for a success fee, and not a fund that invests its own capital?",
+      "inspect": "firm_description"
+    }
+  },
+  "conflict": {
+    "type": "noul",
+    "instructions": {
+      "question": "Does `firm_description` state that the firm holds an investment in a competing fusion, pulsed-power or compact-reactor company, or that one of its partners sits on such a company's board?",
+      "inspect": "firm_description"
+    }
+  }
+}
