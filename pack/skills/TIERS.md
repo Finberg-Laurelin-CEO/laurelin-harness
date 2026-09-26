@@ -33,7 +33,6 @@ SEO (AgriciDaniel/claude-seo, no key. Helper CLI not copied, see `SOURCES.md`):
 
 Research with a key:
 - `exa-search`, `company-research` (exa-labs/agent-skills, `EXA_API_KEY`)
-- `deep-research` (199-biotechnologies, reuses `EXA_API_KEY`)
 - `firecrawl-research-index`, `firecrawl-deep-research`, `firecrawl-seo-audit`, `firecrawl-competitive-intel` (firecrawl/skills, `FIRECRAWL_API_KEY`)
 
 Research with open APIs (K-Dense-AI/scientific-agent-skills, no key):

@@ -28,7 +28,7 @@ Every prose deliverable a person reads goes through the `writing-ste` skill. Its
 3. No em dash or en dash in prose. An en dash stays only in a numeric range or a notation like D–D.
 4. No metaphor, no coaching language, no fragment headlines, no rhetorical questions.
 5. Never self-state a quality. Never "this memo is rigorous". Print the table and let it show.
-6. Numbers live in sentences with a source or an [estimate] label. Write rates with a slash: $30k/g, 100 g/yr. Never use a page or sheet count as a credential. Use the revision identifier.
+6. Numbers live in sentences with a source or an [estimate] label. Write rates with a slash: $30k/g, 42 units/yr. Never use a page or sheet count as a credential. Use the revision identifier.
 7. Headings name the subject plainly. No anthropomorphic headings.
 8. Investor prose states outcomes as schedule, dated, in the present tense. Never "if it works", "or we stop", "failure case", "experiment", "kill". Name a risk and name what removes it. Concede what is hard about the field. Never concede that Laurelin is conditional.
 9. Investor prose carries Laurelin's case at full strength. Never "to be fair", "critics would say", "on the other hand". A concession appears only where it buys credibility. Every hit on a competitor is a citation, never an adjective.

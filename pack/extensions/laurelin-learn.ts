@@ -66,7 +66,7 @@ export type Kind = (typeof KINDS)[number];
 
 export const KIND_CRITERIA: Record<Kind, unknown> = {
 	prose_style: { what: "How the text is written: word choice, tone, sentence shape, banned words, slop, metaphor, hedging, headings", examples: ["no slop, say 'we use'", "shorter sentences", "drop the em dashes"] },
-	number: { what: "A figure, unit, date or count was wrong, unsourced, or not the canonical one", examples: ["the yield is 100 g/yr, not 80", "use the number from the newest engineering doc"] },
+	number: { what: "A figure, unit, date or count was wrong, unsourced, or not the canonical one", examples: ["the yield is 42 units/yr, not 80", "use the number from the newest engineering doc"] },
 	layout: { what: "How a page, slide or PDF looks: overlap, overflow, white space, order of blocks, fonts", examples: ["the title runs over the image on page 7", "put the table before the chart"] },
 	location: { what: "Where a file was written or read: wrong folder, wrong vault path, wrong file name", examples: ["that goes in Laurelin/investors, not the root", "you read the old deck"] },
 	verbatim: { what: "The agent changed text that had to stay word for word: Joe's own words, a quote, a technical name", examples: ["you changed my prose, put it back", "keep the quote exactly"] },
@@ -331,7 +331,7 @@ export async function classifyKind(c: Pick<Correction, "correction" | "corrected
 						focus: "Private content: an investor, contact or person by name, an internal or canonical number, a vault note's contents, a classification or cryptonym, export-controlled technical detail. A rule about wording, order of work, file layout or checking is not private.",
 					},
 					criteria: {
-						true: { what: "The rule must carry a name, number or fact that stays in the vault", examples: ["the yield figure is the one in the design basis, 100 g/yr", "never email this investor directly"] },
+						true: { what: "The rule must carry a name, number or fact that stays in the vault", examples: ["the yield figure is the one in the design basis, 42 units/yr", "never email this investor directly"] },
 						false: { what: "The rule is generic: how to write, check, place or order work", examples: ["no slop, say 'we use'", "run the gates before you say done"] },
 					},
 				},
@@ -852,6 +852,12 @@ export function applyProposal(p0: Proposal, paths: Paths, hooks: ApplyHooks = {}
 	recordProposal(p, paths);
 	if (hooks.sendUserMessage) {
 		const scope = hooks.storeScope ?? (process.env.LAURELIN_LEARN_STORE === "local" ? "local" : "global");
+		// Store the rule only when running under the fork's own settings folder. Loaded by a
+		// plain prime-agent, /refine --global would write into ~/.prime/agent (rule 17).
+		if (!process.env.LAURELIN_CODING_AGENT_DIR) {
+			hooks.warn?.(`learn ${p.id}: applied on disk; not stored in the refine store because this is not the laurelin-agent launcher (LAURELIN_CODING_AGENT_DIR unset).`);
+			return;
+		}
 		hooks.sendUserMessage(`/refine ${scope === "global" ? "--global " : ""}${MARKER}${p.id}`);
 	}
 	return p;

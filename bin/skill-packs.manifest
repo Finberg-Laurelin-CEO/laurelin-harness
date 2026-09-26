@@ -38,8 +38,6 @@ firecrawl/skills 3a410054eb2a4bbb1545d0fd88d4cb282f64624f 2026-09-25 LICENSE ski
 K-Dense-AI/scientific-agent-skills 49c6e97775eaa18ba791bebe23162a70ae601c18 2026-09-25 LICENSE.md skills/literature-review literature-review note
 K-Dense-AI/scientific-agent-skills 49c6e97775eaa18ba791bebe23162a70ae601c18 2026-09-25 LICENSE.md skills/paper-lookup paper-lookup note
 
-# 5. 199-biotechnologies/claude-deep-research-skill (MIT, declared in README). Reuses EXA_API_KEY.
-199-biotechnologies/claude-deep-research-skill f2f2c0fa4e7617ca84c86b63f4bb40f77a746933 2026-09-25 declared:MIT . deep-research note
 
 # 6. whyashthakker/agent-skills-marketing (MIT). Two B2B writers.
 whyashthakker/agent-skills-marketing 985b4becb89bf441c1abd714177a8f99079bd25e 2026-09-25 LICENSE .claude/skills/press-release-writer press-release-writer -

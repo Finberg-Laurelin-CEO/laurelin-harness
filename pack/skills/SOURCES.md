@@ -17,17 +17,14 @@ The survey that chose these packs, and the packs it skipped, is in `docs/briefs/
 - `seo-audit` from `coreyhaines31/marketingskills` and `firecrawl-seo-audit` from `firecrawl/skills` have different names and both stay. The first is the method with no key. The second is the Firecrawl-driven crawl and needs `FIRECRAWL_API_KEY`.
 - `deep-research` (199-biotechnologies) and `firecrawl-deep-research` both stay. The first is an eight-phase method with its own scripts over Exa. The second is a Firecrawl workflow. The router picks by key and by the question.
 - `claude-seo` ships `seo-audit` too. It is not installed. The marketingskills one covers the audit method and the four claude-seo folders cover technical, schema, AI-answer and agent readiness.
-- Claude Code has plugin skills with similar names (`ecc:exa-search`, `ecc:deep-research`, `ecc:seo`). They live in Claude Code's plugin folders, not in this pack, and do not collide with Prime's skill list.
 
 ## Known gaps in the copies
 
 - `seo-technical`, `seo-schema`, `seo-geo` and `seo-agentic` call a helper CLI at `${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo` for page fetches and checks. The plugin's `scripts/` folder is not copied, so those steps fail. The audit checklists and the report shape still apply, and the agent should fetch pages with `fastbrowse` instead. `seo-schema` also links `../seo/references/schema-types.md`, which is not copied.
 - `launch`, `emails` and `analytics` link to `../../tools/integrations/*.md` in the marketingskills repo (Mailchimp, Customer.io, GA4 and others). Those integration notes are not copied. The links dangle. The skills work without them.
 - `firecrawl-deep-research` points paper questions at `../firecrawl-research-papers/SKILL.md`, which is not installed. `literature-review`, `paper-lookup` and `firecrawl-research-index` cover that.
-- `deep-research` needs Python packages from its `requirements.txt` for the scripts to run. Nothing is installed by this repo. The merge owner decides where those packages live.
 - `product-marketing` writes its context document to `.agents/product-marketing.md` in the working folder. That file would be Laurelin content, so it belongs in the vault, not in this repo.
 - `karpathy-guidelines` is copied from the installed Claude Code plugin checkout (`forrestchang/andrej-karpathy-skills`). The brief names `multica-ai/andrej-karpathy-skills`. The installed marketplace remote is the forrestchang repo, and that is what is recorded. The repo has no `LICENSE` file. The SKILL.md frontmatter and the README declare MIT, and the `LICENSE` file here says so.
-- `deep-research` likewise has no `LICENSE` file upstream. Its README declares MIT.
 
 ## Skills and their sources
 
@@ -51,7 +48,6 @@ The survey that chose these packs, and the packs it skipped, is in `docs/briefs/
 | `firecrawl-competitive-intel` | [firecrawl/skills](https://github.com/firecrawl/skills) | `skills/workflows/firecrawl-competitive-intel` | `3a41005` | 2026-09-25 | ISC | 2026-09-25 |
 | `literature-review` | [K-Dense-AI/scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills) | `skills/literature-review` | `49c6e97` | 2026-09-21 | MIT | 2026-09-25 |
 | `paper-lookup` | [K-Dense-AI/scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills) | `skills/paper-lookup` | `49c6e97` | 2026-09-21 | MIT | 2026-09-25 |
-| `deep-research` | [199-biotechnologies/claude-deep-research-skill](https://github.com/199-biotechnologies/claude-deep-research-skill) | `.` | `f2f2c0f` | 2026-04-11 | MIT (declared) | 2026-09-25 |
 | `press-release-writer` | [whyashthakker/agent-skills-marketing](https://github.com/whyashthakker/agent-skills-marketing) | `.claude/skills/press-release-writer` | `985b4be` | 2026-06-23 | MIT | 2026-09-25 |
 | `case-study-writer` | [whyashthakker/agent-skills-marketing](https://github.com/whyashthakker/agent-skills-marketing) | `.claude/skills/case-study-writer` | `985b4be` | 2026-06-23 | MIT | 2026-09-25 |
 | `seo-technical` | [AgriciDaniel/claude-seo](https://github.com/AgriciDaniel/claude-seo) | `skills/seo-technical` | `e77e783` | 2026-09-24 | MIT | 2026-09-25 |
