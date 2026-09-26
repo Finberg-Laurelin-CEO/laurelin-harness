@@ -31,6 +31,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import sys
 import time
 from collections import Counter, defaultdict
@@ -222,6 +223,20 @@ def _err(e):
     return getattr(e, 'code', None) or type(e).__name__
 
 
+
+STOPWORDS = set("a an and are as at be been by for from has have how i if in into is it its of on or our that the their them then there these they this to was we were what when where which who why will with without you your write three plain sentences sentence note notes paths path given cite citing".split())
+
+def text_query(query, limit=8):
+    """Content words of the query, joined with OR for websearch-style full-text search."""
+    words = []
+    for w in re.findall(r"[A-Za-z][A-Za-z0-9'-]{2,}", query.lower()):
+        if w in STOPWORDS or w in words:
+            continue
+        words.append(w)
+        if len(words) >= limit:
+            break
+    return ' OR '.join(words) if words else query
+
 def polygres_search(query, k, root, min_words, max_words):
     """Context (vector) plus tsvector (text), reciprocal-rank fused, then one graph hop."""
     schema = os.environ.get('POLYGRES_SCHEMA', 'public')
@@ -236,7 +251,9 @@ def polygres_search(query, k, root, min_words, max_words):
     except Exception as e:  # noqa: BLE001
         notes.append(f'vector lane off: {_err(e)}')
     try:
-        page = project.text.tsvector(query, config=text_config, limit=k)
+        # Full-text search ANDs every word, so a whole sentence matches nothing. Send the
+        # content words joined with OR instead; ranking still favours sections with more of them.
+        page = project.text.tsvector(text_query(query), config=text_config, limit=k)
         lanes['text'] = list(getattr(page, 'results', []) or [])
     except Exception as e:  # noqa: BLE001
         notes.append(f'text lane off: {_err(e)}')
