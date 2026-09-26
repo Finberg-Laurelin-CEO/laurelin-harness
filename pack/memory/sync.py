@@ -98,7 +98,15 @@ def plan(root, state, min_words, max_words, force=False):
         out['changed'].append(rel)
         out['note_rows'].append(note)
         out['section_rows'].extend(srows)
-        out['link_rows'].extend(lrows)
+        # One edge per (section, note) pair: a section that links the same note twice makes one row,
+        # or the links import fails on the primary key.
+        seen_pairs = {(l['src_id'], l['dst_path']) for l in out['link_rows']}
+        for l in lrows:
+            k = (l['src_id'], l['dst_path'])
+            if k in seen_pairs:
+                continue
+            seen_pairs.add(k)
+            out['link_rows'].append(l)
         out['unresolved'] += sum(1 for s in srows for l in s['links'] if not l['path'])
         # a note that shrank leaves surplus section ids behind: tombstone them
         for i in range(len(srows), int(prev.get('sections', 0)) if prev else 0):
