@@ -31,6 +31,8 @@ GITLAB_TOKEN required GitLab (git remotes)
 VENICE_API_KEY optional Venice models
 EXA_API_KEY optional Exa search skills (exa-search, company-research, deep-research)
 FIRECRAWL_API_KEY optional Firecrawl skills (research index, deep research, SEO audit, competitive intel)
+POLYGRES_API_KEY optional Polygres project key (memory sync through the SDK)
+POLYGRES_RUNTIME_URL optional Polygres Runtime API URL (from the project's Connect page)
 "
 
 die() { echo "laurelin: $*" >&2; exit 1; }
