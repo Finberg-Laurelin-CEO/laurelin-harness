@@ -36,6 +36,11 @@ Each entry in `skills/` is a symlink to the canonical copy in `~/.claude/skills/
 | `building-with-jev` | How to write Jev questions, structure state and set thresholds |
 | `sync-gbrain` | Keeps gbrain, the search over the safe vault copy, current with a repo |
 | `investor-research` | Researches investors to the vault's own playbook: firm hubs, person notes, deck guidance, Jev fit grade, validator, follow-up triage. Lives in this repo, not linked (Step 8.1) |
+| `karpathy-guidelines` | Coding behaviour: think before coding, minimal change, surgical edits, verifiable goals. A copy from the installed Claude Code plugin, always on |
+
+### Adopted packs (loaded when needed)
+
+Twenty-three more skills are copies from outside packs: marketing (`product-marketing`, `launch`, `emails`, `content-strategy`, `analytics`, `public-relations`, `copywriting`, `seo-audit`), B2B writers (`press-release-writer`, `case-study-writer`), SEO (`seo-technical`, `seo-schema`, `seo-geo`, `seo-agentic`) and research (`exa-search`, `company-research`, `deep-research`, the four `firecrawl-*` skills, `literature-review`, `paper-lookup`). `skills/TIERS.md` says which skills are always on and which load when needed. `skills/SOURCES.md` records each copy's repo, commit, licence and date, the conflicts resolved, and the known gaps. `bin/install-skill-packs.sh` makes the copies from `bin/skill-packs.manifest`; run it again to refresh them after changing a pin.
 
 ### Linking the skills into every tool
 

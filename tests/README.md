@@ -16,6 +16,7 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
 | test set (Step 6: runner, scoring, calibration) | `tests/test-testset.sh` (runs one synthetic job through Prime, about a minute) |
 | investor research (Step 8.1: validator gate, fit question set through Jev, follow-up triage) | `tests/test-investor-research.sh` (synthetic firms only, never reads the vault) |
+| skill packs (wave 3: adopted marketing, SEO and research skills, tiers, sources, description budget) | `tests/test-skill-packs.sh` (one model call through the launcher, skipped without a model; `LAURELIN_TEST_INSTALL=1` also reruns `bin/install-skill-packs.sh` and needs the clones or the network) |
 
 ## Test-set runner (Step 6)
 

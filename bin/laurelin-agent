@@ -29,6 +29,8 @@ FOLK_API_KEY required Folk CRM (investor and contact records)
 OPENAI_API_KEY required gbrain embeddings
 GITLAB_TOKEN required GitLab (git remotes)
 VENICE_API_KEY optional Venice models
+EXA_API_KEY optional Exa search skills (exa-search, company-research, deep-research)
+FIRECRAWL_API_KEY optional Firecrawl skills (research index, deep research, SEO audit, competitive intel)
 "
 
 die() { echo "laurelin: $*" >&2; exit 1; }

@@ -69,7 +69,7 @@ elif ! command -v prime-agent >/dev/null 2>&1; then
   say "skipped: no model (prime-agent is not on PATH)"
 else
   [ -f "$HOME/.config/agent-keys/env" ] && . "$HOME/.config/agent-keys/env"
-  prompt="List the folder names of every skill you have loaded, one name per line, names only, no commentary. There should be about twelve."
+  prompt="List the folder names of every skill you have loaded, one name per line, names only, no commentary. List all of them, however many there are."
   raw="$(timeout 180 prime-agent -e ./pack --no-session -p "$prompt" --mode json 2>/dev/null)"
   rc=$?
   answer="$(printf '%s' "$raw" | python3 -c '
