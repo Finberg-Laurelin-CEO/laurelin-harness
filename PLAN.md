@@ -530,10 +530,10 @@ Facts learned in the build: Prime's `-p` and JSON modes report a screen but answ
 
 **Next pieces (wave 3), in order:**
 0. **Fork isolation and rebrand** (9/25, in progress): the fork gets its own settings folder so the installed Prime is never touched, and calls itself Laurelin Agent everywhere.
-1. **Investor skills** (Joe, 9/25; Step 8.1): a skill set that finds investors and partners, researches them (context.dev, fastbrowse), scores fit with Jev, and builds and keeps the investor database in the vault (`Laurelin/investors`, `Laurelin/Investor Research`), with follow-up triage. Private data stays in the vault; the skill holds only the method.
+1. **Investor skills** (Joe, 9/25; Step 8.1): a skill set that finds investors and partners, researches them (context.dev, fastbrowse), scores fit with Jev, and builds and keeps the investor database in the vault (`Laurelin/investors`, `Laurelin/Investor Research`), with follow-up triage. Private data stays in the vault; the skill holds only the method. Joe: the vault already has the workflow, the place and the folder structure; the skill is written to match them, not to invent them.
 2. **`laurelin graph`** runner (section 21).
-3. **Step 1d memory** after Joe approves the VM copy.
-2. **Step 7**: the first real fundraising document through the whole loop, with the private rules note filled in the vault.
+3. **Step 1d memory**: deferred (Joe, 9/25: no memory on the GCP machine yet). Agents read the vault directly for now.
+2. **Step 7**: the first real fundraising document through the whole loop. The private rules note in the vault is distilled from the Claude memory notes that already hold the memo and design rules (Joe, 9/25), not written from scratch.
 3. **Step 2b**: the ACP client for live permission forwarding, if the print-mode workers prove limiting.
 4. **Learning loop** (Step 10) on top of Prime's refine store.
 5. Fork branding: the fork still says "Prime Agent" in its help text and prompts; a rename pass through `agent/` when the spin-out needs it.
@@ -596,3 +596,4 @@ Where this lands: a `laurelin graph` runner in wave 3 that expresses a job as no
 - 2026-09-25: Fork isolated: own folder `~/.laurelin/agent` (sign-in linked, nothing else shared), own service socket keyed to the build. Before this the fork had written five sessions, a kernel rebuild and a default-model change into `~/.prime/agent`; the default model was restored (backup kept) and Prime verified working. Rebrand: Laurelin rings logo, "Laurelin Agent" in 41 files, `laurelin` in command hints. Launcher always loads this repo's pack (Prime's settings pointed at the old checkout).
 - 2026-09-25: Command renamed to `laurelin-agent`; `laurelin` on Joe's interactive PATH is the chat platform's Python client. `bin/laurelin` stays as a link for scripts.
 - 2026-09-25: Joe launched `laurelin-agent` on his light terminal: title screen, theme and input readable. First accepted look. Remaining work listed in section 20 wave 3.
+- 2026-09-25: Joe: no GCP memory yet; private rules come from the Claude memory notes; investor skill must follow the vault's existing workflow and folders.
