@@ -2,3 +2,4 @@
 # Lines that start with # are ignored.
 $REPO
 ~/Documents/Obsidian Vault/Laurelin
+~/Documents/Obsidian Vault/Laurelin/Investor Research/_circulating-decks
