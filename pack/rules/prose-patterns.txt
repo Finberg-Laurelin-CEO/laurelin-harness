@@ -1,0 +1,9 @@
+# Learned prose patterns for the prose gate (PLAN.md Step 10, the learning loop).
+# One rule per line:  <name>: <regular expression>   (case-insensitive, Python re syntax)
+# The prose gate (pack/gates/prose.sh) checks every sentence and heading of a prose
+# file against these before it calls jev-sweep. A match is a hit at 1.00 and fails
+# the gate, printed in jev-sweep's own format: [<name> 1.00] <sentence>.
+#
+# Lines are added by /learn after Joe approves a proposal from laurelin-learn.
+# Each added line carries the proposal id in a comment above it, so a revert can
+# find it. Lines starting with # are comments. Blank lines are ignored.
