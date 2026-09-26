@@ -16,6 +16,7 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
 | test set (Step 6: runner, scoring, calibration) | `tests/test-testset.sh` (runs one synthetic job through Prime, about a minute) |
 | investor research (Step 8.1: validator gate, fit question set through Jev, follow-up triage) | `tests/test-investor-research.sh` (synthetic firms only, never reads the vault) |
+| metrics (section 22, Step 6: first-pass acceptance, corrections per job, cost, gate pass rates, baseline, footer) | `tests/test-metrics.sh` (synthetic sessions only, never reads Joe's sessions; Jev part skipped without the key) |
 
 ## Test-set runner (Step 6)
 

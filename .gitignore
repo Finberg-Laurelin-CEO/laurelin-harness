@@ -12,3 +12,4 @@ tests/tmp/
 tests/testset/results/
 __pycache__/
 *.pyc
+metrics/latest.json

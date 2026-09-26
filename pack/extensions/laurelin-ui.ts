@@ -112,6 +112,24 @@ function packVersion(): string {
 	}
 }
 
+/**
+ * The footer's acceptance figure, from the last `laurelin-metrics` run:
+ * metrics/latest.json (gitignored), or LAURELIN_METRICS_FILE. Returns
+ * `accept 71% (wk)` for the latest ISO week, or null when there is no number.
+ */
+function acceptanceFooter(): string | null {
+	try {
+		const here = dirname(fileURLToPath(import.meta.url));
+		const file = process.env.LAURELIN_METRICS_FILE || join(here, "..", "..", "metrics", "latest.json");
+		const json = JSON.parse(readFileSync(file, "utf8")) as { latest_week?: { acceptance?: number | null } };
+		const a = json.latest_week?.acceptance;
+		if (typeof a !== "number") return null;
+		return `accept ${Math.round(a * 100)}% (wk)`;
+	} catch {
+		return null;
+	}
+}
+
 function today(): string {
 	return new Date().toISOString().slice(0, 10);
 }
@@ -260,13 +278,15 @@ export default function laurelinUi(pi: ExtensionAPI) {
 		const t = ui.ui.theme;
 		const color = classification === "green" ? "success" : classification === "yellow" ? "warning" : "error";
 		const dot = t.fg("dim", " · ");
+		const accept = acceptanceFooter();
 		ui.ui.setStatus(
 			"laurelin",
 			t.fg(color, t.bold(`■ ${classification.toUpperCase()}`)) +
 				dot +
 				t.fg("muted", ui.model?.id ?? "no model") +
 				dot +
-				t.fg("muted", worker),
+				t.fg("muted", worker) +
+				(accept ? dot + t.fg("muted", accept) : ""),
 		);
 	};
 
