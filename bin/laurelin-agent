@@ -215,7 +215,7 @@ launch() {
   # pack by a relative path that resolves elsewhere; this repo's copy wins.
   args=(-e "$PACK")
   SETTINGS="${LAURELIN_CODING_AGENT_DIR:-$HOME/.prime/agent}/settings.json"
-  if grep -qs 'laurelin-harness/pack' "$SETTINGS"; then
+  if python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if any("laurelin-harness/pack" in p for p in d.get("packages",[])) else 1)' "$SETTINGS" 2>/dev/null; then
     echo "note: $SETTINGS also lists a laurelin-harness pack; this repo's pack at $PACK is loaded as well." >&2
   fi
   # Coordinator model: the ChatGPT sign-in, never Prime's Claude sign-in (PLAN section 11).
