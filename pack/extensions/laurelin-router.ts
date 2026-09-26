@@ -128,6 +128,27 @@ export const INTENT_CRITERIA: Record<string, unknown> = {
 export interface Skill {
 	name: string;
 	description: string;
+	/** Absolute path of the SKILL.md. */
+	path?: string;
+	/** True for skills Prime does not list at startup (ECC): the routing note hands over the path. */
+	onDemand?: boolean;
+}
+
+/** Skill folders the router chooses from. Startup-listed folders come first so a pack skill wins a name clash. */
+export function skillDirs(): { dir: string; onDemand: boolean }[] {
+	const h = homedir();
+	const listed = [
+		join(PACK, "skills"),
+		join(h, ".claude", "skills"),
+		join(h, ".agents", "skills"),
+		join(h, ".codex", "skills"),
+		join(h, ".claude", "plugins", "cache", "claude-plugins-official", "superpowers", "6.0.3", "skills"),
+		join(h, ".codex", "plugins", "cache", "ponytail", "ponytail", "4.10.0", "skills"),
+	];
+	const onDemand = (process.env.LAURELIN_ONDEMAND_SKILLS ?? join(h, ".claude", "plugins", "cache", "ecc", "ecc", "2.2.0", "skills"))
+		.split(":")
+		.filter(Boolean);
+	return [...listed.map((dir) => ({ dir, onDemand: false })), ...onDemand.map((dir) => ({ dir, onDemand: true }))];
 }
 
 export interface Menu {
@@ -210,10 +231,12 @@ export function parseSkillFrontMatter(text: string, fallbackName: string): Skill
 }
 
 /** The skills in pack/skills (links followed), each with its description. */
-export function loadSkillMenu(dirs: string[] = [join(PACK, "skills")]): Skill[] {
+export function loadSkillMenu(dirs: (string | { dir: string; onDemand: boolean })[] = [join(PACK, "skills")]): Skill[] {
 	const out: Skill[] = [];
 	const seen = new Set<string>();
-	for (const dir of dirs) {
+	for (const entry of dirs) {
+		const dir = typeof entry === "string" ? entry : entry.dir;
+		const onDemand = typeof entry === "string" ? false : entry.onDemand;
 		let names: string[] = [];
 		try {
 			names = readdirSync(dir);
@@ -227,7 +250,7 @@ export function loadSkillMenu(dirs: string[] = [join(PACK, "skills")]): Skill[] 
 				const s = parseSkillFrontMatter(readFileSync(file, "utf8"), n);
 				if (s && !seen.has(s.name)) {
 					seen.add(s.name);
-					out.push(s);
+					out.push({ ...s, path: file, onDemand });
 				}
 			} catch {
 				// a broken link or a folder without SKILL.md is not a skill
@@ -469,7 +492,8 @@ export function formatNote(d: Decision): string {
 		`Route: worker ${a.worker.choice}${mark(a.worker)}, skill ${a.skill.choice}${mark(a.skill)}, ` +
 		`class ${a.classification.choice.toUpperCase()}${mark(a.classification)}, outward ${a.outward.choice}${mark(a.outward)}, ` +
 		`intent ${a.intent.choice}${mark(a.intent)}, confidence ${d.confidence.toFixed(2)}` +
-		(d.error ? ` (Jev unavailable: ${d.error})` : "")
+		(d.error ? ` (Jev unavailable: ${d.error})` : "") +
+		((d as any).skill_path ? `. Skill ${a.skill.choice} is not preloaded: read ${(d as any).skill_path} before you start.` : "")
 	);
 }
 
@@ -624,7 +648,7 @@ export default function (pi: ExtensionAPI) {
 		} catch {
 			// outside a bound session (tests)
 		}
-		return { workers: workerMenu(toolNames), skills: loadSkillMenu() };
+		return { workers: workerMenu(toolNames), skills: loadSkillMenu(skillDirs()) };
 	}
 
 	/** Ask Joe on screen for each abstained worker, skill or classification. */
@@ -658,6 +682,11 @@ export default function (pi: ExtensionAPI) {
 		const state = buildState(prompt, ctx);
 		const d = await route(state, menu, thresholds);
 		await askJoe(d, menu, ctx);
+		const chosen = menu.skills.find((k) => k.name === d.answers.skill.choice);
+		if (chosen?.onDemand && chosen.path) {
+			(d as any).skill_path = chosen.path;
+			d.note = formatNote(d);
+		}
 		try {
 			pi.appendEntry("laurelin_decision", d);
 		} catch {

@@ -20,7 +20,7 @@ cd "$repo"
 expected=(
   writing-ste humanizer laurelin-reactor-calcs fastbrowse sync-gbrain
   jev jev-triage jev-documents jev-eval jev-act jev-patterns building-with-jev
-  karpathy-guidelines
+  karpathy-guidelines fusion-cad
 )
 
 fail=0
