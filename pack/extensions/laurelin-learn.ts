@@ -856,9 +856,9 @@ export function applyProposal(p0: Proposal, paths: Paths, hooks: ApplyHooks = {}
 		// plain prime-agent, /refine --global would write into ~/.prime/agent (rule 17).
 		if (!process.env.LAURELIN_CODING_AGENT_DIR) {
 			hooks.warn?.(`learn ${p.id}: applied on disk; not stored in the refine store because this is not the laurelin-agent launcher (LAURELIN_CODING_AGENT_DIR unset).`);
-			return;
+		} else {
+			hooks.sendUserMessage(`/refine ${scope === "global" ? "--global " : ""}${MARKER}${p.id}`);
 		}
-		hooks.sendUserMessage(`/refine ${scope === "global" ? "--global " : ""}${MARKER}${p.id}`);
 	}
 	return p;
 }

@@ -55,3 +55,12 @@ The survey that chose these packs, and the packs it skipped, is in `docs/briefs/
 | `seo-geo` | [AgriciDaniel/claude-seo](https://github.com/AgriciDaniel/claude-seo) | `skills/seo-geo` | `e77e783` | 2026-09-24 | MIT | 2026-09-25 |
 | `seo-agentic` | [AgriciDaniel/claude-seo](https://github.com/AgriciDaniel/claude-seo) | `skills/seo-agentic` | `e77e783` | 2026-09-24 | MIT | 2026-09-25 |
 <!-- generated:end -->
+
+## Memory skills (hand-copied by the memory branch, not by the installer)
+
+| skill | repo | licence | adopted |
+|---|---|---|---|
+| `polygres-cli` | Evokoa/polygres-skills | Apache-2.0 | 2026-09-25 |
+| `polygres-data-pipeline` | Evokoa/polygres-skills | Apache-2.0 | 2026-09-25 |
+| `polygres-retrieval-design` | Evokoa/polygres-skills | Apache-2.0 | 2026-09-25 |
+| `polygres-sdk` | Evokoa/polygres-skills | Apache-2.0 | 2026-09-25 |

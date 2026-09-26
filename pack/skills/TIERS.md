@@ -43,3 +43,9 @@ Both keys are optional in `laurelin-agent keys check`. Without a key the skill's
 ## Off
 
 Everything else: the rest of each surveyed pack, the packs the survey skipped, and every skill in the Claude Code plugin folders. `docs/briefs/skill-packs.md` has the list and the reasons.
+
+### Loaded when needed: memory (from the memory branch, Evokoa/polygres-skills, Apache-2.0)
+- `polygres-cli`
+- `polygres-data-pipeline`
+- `polygres-retrieval-design`
+- `polygres-sdk`
