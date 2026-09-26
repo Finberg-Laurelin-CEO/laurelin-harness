@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# laurelin-metrics: first-pass acceptance and the numbers beside it.
+#
+# Plan: PLAN.md section 22 and Step 6. Brief: docs/briefs/metrics.md.
+# Docs: docs/metrics.md. The work is in bin/metrics.py; this wrapper finds the
+# repo, loads the key store into the environment (never printing a value) and
+# hands over to python3.
+#
+#   laurelin-metrics                  table per ISO week and overall
+#   laurelin-metrics --json           the same as JSON (also written to metrics/latest.json)
+#   laurelin-metrics --since 2026-09-01 --include-prime
+#   laurelin-metrics baseline         correction share of the year's prompts -> metrics/baseline.md
+
+set -euo pipefail
+
+self="$0"
+while [ -L "$self" ]; do
+  target="$(readlink "$self")"
+  case "$target" in
+    /*) self="$target" ;;
+    *) self="$(dirname "$self")/$target" ;;
+  esac
+done
+REPO="$(cd "$(dirname "$self")/.." && pwd)"
+STORE="${LAURELIN_KEY_STORE:-$HOME/.config/agent-keys/env}"
+
+if [ -z "${TYPESAFE_API_KEY:-}" ] && [ -f "$STORE" ]; then
+  set -a; . "$STORE" >/dev/null 2>&1; set +a
+fi
+
+exec python3 "$REPO/bin/metrics.py" "$@"
