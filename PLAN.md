@@ -641,3 +641,4 @@ Supporting, not decisive: subscription-only cost with Jev at cents per thousand 
 - 2026-09-25: Added section 22, the edge: standards as typed checks, first-pass acceptance as the north-star metric, shipped procedures, safe to leave running. Order: instrument, learning loop, real jobs, then widen.
 - 2026-09-25: Skill-pack survey recorded. Briefs written and branches started for metrics, learning-loop, skill-packs and memory, in the section 22 order. Deck-design brief waits on its research.
 - 2026-09-25: Deck workflow mapped; current deck's generator rescued from a temp folder into the deck kit; LRL-DS declared current; deck-design brief written and branch started.
+- 2026-09-25: Joe confirmed the cream deck system is legacy. Karpathy guidelines added to the pack as an always-on skill (copied from the installed Claude Code plugin, MIT); the harness lists it and Claude Code loads its own copy.

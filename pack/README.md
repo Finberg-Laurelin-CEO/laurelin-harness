@@ -8,7 +8,7 @@ Prime loads it with `prime-agent -e ./pack` for one run, or from the `packages` 
 
 | Folder | Holds | Status |
 |---|---|---|
-| `skills/` | The always-on Laurelin skill set, one folder per skill, each with a `SKILL.md` | 12 linked skills plus `investor-research` (see below) |
+| `skills/` | The always-on Laurelin skill set, one folder per skill, each with a `SKILL.md` | 12 linked skills plus `investor-research` (see below)  Always on: `karpathy-guidelines` (copied from the Claude Code plugin). |
 | `rules/` | The generic rules file and the template for the private half in the vault | Written 2026-09-25 |
 | `extensions/` | Prime extensions (`*.ts`): the interface, the router, the safety handlers | Built |
 | `themes/` | The Laurelin theme JSON | Built |

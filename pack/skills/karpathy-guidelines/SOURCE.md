@@ -1,0 +1,1 @@
+Source: https://github.com/multica-ai/andrej-karpathy-skills (MIT, per SKILL.md front matter). Copied unchanged on 2026-09-25 so the harness loads it as an always-on skill. Claude Code loads the same skill from its installed plugin.
