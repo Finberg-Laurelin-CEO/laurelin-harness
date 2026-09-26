@@ -220,6 +220,8 @@ launch() {
   fi
   # Coordinator model: the ChatGPT sign-in, never Prime's Claude sign-in (PLAN section 11).
   case " $* " in *" --model "*) ;; *) args+=(--model "${LAURELIN_MODEL:-openai-codex/gpt-6-astra}") ;; esac
+  # The memory extension runs pack/memory/query.py; the Polygres SDK lives in the repo's own venv.
+  if [ -x "$REPO/.laurelin/venv/bin/python" ]; then export LAURELIN_PYTHON="${LAURELIN_PYTHON:-$REPO/.laurelin/venv/bin/python}"; fi
   # gstack keys its state by repo; ~/package.json makes it resolve every repo to one slug.
   export GSTACK_PROJECT_SLUG="${GSTACK_PROJECT_SLUG:-laurelin-harness}"
   for t in "$PACK"/themes/*.json; do [ -f "$t" ] && args+=(--theme "$t"); done

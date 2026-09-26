@@ -77,11 +77,13 @@ Watch the checks panel below the editor: the lights change as each gate runs. `/
 
 ## 4a. Memory over the vault, hosted
 
+Once per worktree: `bin/setup-memory.sh` builds the repo-local Python environment with the Polygres SDK (the launcher finds it on its own).
+
 Polygres holds a derived index of the safe vault copy: sections, links and a graph, with full-text search live and meaning search once the embedding job finishes. Try it from the repo's venv:
 
 ```
 set -a; . ~/.config/agent-keys/env; set +a
-.laurelin/tmp/venv/bin/python pack/memory/query.py --polygres --k 5 "investor playbook"
+.laurelin/venv/bin/python pack/memory/query.py --polygres --k 5 "investor playbook"
 ```
 
 Inside `laurelin-agent`, every new task first injects the top five matching sections with their vault paths; `/memory` shows what was injected. The vault stays the source; nothing in Polygres is authoritative.
