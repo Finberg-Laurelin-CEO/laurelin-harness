@@ -14,7 +14,7 @@ It installs dependencies inside `agent/` and builds in about ten seconds. After 
 
 The fork never touches your installed Prime Agent. It keeps its own settings folder, `~/.laurelin/agent`, created on first run, with only your sign-in file linked from `~/.prime/agent` so the subscriptions work. Its sessions, settings, theme and Python kernel live there. It also runs its own background service, keyed to the build, so `bin/laurelin-agent status` lists it beside Prime's. Old fork services show as stale after a rebuild; `bin/laurelin-agent shutdown` is Prime's command and stops Prime's too, so leave them, they cost nothing.
 
-If a `laurelin` session was open before a rebuild, type `/exit` and start it again to get the new code.
+If a `laurelin` session was open before a rebuild, type `/quit` (or press Ctrl+C twice) and start it again to get the new code.
 
 ## 1. Run the automatic tests
 
