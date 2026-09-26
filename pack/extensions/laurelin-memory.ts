@@ -25,7 +25,7 @@
  *
  * Settings: LAURELIN_MEMORY=off starts disabled; LAURELIN_MEMORY_JEV=off skips
  * Jev (a word-count heuristic picks new tasks, retrieval order picks the five);
- * LAURELIN_MEMORY_THRESHOLD (0.6); LAURELIN_MEMORY_KEEP (5);
+ * LAURELIN_MEMORY_THRESHOLD (0.5); LAURELIN_MEMORY_KEEP (5);
  * LAURELIN_MEMORY_CANDIDATES (20); LAURELIN_MEMORY_CHARS (1500 per section);
  * LAURELIN_DECISION_LOG (<repo>/decision-log); LAURELIN_PYTHON (python3);
  * JEV_BIN. query.py has its own: LAURELIN_SAFE_VAULT, LAURELIN_MEMORY_MODE,
@@ -122,7 +122,9 @@ function num(name: string, fallback: number): number {
 
 export function settings() {
 	return {
-		threshold: num("LAURELIN_MEMORY_THRESHOLD", 0.6),
+		// 0.5 until labeled examples calibrate it (PLAN Step 6): on real vault queries Jev rates the right
+		// sections "useful" at 0.4 to 0.6, so 0.6 dropped everything. Tune with LAURELIN_MEMORY_THRESHOLD.
+		threshold: num("LAURELIN_MEMORY_THRESHOLD", 0.5),
 		keep: Math.round(num("LAURELIN_MEMORY_KEEP", 5)),
 		candidates: Math.round(num("LAURELIN_MEMORY_CANDIDATES", 20)),
 		chars: Math.round(num("LAURELIN_MEMORY_CHARS", 1500)),
