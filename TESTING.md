@@ -75,6 +75,17 @@ bin/laurelin-agent --target tests/tmp/fog.md --claim "tests/tmp/fog.md has three
 
 Watch the checks panel below the editor: the lights change as each gate runs. `/task` shows the task file. `/route` shows the last routing decision (worker, skill, class, outward, intent, with confidence). If the run needs an outward action, a confirm dialog appears and `/approvals` lists what waited.
 
+## 4a. Memory over the vault, hosted
+
+Polygres holds a derived index of the safe vault copy: sections, links and a graph, with full-text search live and meaning search once the embedding job finishes. Try it from the repo's venv:
+
+```
+set -a; . ~/.config/agent-keys/env; set +a
+.laurelin/tmp/venv/bin/python pack/memory/query.py --polygres --k 5 "investor playbook"
+```
+
+Inside `laurelin-agent`, every new task first injects the top five matching sections with their vault paths; `/memory` shows what was injected. The vault stays the source; nothing in Polygres is authoritative.
+
 ## 4b. The test set
 
 ```
