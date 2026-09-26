@@ -19,7 +19,7 @@ The style is never copied into this repo. `style-pull.py` reads it fresh at the 
 
 | What | Path |
 |---|---|
-| The rules, in priority order | `Laurelin/Style Guide/Deck Design — Cote Rules.md` wins, then `Non-Technical Deck Doctrine.md`, then `Deck Design.md`, then `Deck Format.md` and `Writing Rules.md` (all under the vault) |
+| The rules, and how they rank | `Laurelin/Style Guide/Deck Design — Cote Rules.md` wins over the others until Joe rules otherwise; that note lists the doctrine conflicts one by one and Joe decides each, none averaged. `Non-Technical Deck Doctrine.md` wins over `Deck Design.md` on density, for non-technical audiences only, and is itself superseded for technical or fusion audiences (it carries a dead-rules list and a survivors list; use the survivors). Then `Deck Design.md`, `Deck Format.md` and `Writing Rules.md`. All under the vault; read them through `bin/vault-io` when a direct read is refused |
 | The kit's convenience copies of those notes | `~/laurelin-deck-kit/doctrine/` (byte copies, checked by `bin/sync-doctrine.sh --check`) |
 | The live visual system | `~/laurelin-visual-system/lrl.css`, `README.md`, `components/`, `fonts/`, `assets/drawing/CLEARANCE.md` |
 | The copy of the current deck | `~/laurelin-deck-kit/content/vN-copy.json` (v8 today) |
@@ -37,6 +37,7 @@ Read the vault notes, never their copies, when both are reachable. The `investor
 - Joe writes every word an investor reads. The skill lays words out, checks them and flags them. It never drafts a headline, a body line or an ask.
 - A number comes from the canonical source the task names. The skill never re-derives one and never invents an ask.
 - Two sources that disagree on a figure are a **conflict**. The skill writes both values, both sources and both dates into the branch of the work log and stops on that sheet. Joe resolves it.
+- Two rule notes that disagree are handled the same way: both rules, both notes, stop on that sheet. The notes name their open conflicts (starting point, length, team and traction sheets, memo before deck, prose method, market framing) and the questions only Joe can answer; the skill flags these and never decides them.
 - Nothing leaves the machine. No email, no upload, no share link.
 
 ## Tools
@@ -51,7 +52,7 @@ Read the vault notes, never their copies, when both are reachable. The `investor
 | Classify a change request | `change.sh "<request>"` with the question set in `change.json`. `change.md` says what each kind edits |
 | The checks | `pack/gates/layout.sh`, `numbers.sh`, `prose.sh`, `verbatim.sh`, `location.sh`, `evidence.sh`, `deck.sh` |
 | Register a version | `register.py --version vN --pdf <pdf> --changes "..." --build "..." [--apply]` |
-| Prose lint on the copy JSON | `writing-ste` (`ste-lint.py --house --dict`), `jev-sweep`, `humanizer` |
+| Prose lint on the copy JSON | `writing-ste` (`ste-lint.py --house --dict`), `jev-sweep`, `humanizer` (check only; it never rewrites a line, Joe writes every public word) |
 | Look at every sheet | `pdftoppm -r 60 -png <pdf> <dir>/page`, then read each image |
 
 ## The steps, in order
@@ -62,7 +63,9 @@ Every step ends with a check. Do not start the next step while the check fails.
 
 - **Run:** `doctrine-check.sh`.
 - **Pass:** `doctrine: pass`. On `doctrine: fail`, stop and give Joe the sync command it prints. The skill never writes the kit's `doctrine/` folder.
-- Read the three rule notes in priority order. Read the firm's `Deck Guidance - <Firm>.md` for a per-firm deck.
+- Read the three rule notes in the order above. Read the firm's `Deck Guidance - <Firm>.md` for a per-firm deck.
+- Ask Joe whether this version adapts the filed deck or starts from a blank deck; the notes disagree on the starting point, and one of them asks for a one-to-two-page memo before any deck.
+- For a per-firm deck, a tailoring pass against the firm's guidance note: mirror what the firm says it wants, never invent alignment, never cite another firm's interest.
 
 ### 2. Ground
 
@@ -71,12 +74,14 @@ Every step ends with a check. Do not start the next step while the check fails.
 - **Forbidden:** working from memory of the deck. Guessing a figure. Reading `content/vN-copy.json` as a fact source for anything but the words.
 
 ### 3. Style
+- The full-colour photo rule comes from Joe's spoken ruling recorded in a memory note; the visual system README still says the opposite and calls the system a draft. Ask Joe to record both rulings in the vault. Until then the skill follows Joe's ruling and says so in the work log.
 
 - **Run:** `style-pull.py`. It reads `lrl.css`, `README.md` and `components/` and writes `.laurelin/style.json`.
 - **Pass:** the line names the system (`LRL-DS-001` today), its colour count, its type classes and its forbidden list.
 - Photos are full colour in a deck (Joe, 2026-09-23). The README's desaturation rule is recorded in `style.json` as overruled, with its source.
 
 ### 4. The change
+- An `order` request that adds a team sheet, a traction sheet or a table-and-boxes sheet, or a `copy` request that touches one of the notes' open questions, stops and asks Joe before any edit.
 
 - **Run:** `change.sh "<Joe's request>"`. Jev labels it `style_token`, `layout`, `copy`, `order`, `art` or `delivery`. Under 0.6 confidence, ask Joe which it is.
 - **Edit** only what `change.md` allows for that kind. Style and layout changes edit `style.json` overrides or a sheet's `type`, never the words. Copy changes go through the verbatim gate. Order changes edit the `sheets` list.
@@ -89,6 +94,10 @@ Every step ends with a check. Do not start the next step while the check fails.
 - NDA-gated art renders only with `LAURELIN_NDA=1`, and only when the sheet's `art` carries `"nda": true`. Without it the sheet keeps its place with a drawing slot that names the file. A deck with NDA art stays private. `CLEARANCE.md` says which files are cleared.
 
 ### 6. The checks
+- The prose gate must catch the deck-specific banned patterns the notes name: semantic negation in any form, emphasis with no fact under it, boxes that say little, unnamed bets, a metric used before it is explained in plain words, framing that contradicts what the customer buys, and any line that would survive being said about another company.
+- The eye pass also looks for arrows that miss their box, a chart that does not fill its frame, line art scaled below about 60 percent, and a figure with no source tag on the sheet. Every number on a sheet carries its source; a derived figure states its basis; nothing a single phone call could kill; no investor names.
+- Report the sheet count against both lengths the notes give (about ten, or the longer range); Joe picks.
+- The ten-second read test per sheet, and the room test: can Joe answer the sheet aloud with no agent.
 
 Run every gate with `LAURELIN_TARGET` on the compressed PDF. Read the one line each prints.
 
@@ -105,6 +114,8 @@ Run every gate with `LAURELIN_TARGET` on the compressed PDF. Read the one line e
 Then look at every page image. The layout gate judges boxes. Only eyes catch a chart past the frame, a clipped viewer, a rotated graphic or a label over a caption. Past corrections to look for: a chart past the frame, sheet numbers that drift, a photo in grayscale, people listed after they left, a competitor figure gone stale, the bore size retired, a page count used as a credential.
 
 ### 7. File
+- Per-firm deck: the PDF goes into the firm's folder under `Laurelin/investors/<Firm>/`, a row under `## Built decks` in that firm's guidance note, and the work log in the firm folder. A memo is not a deck and is filed as a memo.
+- The deck kit exported at 13.333 by 7.5 inches; this skill renders 1920 by 1080 pixels (1440 by 810 points). Say which geometry a version uses in the register row.
 
 - **Copy** the PDF into the real `Laurelin/Investor Research/_circulating-decks/` directory. Move the old current deck to `_superseded/`.
 - **Run:** `register.py --version vN --pdf <filed.pdf> --changes "<one line>" --build "<the build.py command>"`. Read the row and the banner. Then `--apply` to append the row to `versions.jsonl`. Put the banner line at the top of `_index.md`, word for word.
