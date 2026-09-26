@@ -1,0 +1,4 @@
+interface:
+  display_name: "Polygres Data Pipeline"
+  short_description: "Build Polygres pipelines with MCP"
+  default_prompt: "Use $polygres-data-pipeline to inspect my source through available MCP tools, choose the smallest useful pipeline, and verify ingestion and retrieval."

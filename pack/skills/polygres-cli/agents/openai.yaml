@@ -1,0 +1,4 @@
+interface:
+  display_name: "Polygres CLI"
+  short_description: "Operate Polygres through MCP and CLI"
+  default_prompt: "Use $polygres-cli to inspect this project's mode, prefer available MCP tools, and use the CLI when it fits the operation."

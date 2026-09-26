@@ -13,6 +13,12 @@ Prime loads it with `prime-agent -e ./pack` for one run, or from the `packages` 
 | `extensions/` | Prime extensions (`*.ts`): the interface, the router, the safety handlers | Built |
 | `themes/` | The Laurelin theme JSON | Built |
 | `gates/` | Gate commands. Each exits 0 on pass, 1 on fail, and prints one line why. `deck.sh` checks a built deck PDF | Built |
+| `skills/` | The always-on Laurelin skill set, one folder per skill, each with a `SKILL.md` | 12 linked skills plus `investor-research` and the four Polygres skills (see below) |
+| `rules/` | The generic rules file and the template for the private half in the vault | Written 2026-09-25 |
+| `extensions/` | Prime extensions (`*.ts`): the interface, the router, the safety handlers | Built |
+| `themes/` | The Laurelin theme JSON | Built |
+| `gates/` | Gate commands. Each exits 0 on pass, 1 on fail, and prints one line why | Built |
+| `memory/` | Vault sync to Polygres, hybrid and local search, the schema; see `memory/README.md` | Built 2026-09-25 |
 | `prompts/` | Prompt templates | Built |
 
 `package.json` declares `extensions`, `skills` and `prompts` under the `pi` key. Add `themes` and `gates` when those folders land.
@@ -37,6 +43,7 @@ Each entry in `skills/` is a symlink to the canonical copy in `~/.claude/skills/
 | `sync-gbrain` | Keeps gbrain, the search over the safe vault copy, current with a repo |
 | `investor-research` | Researches investors to the vault's own playbook: firm hubs, person notes, deck guidance, Jev fit grade, validator, follow-up triage. Lives in this repo, not linked (Step 8.1) |
 | `deck-design` | Builds and revises investor decks in the live Laurelin Visual System: pulls the style at run time, builds from a copy JSON, renders, runs the gates, registers versions. Lives in this repo, not linked (Step 7) |
+| `polygres-cli`, `polygres-sdk`, `polygres-retrieval-design`, `polygres-data-pipeline` | Operate, query and design retrieval on Polygres, the hosted search and graph layer over the safe vault copy. Copied from `Evokoa/polygres-skills` (Apache-2.0, package 0.9.0), not edited; each folder has a `SOURCE.md` and the `LICENSE` |
 
 ### Linking the skills into every tool
 
