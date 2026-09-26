@@ -8,6 +8,13 @@ description: Model, edit, check and export CAD in Autodesk Fusion through the lo
 Fusion is the CAD tool of record. It has no headless mode: its Python API (`adsk.core`, `adsk.fusion`) runs only inside the running app. The AnorBridge add-in exposes it on the loopback port so the harness can run scripts in it.
 
 ## Tools
+The `fusion` MCP server gives these as native tools in laurelin-agent and Claude Code. Use them first:
+- `fusion_status`: version, active and open documents, units, component and body counts. Call it first.
+- `fusion_parameters`, `fusion_set_parameter(name, expression)`: read and change user parameters; the set takes a checkpoint F3D first and refuses protected documents.
+- `fusion_exec(code, edits)`: Python inside Fusion with `app` and `design` predefined; `edits=true` takes a checkpoint first.
+- `fusion_check_interference`, `fusion_screenshot`: verify, and look at the model before claiming a change is right.
+- `fusion_export(format)`: STEP, F3D, STL or IGES, always a new timestamped file.
+Fallback when the server is not loaded:
 - `bin/fusion-bridge health`: is Fusion up and which document is open. Run this first.
 - `bin/fusion-bridge run <script.py>`: run a Fusion API script. Put scripts in the task's working folder, never in the vault.
 - `bin/fusion-bridge exec "<python>"`: one short snippet (read a parameter, list components).
