@@ -1,0 +1,54 @@
+{
+  "_note": "Invented company, invented numbers, no art. A fixture for tests/test-deck-design.sh. Nothing here is a Laurelin fact.",
+  "deck": {
+    "name": "quillon-general-v1",
+    "version": "v1",
+    "brand": {"word": "QUILLON", "mark": "ring"},
+    "tagline": "SYSTEMS FOR TIDAL POWER",
+    "edition": "2026 · SAMPLE",
+    "site": "example.com"
+  },
+  "sheets": [
+    {
+      "id": "lead",
+      "type": "title",
+      "ground": "carbon",
+      "sub": "Systems for tidal power",
+      "label": "Sample deck · September 2026"
+    },
+    {
+      "id": "product",
+      "type": "stats",
+      "ground": "bone",
+      "tab": "PRODUCT",
+      "title": "A tidal turbine that ships in one container.",
+      "sub": "Quillon builds a 2 MW turbine unit that installs in a week and sells power under a fixed-price agreement.",
+      "body": "The host site leases the unit and pays for the electricity it takes.",
+      "stats_label": "TARGET FIGURES · SAMPLE MODEL",
+      "stats": [
+        ["2 MW", "Rated output per unit", "Sample model, sheet 3"],
+        ["$4.2M", "Target unit price", "Sample model, sheet 3"],
+        ["7 days", "Install time", "Sample plan, month 6"],
+        ["94%", "Availability target", "Sample model, sheet 4"]
+      ],
+      "foot": "Figures from the sample model of 2026-09-01 · EXAMPLE.COM"
+    },
+    {
+      "id": "revenue",
+      "type": "chart",
+      "ground": "carbon",
+      "tab": "REVENUE",
+      "title": "Test-program revenue, years two to five.",
+      "sub": "The bars plot the revenue column of the sample model. Year five is the highlighted value.",
+      "chart": {
+        "label": "REVENUE BY YEAR · SAMPLE MODEL",
+        "prefix": "$",
+        "unit": "M",
+        "series": [["Year 2", 1.5], ["Year 3", 4], ["Year 4", 9], ["Year 5", 16]],
+        "highlight": 3,
+        "source": "Sample model, revenue table, 2026-09-01"
+      },
+      "foot": "Sample figures only"
+    }
+  ]
+}
