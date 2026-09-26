@@ -1,0 +1,52 @@
+# Adopted outside skills, one per line. Read by bin/install-skill-packs.sh.
+# Columns (whitespace separated):
+#   source   GitHub owner/repo
+#   commit   full commit hash the copy is pinned to
+#   pinned   date the pin was chosen (YYYY-MM-DD)
+#   licence  path of the licence file in the repo, or declared:<name> when the repo
+#            ships no licence file and declares one in its README or frontmatter
+#   path     the skill folder inside the repo (. for a repo that is one skill)
+#   name     folder name under pack/skills; must equal the SKILL.md name field
+#   flags    comma list: note (add the harness note at the top of SKILL.md),
+#            local (copy from the installed Claude Code plugin when present); or -
+# Survey and reasons: docs/briefs/skill-packs.md. Conflicts: pack/skills/SOURCES.md.
+
+# Karpathy behaviour guidelines: always on. Installed as a Claude Code plugin; copied from there.
+forrestchang/andrej-karpathy-skills 2c606141936f1eeef17fa3043a72095b4765b9c2 2026-09-25 declared:MIT skills/karpathy-guidelines karpathy-guidelines local
+
+# 1. coreyhaines31/marketingskills (MIT). The one general marketing pack, no keys.
+coreyhaines31/marketingskills 5b2c0007766c6a1cf1d53fd8fc73e979e0821022 2026-09-25 LICENSE skills/product-marketing product-marketing -
+coreyhaines31/marketingskills 5b2c0007766c6a1cf1d53fd8fc73e979e0821022 2026-09-25 LICENSE skills/seo-audit seo-audit note
+coreyhaines31/marketingskills 5b2c0007766c6a1cf1d53fd8fc73e979e0821022 2026-09-25 LICENSE skills/launch launch note
+coreyhaines31/marketingskills 5b2c0007766c6a1cf1d53fd8fc73e979e0821022 2026-09-25 LICENSE skills/emails emails note
+coreyhaines31/marketingskills 5b2c0007766c6a1cf1d53fd8fc73e979e0821022 2026-09-25 LICENSE skills/content-strategy content-strategy note
+coreyhaines31/marketingskills 5b2c0007766c6a1cf1d53fd8fc73e979e0821022 2026-09-25 LICENSE skills/analytics analytics -
+coreyhaines31/marketingskills 5b2c0007766c6a1cf1d53fd8fc73e979e0821022 2026-09-25 LICENSE skills/public-relations public-relations note
+coreyhaines31/marketingskills 5b2c0007766c6a1cf1d53fd8fc73e979e0821022 2026-09-25 LICENSE skills/copywriting copywriting -
+
+# 2. exa-labs/agent-skills (MIT). Needs EXA_API_KEY.
+exa-labs/agent-skills 975171aac8d40e713fbcc5637bf64972378a3617 2026-09-25 LICENSE skills/exa-search exa-search note
+exa-labs/agent-skills 975171aac8d40e713fbcc5637bf64972378a3617 2026-09-25 LICENSE skills/company-research company-research note
+
+# 3. firecrawl/skills (ISC). Needs FIRECRAWL_API_KEY.
+firecrawl/skills 3a410054eb2a4bbb1545d0fd88d4cb282f64624f 2026-09-25 LICENSE skills/core/firecrawl-research-index firecrawl-research-index note
+firecrawl/skills 3a410054eb2a4bbb1545d0fd88d4cb282f64624f 2026-09-25 LICENSE skills/workflows/firecrawl-deep-research firecrawl-deep-research note
+firecrawl/skills 3a410054eb2a4bbb1545d0fd88d4cb282f64624f 2026-09-25 LICENSE skills/workflows/firecrawl-seo-audit firecrawl-seo-audit note
+firecrawl/skills 3a410054eb2a4bbb1545d0fd88d4cb282f64624f 2026-09-25 LICENSE skills/workflows/firecrawl-competitive-intel firecrawl-competitive-intel note
+
+# 4. K-Dense-AI/scientific-agent-skills (MIT). Open APIs, no key.
+K-Dense-AI/scientific-agent-skills 49c6e97775eaa18ba791bebe23162a70ae601c18 2026-09-25 LICENSE.md skills/literature-review literature-review note
+K-Dense-AI/scientific-agent-skills 49c6e97775eaa18ba791bebe23162a70ae601c18 2026-09-25 LICENSE.md skills/paper-lookup paper-lookup note
+
+# 5. 199-biotechnologies/claude-deep-research-skill (MIT, declared in README). Reuses EXA_API_KEY.
+199-biotechnologies/claude-deep-research-skill f2f2c0fa4e7617ca84c86b63f4bb40f77a746933 2026-09-25 declared:MIT . deep-research note
+
+# 6. whyashthakker/agent-skills-marketing (MIT). Two B2B writers.
+whyashthakker/agent-skills-marketing 985b4becb89bf441c1abd714177a8f99079bd25e 2026-09-25 LICENSE .claude/skills/press-release-writer press-release-writer -
+whyashthakker/agent-skills-marketing 985b4becb89bf441c1abd714177a8f99079bd25e 2026-09-25 LICENSE .claude/skills/case-study-writer case-study-writer -
+
+# 7. AgriciDaniel/claude-seo (MIT). Four skill folders only; the plugin's helper CLI is not copied.
+AgriciDaniel/claude-seo e77e783e38eeb738424eb72117abbd2dacdd88af 2026-09-25 LICENSE skills/seo-technical seo-technical note
+AgriciDaniel/claude-seo e77e783e38eeb738424eb72117abbd2dacdd88af 2026-09-25 LICENSE skills/seo-schema seo-schema note
+AgriciDaniel/claude-seo e77e783e38eeb738424eb72117abbd2dacdd88af 2026-09-25 LICENSE skills/seo-geo seo-geo note
+AgriciDaniel/claude-seo e77e783e38eeb738424eb72117abbd2dacdd88af 2026-09-25 LICENSE skills/seo-agentic seo-agentic note
