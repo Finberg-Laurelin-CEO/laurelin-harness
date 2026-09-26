@@ -1,0 +1,4 @@
+interface:
+  display_name: "Polygres SDK"
+  short_description: "Build Polygres retrieval applications"
+  default_prompt: "Use $polygres-sdk to build this Python integration and use available MCP Context tools for interactive verification."

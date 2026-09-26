@@ -1,0 +1,4 @@
+interface:
+  display_name: "Polygres Retrieval Design"
+  short_description: "Design retrieval with MCP evidence"
+  default_prompt: "Use $polygres-retrieval-design to inspect available MCP evidence and design the smallest useful retrieval strategy."

@@ -16,6 +16,7 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
 | test set (Step 6: runner, scoring, calibration) | `tests/test-testset.sh` (runs one synthetic job through Prime, about a minute) |
 | investor research (Step 8.1: validator gate, fit question set through Jev, follow-up triage) | `tests/test-investor-research.sh` (synthetic firms only, never reads the vault) |
+| memory (section 8 item 3: vault sync to Polygres, hybrid and local search, `laurelin-memory` injection with Jev rerank) | `tests/test-memory.sh` (five invented notes; never reads the vault or the safe copy) |
 
 ## Test-set runner (Step 6)
 
