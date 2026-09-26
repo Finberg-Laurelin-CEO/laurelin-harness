@@ -104,7 +104,7 @@ One rule runs through the shape (Joe, 9/24): **the LLM creates, Jev decides, cod
 4. **Skills:** always on: about 20 Laurelin skills. Loaded when needed: design, video, CAD, legal, grants. Off: the rest.
 5. **Checks:** section 5. A job is done only when its checks pass. Each check climbs a ladder: code gathers evidence, Jev judges it, an LLM reviewer reads only when Jev cannot answer, and Jev judges the reviewer's findings (Step 4).
 6. **Learning loop:** when Joe corrects the agent, it drafts a new rule and check. Joe approves or rejects it. The agent reruns a test set of past jobs to confirm nothing broke.
-7. **Classification routing:** Red material stays on local models. Yellow goes to approved vendors only. Green can use any model.
+7. **Classification label:** every task carries Green, Yellow or Red in its task file, the badge and the logs. Decided 9/25 (Joe): it is a label, not a gate. No model, and not Jev, is blocked by it in version 1. The plug-in point for a restricted deployment later (a GovCloud Jev, a local model) is the endpoint setting of each worker and of the Jev command, so a policy can be added without touching the harness. The `jev` command already reads `TYPESAFE_BASE_URL` and `TYPESAFE_DEFAULT_MODEL`, so a GovCloud Jev is two lines in the key store.
 8. **Jev judgment worker (always on):** every typed judgment goes to Jev, not to an LLM. Section 18 is the full catalogue of those judgments. That covers classification, choosing among known options, rubric scores, yes/no over text in hand, reranking and claim-against-source checks. It uses the `jev`, `jev-decide`, `jev-triage`, `jev-documents`, `jev-eval`, `jev-act`, `jev-patterns` and `building-with-jev` skills. Jev runs in about 200 ms at about $0.04 per million input tokens. If Jev's confidence is under 0.6, escalate to an LLM or to Joe. Jev never authorises a send, purchase, merge or deletion. In the harness, Jev also:
    - runs the prose checks in section 5 (jev-sweep);
    - decides which worker or skill a task goes to;
@@ -246,7 +246,7 @@ Today keys are spread over three places: `~/.config/agent-keys/env` (three keys,
 - Approval gate on every outward action (section 6). Build it from gstack's `check-careful.sh` and `check-freeze.sh` (standalone bash; Prime needs a small hook adapter). Add Laurelin's outward patterns (deploys, merges, email sends, posts, payments) to `~/.gstack/careful-patterns.txt`. Log each approval in the `gstack-egress` receipt format.
 - Secret scrubber on everything Joe pastes: `gstack-redact` (44 patterns, exit code 3 blocks).
 - Refusal flags for the requests listed in section 7.
-- Classification routing (Red stays local).
+- Classification carried as a label (see section 8 item 7); no routing by it in version 1.
 - Limits on every autonomous run: an action count, a spend cap, and saved progress after each action. On resume after an interruption, the harness inspects the last completed action before repeating anything, since a confident answer cannot prove a file was saved or a message was sent.
 - Test: a fake send stops for approval; a pasted fake key is caught; a run stops at its action limit and resumes without repeating a step.
 
@@ -346,7 +346,6 @@ Direction added later on 9/24 (Joe): this is likely to spin out as a **Jev-nativ
 
 ## 14. Open questions
 
-- Is Jev (TypeSafe's hosted API) an approved vendor for Yellow text, and should Red be redacted before a Jev call rather than skipped? (Section 20, from the wave 2 review.)
 - Joe approves the first copy of the safe vault set to the GCP machine when Step 1d runs.
 
 Closed 9/24: approval list (all outward actions wait), scope (academic writing in, Dynamo out), model funding (none, ChatGPT sign-in runs the coordinator), secret rotation (declined), no Ollama chat model, gbrain in version 1 pinned at 0.54.1 as one shared server with thin clients, Polygres skipped, no separate prompt-inventory copy, gstack pieces adopted (section 17), outside services placed (section 16), test set chosen (section 15).
@@ -527,7 +526,7 @@ Facts learned in the build: Prime's `-p` and JSON modes report a screen but answ
 
 **Hard fork, 9/25.** Prime's source is in this repo under `agent/` as a git subtree (0.9.6), manifest name `laurelin`, own background-service socket, built by `bin/build-agent.sh` in about ten seconds. The launcher prefers the built fork. First fork change: gates always rerun when a task file exists (Prime skipped reruns while the git tree was unchanged, which blocked every target outside git, including the vault).
 
-**Open policy point from review (Joe):** the router and the test-set scorer send message text and up to 6,000 characters of a target file to Jev, which is TypeSafe's hosted API, before the material is classified. Section 8 item 7 says Red stays local and Yellow goes to approved vendors only. Interim rule in code: when the task file says `red`, the router does not call Jev and uses the defaults. Decision needed: is Jev an approved vendor for Yellow text, and should Red be redacted before any Jev call rather than skipped.
+**Policy point from review, closed 9/25 (Joe):** Jev is an approved vendor for every classification. The router and the scorer send text to Jev regardless of label. The earlier interim bypass for red tasks is removed. Section 8 item 7 now reads as a label, with the endpoint setting as the plug-in point for a restricted Jev later.
 
 **Next pieces (wave 3), in order:**
 1. **Step 1d memory** after Joe approves the VM copy.
@@ -569,3 +568,4 @@ Facts learned in the build: Prime's `-p` and JSON modes report a screen but answ
 - 2026-09-25: Hard fork started on branch `fork`: Prime source (0.9.6, MIT) as `agent/` subtree, manifest name `laurelin`, builds in 8 seconds, launcher prefers the built fork. Settings folder stays `~/.prime/agent` for now so the sign-ins keep working.
 - 2026-09-25: Wave 2 merged (bridge, worker-settings, gates2, router, testset) and the hard fork landed; fork change so gates rerun for targets outside git. New open question on Jev as a vendor for Yellow and Red text.
 - 2026-09-25: End-to-end proof through the fork: evidence gate failed, agent recorded evidence, gates reran; prose gate caught slop, agent rewrote, gates reran; all passed before done. Router skips Jev for RED tasks.
+- 2026-09-25: Joe: Jev is approved for all material; classification is a label, not a gate; endpoint settings are the plug-in point for a GovCloud Jev or local model later. Red bypass removed from the router.

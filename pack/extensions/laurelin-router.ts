@@ -684,16 +684,9 @@ export default function (pi: ExtensionAPI) {
 		const source = lastSource;
 		lastSource = undefined;
 		if (!enabled || source === "extension" || !worthRouting(event.prompt)) return undefined;
-		// Red material never leaves the machine (PLAN section 8 item 7). Jev is a
-		// hosted API, so a task marked red is not routed through it; defaults apply.
-		const task = readTask(ctx?.cwd ?? process.cwd()) as any;
-		if (task && String(task.classification).toLowerCase() === "red") {
-			say(ctx, "Router: task is RED, Jev not called, defaults used (coordinator, no skill).", "warning");
-			pi.events?.emit?.("laurelin:classification", { classification: "red", source: "router" });
-			return {
-				message: { customType: "laurelin-route", content: "[Laurelin router] RED task: no outside call. Worker coordinator, class RED.", display: true },
-			};
-		}
+		// Classification is a label for the badge and the logs, never a gate on which
+		// model sees the text (Joe, 9/25). A different Jev endpoint plugs in through
+		// JEV_BIN or the jev command's own endpoint setting.
 		const d = await routeAndLog(event.prompt.trim(), ctx);
 		if (d.error) say(ctx, `Router: ${d.error}. Using defaults.`, "warning");
 		return {
