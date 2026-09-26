@@ -19,6 +19,8 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | investor research (Step 8.1: validator gate, fit question set through Jev, follow-up triage) | `tests/test-investor-research.sh` (synthetic firms only, never reads the vault) |
 | metrics (section 22, Step 6: first-pass acceptance, corrections per job, cost, gate pass rates, baseline, footer) | `tests/test-metrics.sh` (synthetic sessions only, never reads Joe's sessions; Jev part skipped without the key) |
 | deck design (Step 7: style pull, builder, renderer, layout and deck gates, register, change classifier) | `tests/test-deck-design.sh` (an invented company and drawn images; never reads the deck kit's content or the vault) |
+| learning loop (Step 10: correction detected, rule and check drafted, `/learn` apply and reject, prose gate learns a pattern, regression reverts) | `tests/test-learning-loop.sh` (synthetic session, writes only under `tests/tmp/`) |
+| skill packs (wave 3: adopted marketing, SEO and research skills, tiers, sources, description budget) | `tests/test-skill-packs.sh` (one model call through the launcher, skipped without a model; `LAURELIN_TEST_INSTALL=1` also reruns `bin/install-skill-packs.sh`) |
 
 ## Test-set runner (Step 6)
 
