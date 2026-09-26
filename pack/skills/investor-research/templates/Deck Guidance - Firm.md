@@ -30,7 +30,7 @@ Words only. The canonical numbers and claims never bend.
 ## Framing calls settled before the build
 
 - **Solo founder:** <the firm-specific answer>
-- **De-risking language:** analytically and architecturally de-risked. Never "technically de-risked" full stop.
+- **De-risking language:** <the exact wording the firm uses; take the house rule from the vault Style Guide>
 - **Program fit:** <the answer>
 - <anything else the room will probe>
 

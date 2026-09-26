@@ -64,7 +64,7 @@ For every actual firm, create or enrich `investors/<Firm>/_index.md` from `templ
 
 - **Tool:** context.dev for the company record and news. `fastbrowse` for the official site, the team page, fund announcements and FAQs.
 - **Write, in this order:** official website (the canonical domain, never a directory profile or a similarly named firm). Thesis in the firm's own words as verbatim quotes. Fund mechanics: fund size, stage, typical check, lead or follow, what the vehicle is (read the fine print: a program, a personal vehicle and a placement agent all look like funds at first). Portfolio precedents in energy, fusion and deep tech. A competing investment is a conflict flag, never a warm signal. People and lanes. Warm paths as links to `contacts/` and `network/` notes and the network map. Landmines: fee for intro, placement agent, adjacent lanes, stale valuations. Then the fit read (step 4).
-- **Section shape:** `## Research (captured YYYY-MM-DD)` so staleness shows at a glance. Re-verify anything older than a few weeks before it feeds a deck, a memo or an email.
+- **Section shape:** `## Research (captured YYYY-MM-DD)` so age is visible. Check any fact older than a few weeks again before a deck, a memo or an email uses it.
 - **Frontmatter:** `tags, firm, website, domain, stage, check_size, status, updated, source, source_list, laurelin_fit, frege_fit, contact, email, linkedin_company`. Status from `status.md`. Link the hub back to the source dossier.
 - **Forbidden:** a LinkedIn page or a database profile in `website:`. An estimate written as a fact.
 

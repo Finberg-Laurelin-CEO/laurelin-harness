@@ -28,11 +28,11 @@ Built 2026-09-25 from `docs/briefs/investor-research.md`. Test: `tests/test-inve
 
 ## Findings
 
-- **The real corpus fails the validator today.** A read-only run over the investors root (log sent to a scratch folder, nothing written) took under a second and found 242 folders, 385 person notes, about 2,600 problems: roughly 1,600 URL lines with no date on the line or heading, about 550 missing required keys, about 250 addresses without a status marker, about 90 person notes not in their people block, 58 indexes with no people block, 17 person notes with no backlink, 11 folders with no index. Decide whether a one-time dating pass runs over the corpus, or whether the gate gets a legacy mode. The gate runs only when the task target is an investors root or a firm folder, so it costs nothing elsewhere.
+- **The real corpus fails the validator today.** A read-only run over the investors root (log sent to a scratch folder, nothing written) took under a second and found a large number of problems: undated URL lines, missing required keys, addresses without a status marker, person notes missing from rosters, indexes without a people block, and folders with no hub.
 - **Triage confidence is low on synthetic rows** (about 0.3 to 0.5). The attention question needs labeled examples from real firm notes before its threshold means anything. The rows say `low confidence: ask Joe` until then.
 - **Four vault notes could not be read** from this worktree: `Company Brain/Hermes Skill - Investor Diligence.md`, `CRM/CRM Schema.md`, `CRM/Meeting Attendee and VC Dossier SOP.md` and `CRM/Outreach Guidelines/`. The sandbox refused them (`Operation not permitted`); only the `investors` symlink resolved. The skill lists them under "Where things live" from the brief. Nobody on this branch checked that the skill matches the CRM schema. The merge owner should.
 - **The context.dev skill is not installed** at `~/.agents/skills/context-dev`. The key is in the key store. The skill points at the MCP endpoint and the skill name, and falls back to `fastbrowse`.
-- **`HUNTER_API_KEY` is not in the key store.** The vault's Hunter workflow note carries the key as a literal in its body. The skill reads the key from the environment only. Joe's command, optional and outside this repo: `bin/laurelin keys add HUNTER_API_KEY`, then remove the literal from the vault note.
+- **`HUNTER_API_KEY` is not in the key store.** A vault note carries this key as a literal; it should move to the key store. The skill reads the key from the environment only. Joe's command, optional and outside this repo: `bin/laurelin keys add HUNTER_API_KEY`, then remove the literal from the vault note.
 - `FOLK_API_KEY` is set. Version 1 makes no Folk call.
 
 ## Test
