@@ -569,6 +569,30 @@ From an essay on "graph engineering" Joe passed on. These rules govern any run i
 
 Where this lands: a `laurelin graph` runner in wave 3 that expresses a job as nodes with schemas over Prime's native subagents, with the reduce steps in code, the verifiers on the check ladder, and the gates as anchors.
 
+## 22. The edge (ideated 9/25)
+
+Joe asked what edge the "co-founder in a box" has. Honest answer: not the fork, not the terminal, not being an agent. Anyone can fork Prime in an afternoon. The edge is in four things that compound with use, and a north-star metric that proves them.
+
+**1. It learns the founder's standards as typed checks, not as prompt text.** Every correction Joe makes becomes a rule, the rule becomes a Jev criterion or a gate, the test set reruns, and the next job cannot fail the same way. Other tools remember preferences as prose that a model may or may not honour. Here a standard is enforced by a decision with a confidence and a log line. This is Step 10 and section 18 group 7, and it is the feature.
+
+**2. It is measured by the second prompt, not the first.** The year's data says 35 percent of prompts were corrections. Every competitor optimises how fast work starts. This harness optimises whether the first result is accepted. The north-star metric is **first-pass acceptance**: the share of jobs Joe accepts without a correction, per week, with corrections per job and cost per accepted job beside it. Beacon and the decision log measure it; nothing else in the market reports it.
+
+**3. It ships with a company's operating procedures, not an empty box.** The investor playbook, the deck doctrine, the memo format, the classification labels, the canonical-numbers rule, the outward-action gate. The method is generic and open; the data stays in the founder's vault. A new founder gets a working company brain on day one and fills it with their own facts.
+
+**4. It is safe to leave running.** Nothing outward moves without approval, every claim of done has a ledger row, every decision is logged with its evidence, and limits stop a run before it spends. A solo founder's real fear is the agent sending the wrong email at 3 a.m. Receipts and gates make overnight runs a normal thing.
+
+Supporting, not decisive: subscription-only cost with Jev at cents per thousand decisions; any model, any subscription, swap when a cap hits; disk-first state so a crash resumes.
+
+**What is not an edge, said plainly.** The generic layer is thin and competes with Claude Code, Codex, Prime and Hermes. The value is in the private content and the labeled decision log, which only accrue with use. Jev is one vendor. Prime moves fast upstream.
+
+**What "run really well" means, in order.**
+1. Instrument first-pass acceptance now (beacon stream plus the decision log), so every later change is judged by the number.
+2. Build the learning loop (Step 10) before more skills. A skill without the loop is a prompt; a skill with the loop gets better every week.
+3. Run real jobs, small, daily: one investor batch, one deck change, one memo section. Each correction feeds the loop.
+4. Only then widen: more skills, the graph runner, Polygres.
+
+**The spin-out pitch, in one line.** Your company's standards, enforced by decisions you can inspect, with a correction rate that falls every week and a log that proves it.
+
 ## Change log
 
 - 2026-09-23: Plan created from the 7,237-prompt inventory.
@@ -610,3 +634,4 @@ Where this lands: a `laurelin graph` runner in wave 3 that expresses a job as no
 - 2026-09-25: investor-research skill merged with its validator gate, fit set, status vocabulary and triage. Corpus validator findings recorded for Joe.
 - 2026-09-25: Rule-6 review of investor-research: no names, contacts, figures or keys; one verbatim house rule and one playbook sentence replaced; counts trimmed from notes. The `frege_fit` key is kept because the vault's own notes use it; section 12's sanitizer pass decides its fate at release.
 - 2026-09-25: Joe: deck-design skill from his current workflow; survey marketing, SEO and research skill packs; Karpathy skills throughout; Polygres plus the vault for memory with retrieval autoloaded. Two research passes started.
+- 2026-09-25: Added section 22, the edge: standards as typed checks, first-pass acceptance as the north-star metric, shipped procedures, safe to leave running. Order: instrument, learning loop, real jobs, then widen.
