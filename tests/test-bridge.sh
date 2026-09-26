@@ -89,7 +89,9 @@ else
     checks="$(jq -r .check "$LOG" 2>/dev/null | sort -u | tr '\n' ' ')"
     last="$(jq -sr 'group_by(.check) | map("\(.[0].check)=\(.[-1].result)") | join(" ")' "$LOG" 2>/dev/null)"
     notok="$(jq -sr 'group_by(.check) | map(.[-1]) | map(select(.result != "pass" and .result != "skipped")) | length' "$LOG" 2>/dev/null)"
-    if [ "$code" -eq 0 ] && [ "$checks" = "evidence layout location numbers prose verbatim " ] && [ "${notok:-1}" = 0 ]; then
+    # The six original gates must all have run; later gates (deck, investors, ...) may run too and must not fail.
+    missing=""; for g in evidence layout location numbers prose verbatim; do case " $checks " in *" $g "*) ;; *) missing="$missing $g";; esac; done
+    if [ "$code" -eq 0 ] && [ -z "$missing" ] && [ "${notok:-1}" = 0 ]; then
       ok "prime finished (exit 0) within 2 continuations; last result per gate: $last"
     else
       bad "prime exit $code; gates seen: $checks; last results: $last"; printf '%s\n' "$out" | tail -n 20
