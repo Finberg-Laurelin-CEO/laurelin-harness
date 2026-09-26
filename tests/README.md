@@ -16,6 +16,7 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | safety (Step 5: approval gate, scrubber, limits, refusal flags) | `tests/test-safety.sh` |
 | test set (Step 6: runner, scoring, calibration) | `tests/test-testset.sh` (runs one synthetic job through Prime, about a minute) |
 | investor research (Step 8.1: validator gate, fit question set through Jev, follow-up triage) | `tests/test-investor-research.sh` (synthetic firms only, never reads the vault) |
+| learning loop (Step 10: correction detected, rule and check drafted, `/learn` apply and reject, prose gate learns a pattern, regression reverts) | `tests/test-learning-loop.sh` (synthetic session, writes only under `tests/tmp/`) |
 
 ## Test-set runner (Step 6)
 

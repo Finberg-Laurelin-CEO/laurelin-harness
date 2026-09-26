@@ -20,6 +20,31 @@ top_p=0
 top_maybe=0
 hit_lines=""
 checked=0
+# Rung 1, code: the learned patterns (PLAN Step 10). /learn appends a line to
+# pack/rules/prose-patterns.txt when Joe approves a rule; the gate applies them
+# here, in jev-sweep's output shape, before any model sees the text.
+PATTERNS="${LAURELIN_PROSE_PATTERNS:-$GATE_DIR/../rules/prose-patterns.txt}"
+if [ -f "$PATTERNS" ]; then
+  while IFS= read -r f; do
+    phits="$(python3 "$GATE_DIR/prose-patterns.py" "$PATTERNS" "$f" 2>&1)"
+    case $? in
+      0) n="$(printf '%s\n' "$phits" | grep -c '^  \[')"
+         total_hits=$((total_hits + n)); top_p=1.00
+         hit_lines="${hit_lines}$(printf '%s\n' "$phits" | sed "s|^  |  $(basename "$f"): |")"$'\n' ;;
+      1) ;;
+      *) gate_fail "$CHECK" "bad learned pattern: $(printf '%s' "$phits" | tail -n 1)" ;;
+    esac
+  done <<< "$files"
+  if [ "$total_hits" -gt 0 ]; then
+    inputs="$(jq -nc --arg t "$target" --argjson h "$total_hits" --arg p "$PATTERNS" '{target: $t, hits: $h, patterns: $p}')"
+    gate_log "$CHECK" "$inputs" "no learned prose pattern matches any sentence" "$total_hits hits" 1 fail
+    printf '%s: fail, %s learned-pattern hits, first three:\n' "$CHECK" "$total_hits"
+    printf '%s' "$hit_lines" | head -n 3
+    exit 1
+  fi
+fi
+
+# Rung 2, Jev: jev-sweep over every prose file.
 while IFS= read -r f; do
   out="$(jev-sweep "$f" 2>&1)" || gate_fail "$CHECK" "jev-sweep error on $f: $(printf '%s' "$out" | tail -n 1)"
   checked=$((checked + 1))

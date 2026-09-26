@@ -12,3 +12,5 @@ tests/tmp/
 tests/testset/results/
 __pycache__/
 *.pyc
+decision-log/learn-baseline.json
+decision-log/learn-backups/
