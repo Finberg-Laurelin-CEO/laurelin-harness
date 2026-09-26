@@ -10,9 +10,9 @@ The harness is now a fork of Prime Agent, named `laurelin`, whose source lives u
 bin/build-agent.sh
 ```
 
-It installs dependencies inside `agent/` and builds in about ten seconds. After that `bin/laurelin` uses the fork.
+It installs dependencies inside `agent/` and builds in about ten seconds. After that `bin/laurelin-agent` uses the fork.
 
-The fork never touches your installed Prime Agent. It keeps its own settings folder, `~/.laurelin/agent`, created on first run, with only your sign-in file linked from `~/.prime/agent` so the subscriptions work. Its sessions, settings, theme and Python kernel live there. It also runs its own background service, keyed to the build, so `bin/laurelin status` lists it beside Prime's. Old fork services show as stale after a rebuild; `bin/laurelin shutdown` is Prime's command and stops Prime's too, so leave them, they cost nothing.
+The fork never touches your installed Prime Agent. It keeps its own settings folder, `~/.laurelin/agent`, created on first run, with only your sign-in file linked from `~/.prime/agent` so the subscriptions work. Its sessions, settings, theme and Python kernel live there. It also runs its own background service, keyed to the build, so `bin/laurelin-agent status` lists it beside Prime's. Old fork services show as stale after a rebuild; `bin/laurelin-agent shutdown` is Prime's command and stops Prime's too, so leave them, they cost nothing.
 
 If a `laurelin` session was open before a rebuild, type `/exit` and start it again to get the new code.
 
@@ -27,7 +27,7 @@ This runs all six tests in step order. It makes real model calls on your subscri
 ## 2. Start the harness
 
 ```
-bin/laurelin
+bin/laurelin-agent
 ```
 
 This starts Prime Agent with the Laurelin pack, the theme and the gates. Nothing is installed. Plain `prime-agent` is unchanged. The `--help` text:
@@ -58,7 +58,7 @@ Any other flag goes straight to prime-agent (for example --model, --thinking,
 Keys are read from /Users/Joe/.config/agent-keys/env at launch. Values are never printed.
 
 To run "laurelin" from anywhere, make one symlink:
-  ln -s "/Users/Joe/orca/workspaces/laurelin-harness/ideation/bin/laurelin" ~/.local/bin/laurelin
+  ln -s "$PWD/bin/laurelin-agent" ~/.local/bin/laurelin-agent
 ```
 
 ## 3. Look at the interface
@@ -70,7 +70,7 @@ Follow "Manual test: interface" in `tests/README.md`. In short: title screen, th
 The task file tells the gates what to check. Give it on the command line:
 
 ```
-bin/laurelin --target tests/tmp/fog.md --claim "tests/tmp/fog.md has three plain sentences about fog" --autonomous "Create tests/tmp/fog.md with three short plain sentences about morning fog in Simplified Technical English, record evidence for the claim, then say done."
+bin/laurelin-agent --target tests/tmp/fog.md --claim "tests/tmp/fog.md has three plain sentences about fog" --autonomous "Create tests/tmp/fog.md with three short plain sentences about morning fog in Simplified Technical English, record evidence for the claim, then say done."
 ```
 
 Watch the checks panel below the editor: the lights change as each gate runs. `/task` shows the task file. `/route` shows the last routing decision (worker, skill, class, outward, intent, with confidence). If the run needs an outward action, a confirm dialog appears and `/approvals` lists what waited.
@@ -101,9 +101,9 @@ LAURELIN_TARGET=tests/tmp/summary.txt pack/gates/prose.sh
 
 The child branches did not touch anything outside the repo. These are the commands they left for you, each optional:
 
-- Put `laurelin` on your PATH: `ln -s "$PWD/bin/laurelin" ~/.local/bin/laurelin`
+- Put `laurelin-agent` on your PATH: `ln -s "$PWD/bin/laurelin-agent" ~/.local/bin/laurelin-agent`
 - Link the skills into every tool: `bin/link-skills.sh --apply` (dry run first without the flag)
-- Move keys from `~/.zshrc` into the store: `bin/laurelin keys add CONTEXT_DEV_API_KEY` and the same for GITLAB_TOKEN, then delete the lines in `~/.zshrc`
+- Move keys from `~/.zshrc` into the store: `bin/laurelin-agent keys add CONTEXT_DEV_API_KEY` and the same for GITLAB_TOKEN, then delete the lines in `~/.zshrc`
 
 ## 6. What to tell me
 

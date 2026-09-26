@@ -40,7 +40,7 @@ Prime is the right base for the coordinator. Since the Claude and ChatGPT worker
 - **Alternatives:** plain pi (upstream, larger community, lacks Prime's autonomous and scheduling features); a custom coordinator on the ACP SDK (full control, far more work); Hermes (runs on the VM, suits always-on jobs).
 - **Hedge:** keep the Laurelin package in pi's format. Keep the router, checks and workers in separate modules. Checked 9/25 (section 19): the package, theme, hooks and modes carry over to pi, but the gates, native subagents and daemon are Prime-only, so a move to pi would mean rewriting those three.
 | Approvals for outward actions | Every action in section 6 waits for Joe. No exceptions in version 1 (decided 9/24) |
-| How Joe runs it | A `laurelin` terminal command (free on PATH as of 9/24). It is a thin wrapper that starts Prime Agent with the Laurelin package, rules, default model and settings. Prime updates stay separate, and plain `prime-agent` keeps working |
+| How Joe runs it | A `laurelin-agent` terminal command (renamed 9/25: `laurelin` on Joe's PATH is a different program, the Laurelin chat platform's Python client). It is a thin wrapper that starts Prime Agent with the Laurelin package, rules, default model and settings. Prime updates stay separate, and plain `prime-agent` keeps working |
 
 ## 3. The source data
 
@@ -594,3 +594,4 @@ Where this lands: a `laurelin graph` runner in wave 3 that expresses a job as no
 - 2026-09-25: Joe: Jev is approved for all material; classification is a label, not a gate; endpoint settings are the plug-in point for a GovCloud Jev or local model later. Red bypass removed from the router.
 - 2026-09-25: Added section 21, graph rules for multi-agent runs, and the investor skill set and graph runner to wave 3. Joe: the fork must never touch the installed Prime Agent.
 - 2026-09-25: Fork isolated: own folder `~/.laurelin/agent` (sign-in linked, nothing else shared), own service socket keyed to the build. Before this the fork had written five sessions, a kernel rebuild and a default-model change into `~/.prime/agent`; the default model was restored (backup kept) and Prime verified working. Rebrand: Laurelin rings logo, "Laurelin Agent" in 41 files, `laurelin` in command hints. Launcher always loads this repo's pack (Prime's settings pointed at the old checkout).
+- 2026-09-25: Command renamed to `laurelin-agent`; `laurelin` on Joe's interactive PATH is the chat platform's Python client. `bin/laurelin` stays as a link for scripts.

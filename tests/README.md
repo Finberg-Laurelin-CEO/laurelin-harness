@@ -5,7 +5,7 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 | Piece | Command |
 |---|---|
 | pack | `tests/test-pack.sh` |
-| launcher (`bin/laurelin`, Steps 1b and 1e) | `tests/test-launcher.sh` |
+| launcher (`bin/laurelin-agent`, Steps 1b and 1e) | `tests/test-launcher.sh` |
 | interface (theme and `laurelin-ui` extension) | `tests/test-interface.sh` |
 | workers (Step 2: delegate_worker, call_model, Jev context pruning) | `tests/test-workers.sh` |
 | worker settings (Step 2: worker-only Claude Code settings, token cut) | `tests/test-worker-settings.sh` |
@@ -35,7 +35,7 @@ Start Prime with the pack from the repo root:
 prime-agent -e ./pack
 ```
 
-(or `bin/laurelin` once the launcher branch is merged). Then:
+(or `bin/laurelin-agent` once the launcher branch is merged). Then:
 
 1. The title screen shows the mark, `L A U R E L I N`, the version, today's date and `jobs today: 0`. Note whether the mark is the PNG image or the ring glyphs. Press any key.
 2. Pick the theme: `/settings`, theme, `laurelin` (dark terminal) or `laurelin-bone` (light terminal). Or put `"theme": "laurelin"` in `~/.prime/agent/settings.json`.
