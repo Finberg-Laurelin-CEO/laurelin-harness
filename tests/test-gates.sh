@@ -71,11 +71,20 @@ else
 fi
 
 echo "== prime-agent runs location.sh as a gate"
-if ! command -v prime-agent >/dev/null 2>&1; then
+# Prefer the built fork through the launcher (own settings folder, own default model);
+# fall back to an installed prime-agent with an explicit model so Prime's own settings do not matter.
+if [ -x bin/laurelin-agent ] && [ -f agent/packages/coding-agent/dist/bundle/cli.js ]; then
+  PRIME_RUN="bin/laurelin-agent"
+elif command -v prime-agent >/dev/null 2>&1; then
+  PRIME_RUN="prime-agent -e ./pack --model ${LAURELIN_MODEL:-openai-codex/gpt-6-astra}"
+else
+  PRIME_RUN=""
+fi
+if [ -z "$PRIME_RUN" ]; then
   pass=$((pass + 1)); echo "skipped: no prime-agent"
 else
   before="$(grep -c '"check":"location"' "$LAURELIN_GATE_LOG")"
-  out="$(LAURELIN_TARGET=$F/prose-good/note.md timeout 300 prime-agent -e ./pack --no-session \
+  out="$(LAURELIN_TARGET=$F/prose-good/note.md timeout 300 $PRIME_RUN --no-session \
          --autonomous --autonomous-gate pack/gates/location.sh \
          --autonomous-max-turns 3 --autonomous-max-continuations 1 -p "say done" 2>&1)"; code=$?
   after="$(grep -c '"check":"location"' "$LAURELIN_GATE_LOG")"
