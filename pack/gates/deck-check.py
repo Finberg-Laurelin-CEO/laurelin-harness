@@ -1,3 +1,4 @@
+from pathlib import Path
 #!/usr/bin/env python3
 """Helper for deck.sh (not a gate; not executable). Checks a built deck PDF against its copy
 JSON and prints one JSON object: {"pages": N, "sheets": N, "problems": [...], "facts": {...}}.
@@ -165,7 +166,7 @@ def main():
     texts = page_texts(pdf, pages)
     num_problems, n_main, n_appx = check_numbers(texts)
     problems += num_problems
-    tmp = a.tmp or tempfile.mkdtemp(prefix="laurelin-deck-")
+    tmp = a.tmp or tempfile.mkdtemp(prefix="deck-", dir=str(Path(__file__).resolve().parents[2] / ".laurelin" / "tmp")) if (Path(__file__).resolve().parents[2] / ".laurelin" / "tmp").mkdir(parents=True, exist_ok=True) is None else None
     pathlib.Path(tmp).mkdir(parents=True, exist_ok=True)
     img_problems, img_facts = check_images(pdf, tmp)
     problems += img_problems

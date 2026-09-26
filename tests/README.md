@@ -4,6 +4,7 @@ One command per piece, run from the repo root. `tests/run-all.sh` runs every one
 
 | Piece | Command |
 |---|---|
+| vault-io (vault reads with the privacy-block fallback) | `tests/test-vault-io.sh` |
 | pack | `tests/test-pack.sh` |
 | launcher (`bin/laurelin-agent`, Steps 1b and 1e) | `tests/test-launcher.sh` |
 | interface (theme and `laurelin-ui` extension) | `tests/test-interface.sh` |

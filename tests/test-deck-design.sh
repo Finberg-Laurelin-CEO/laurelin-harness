@@ -54,7 +54,18 @@ if [ -f "$VS/lrl.css" ]; then
   n="$(printf '%s' "$out" | jq -r '[.colors | length, .type | length, .forbidden | length, .deck.type.body.px] | map(tostring) | join("/")' 2>/dev/null)"
   check "style-pull --print" $(( code == 0 && $(printf '%s' "$out" | jq '(.colors|length) > 3 and (.type|length) >= 5 and (.forbidden|length) > 3 and (.deck.type.body.px > 0)' 2>/dev/null | grep -c true) == 1 ? 0 : 1 )) "colours/type/forbidden/body px: $n"
   expect pass "style-pull writes"          '^style-pull: wrote'   python3 $SKILL/style-pull.py --out "$TMP/style.json"
-  leaked="$(grep -rlE '#FF4F00|#F2F1EF|Inter Tight|Geist Mono' pack/skills/deck-design pack/gates/deck.sh pack/gates/deck-check.py tests/fixtures/deck 2>/dev/null | wc -l | tr -d ' ')"
+  # The values come from the live css at test time so that none of them is written here.
+  css="${LAURELIN_VISUAL_SYSTEM:-$HOME/laurelin-visual-system}/lrl.css"
+  pat="$(python3 - "$css" <<'PY'
+import re,sys
+try: css=open(sys.argv[1]).read()
+except Exception: print("__no_css__"); sys.exit()
+vals=set(re.findall(r'--(?:orange|bone|carbon|ink)\s*:\s*(#[0-9A-Fa-f]{6})',css))
+fonts=set(re.findall(r'--font-[a-z]+\s*:\s*"([^"]+)"',css))
+print("|".join(sorted(re.escape(v) for v in vals|fonts)) or "__no_css__")
+PY
+)"
+  leaked="$(grep -rlE "$pat" pack/skills/deck-design pack/gates/deck.sh pack/gates/deck-check.py tests/fixtures/deck 2>/dev/null | wc -l | tr -d ' ')"
   check "no style value in repo" $([ "$leaked" -eq 0 ]; echo $?) "no colour or font value committed ($leaked files)"
 else
   echo "skipped: no visual system at $VS; using a stub style"

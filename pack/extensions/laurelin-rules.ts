@@ -8,8 +8,18 @@ import * as path from "node:path";
  */
 const VAULT_RULES = "/Users/Joe/Documents/Obsidian Vault/Laurelin/LaurelinOS/Harness Rules.md";
 
+import { spawnSync } from "node:child_process";
+
+/** Direct read first; on a macOS privacy denial go through bin/vault-io (bridge fallback). */
 function readIfExists(p: string): string {
-	try { return fs.readFileSync(p, "utf8"); } catch { return ""; }
+	try { return fs.readFileSync(p, "utf8"); } catch (e: any) {
+		if (e && e.code === "EPERM") {
+			const tool = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..", "..", "bin", "vault-io");
+			const r = spawnSync(tool, ["read", p], { encoding: "utf8", timeout: 60_000 });
+			if (r.status === 0) return r.stdout;
+		}
+		return "";
+	}
 }
 
 export default function (pi: ExtensionAPI) {

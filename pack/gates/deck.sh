@@ -38,7 +38,8 @@ for t in pdfinfo pdftotext pdfimages; do command -v "$t" >/dev/null || gate_fail
 
 args=("$target" "$copy" --max-bytes "${LAURELIN_DECK_MAX_BYTES:-5242880}")
 [ -n "${LAURELIN_DECK_INDEX:-}" ] && args+=(--index "$LAURELIN_DECK_INDEX")
-tmp="${TMPDIR:-/tmp}/laurelin-deck/$(basename "${target%.*}")-$$"
+tmp="$(cd "$(dirname "$0")/../.." && pwd)/.laurelin/tmp/deck-$(basename "${target%.*}")-$$"
+trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp"
 report="$(python3 "$HELPER" "${args[@]}" --tmp "$tmp" 2>&1)" || gate_fail "$CHECK" "deck-check.py failed: $(printf '%s\n' "$report" | tail -n 1)"
 printf '%s' "$report" | jq -e . >/dev/null 2>&1 || gate_fail "$CHECK" "deck-check.py gave no JSON: $(printf '%s\n' "$report" | tail -n 1)"

@@ -591,7 +591,8 @@ def baseline(args) -> int:
     labels = Counter(s["label"] for s in sample if "label" in s)
     low = sum(1 for s in sample if "label" in s and s["confidence"] < args.threshold)
     judged = sum(labels.values())
-    corrections = labels["correction"]
+    # Same rule as report(): a label counts only at or above the confidence threshold.
+    corrections = sum(1 for x in sample if x.get("label") == "correction" and x.get("confidence", 0) >= args.threshold)
     lo, hi = wilson(corrections, judged)
     tss = [p["ts"] for p in prompts if isinstance(p["ts"], (int, float))]
     span = ""

@@ -90,10 +90,12 @@ class Style:
         self.lh = {k: v.get("line_height") or "1.2" for k, v in t.items()}
         tr = s["tracking"]
         self.track_tight, self.track_mono = tr.get("track-tight", "-0.03em"), tr.get("track-mono", "0.08em")
-        self.hair = s["rules"].get("hair", "1px")
-        self.rule = s["rules"].get("rule", "2px")
+        self.hair = s["rules"]["hair"]
+        self.rule = s["rules"]["rule"]
         o = s["opacity"]
-        self.o60, self.o40, self.o25 = o.get("o60", "0.60"), o.get("o40", "0.40"), o.get("o25", "0.25")
+        self.o60, self.o40, self.o25 = o["o60"], o["o40"], o["o25"]
+        h = self.carbon.lstrip("#")
+        self.carbon_rgb = ",".join(str(int(h[i:i + 2], 16)) for i in (0, 2, 4))
         self.reticle = int(str(s["images"].get("reticle_size", "16px")).rstrip("px") or 16)
         self.photo_filter = s["images"].get("photo_filter", "none")
         self.system = s["source"].get("system")
@@ -252,7 +254,7 @@ class Builder:
             img = (f'<img src="{esc(src)}" alt="{esc(art.get("alt", ""))}" style="position:absolute; left:0px; top:0px; '
                    f'width:{W}px; height:{H}px; object-fit:cover; filter:{s.photo_filter}">'
                    f'<div style="position:absolute; left:0px; top:0px; width:{W}px; height:{H}px; '
-                   f'background:linear-gradient(180deg, rgba(13,15,16,0.35) 0%, rgba(13,15,16,0) 22%, rgba(13,15,16,0.1) 50%, rgba(13,15,16,0.88) 100%)"></div>')
+                   f'background:linear-gradient(180deg, rgba({s.carbon_rgb},0.35) 0%, rgba({s.carbon_rgb},0) 22%, rgba({s.carbon_rgb},0.1) 50%, rgba({s.carbon_rgb},0.88) 100%)"></div>')
         return (img + self.hairgrid(0, 0, W, H)
                 + f'<div style="position:absolute; left:0px; top:0px; width:{W}px; height:{s.rule}; background:{s.orange}"></div>'
                 + self.corners(s.M - 32, 64, W - 2 * s.M + 64, H - 128, color=fg, inset=0, size=32)
