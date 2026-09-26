@@ -53,7 +53,10 @@ interface Approval {
 
 const LEVELS: Level[] = ["green", "yellow", "red"];
 const CHECK_NAMES = ["prose", "numbers", "layout", "location", "word for word", "evidence"];
-const MARK_PATH = join(homedir(), "Laurelin_Brand_Assets", "imagery", "reference", "brand", "laurelin-mark.png");
+// The mark must be the opposite colour of the terminal: black rings on a light
+// terminal, white rings on a dark one. The launcher sets LAURELIN_BG.
+const MARK_FILE = process.env.LAURELIN_BG === "light" ? "laurelin-ring-dark.png" : "laurelin-mark.png";
+const MARK_PATH = process.env.LAURELIN_MARK || join(homedir(), "Laurelin_Brand_Assets", "imagery", "reference", "brand", MARK_FILE);
 
 const DEMO_CHECKS: Array<Record<string, Check>> = [
 	{},

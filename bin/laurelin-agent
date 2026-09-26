@@ -218,9 +218,7 @@ launch() {
   case " $* " in *" --model "*) ;; *) args+=(--model "${LAURELIN_MODEL:-openai-codex/gpt-6-astra}") ;; esac
   # gstack keys its state by repo; ~/package.json makes it resolve every repo to one slug.
   export GSTACK_PROJECT_SLUG="${GSTACK_PROJECT_SLUG:-laurelin-harness}"
-  if [ -f "$PACK/themes/laurelin.json" ]; then
-    args+=(--theme "$PACK/themes/laurelin.json")
-  fi
+  for t in "$PACK"/themes/*.json; do [ -f "$t" ] && args+=(--theme "$t"); done
   for a in "$@"; do
     if [ "$a" = "--autonomous" ]; then
       for g in "$PACK"/gates/*.sh; do
@@ -257,6 +255,45 @@ if [ -f "$FORK_CLI" ]; then
     echo "laurelin: created $LAURELIN_AGENT_DIR (sign-in linked from ~/.prime/agent, settings fresh)" >&2
   fi
   export LAURELIN_CODING_AGENT_DIR="$LAURELIN_AGENT_DIR"
+  # Match the terminal: light background gets the light theme and the black mark,
+  # dark background gets the dark theme and the white mark. LAURELIN_THEME overrides.
+  detect_bg() {
+    local reply="" r g b
+    if [ -t 0 ] && [ -t 1 ] && [ -r /dev/tty ] && [ -w /dev/tty ]; then
+      local old; old=$(stty -g < /dev/tty 2>/dev/null)
+      stty raw -echo min 0 time 3 < /dev/tty 2>/dev/null
+      printf '\033]11;?\007' > /dev/tty
+      IFS= read -r -t 0.4 -d $'\\' reply < /dev/tty 2>/dev/null || true
+      [ -n "$old" ] && stty "$old" < /dev/tty 2>/dev/null
+      # reply looks like: ESC]11;rgb:ffff/ffff/ffff
+      case "$reply" in *rgb:*)
+        r=$(printf '%s' "$reply" | sed -n 's/.*rgb:\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\).*/\1/p' | cut -c1-2)
+        g=$(printf '%s' "$reply" | sed -n 's/.*rgb:\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\).*/\2/p' | cut -c1-2)
+        b=$(printf '%s' "$reply" | sed -n 's/.*rgb:\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\).*/\3/p' | cut -c1-2)
+        if [ -n "$r$g$b" ]; then
+          local lum=$(( (0x$r * 299 + 0x$g * 587 + 0x$b * 114) / 1000 ))
+          [ "$lum" -gt 127 ] && { echo light; return; } || { echo dark; return; }
+        fi ;;
+      esac
+    fi
+    # No answer from the terminal: follow the macOS appearance.
+    if defaults read -g AppleInterfaceStyle 2>/dev/null | grep -qi dark; then echo dark; else echo light; fi
+  }
+  if [ -n "${LAURELIN_THEME:-}" ]; then
+    THEME_NAME="$LAURELIN_THEME"; case "$THEME_NAME" in *bone*) LAURELIN_BG=light ;; *) LAURELIN_BG=dark ;; esac
+  else
+    LAURELIN_BG=$(detect_bg)
+    if [ "$LAURELIN_BG" = light ]; then THEME_NAME=laurelin-bone; else THEME_NAME=laurelin; fi
+  fi
+  export LAURELIN_BG
+  python3 - "$LAURELIN_AGENT_DIR/settings.json" "$THEME_NAME" <<'PY' 2>/dev/null || true
+import json,sys
+p,t=sys.argv[1],sys.argv[2]
+try: d=json.load(open(p))
+except Exception: d={}
+if d.get("theme")!=t:
+    d["theme"]=t; json.dump(d,open(p,"w"),indent=2); open(p,"a").write("\n")
+PY
   # The fork keeps its own background service so it never collides with an installed Prime.
   # Socket keyed to the build, so a rebuilt fork never attaches to a service running old code.
   LAURELIN_SOCK_DIR="${TMPDIR:-/tmp}/laurelin-$(id -u)-$(stat -f %m "$FORK_CLI" 2>/dev/null || stat -c %Y "$FORK_CLI")"
