@@ -69,7 +69,7 @@ export interface DaemonSocketIdentity {
 
 export function defaultDaemonSocketPath(): string {
 	if (process.platform === "win32") {
-		return "\\\\.\\pipe\\prime-agent-daemon";
+		return "\\\\.\\pipe\\laurelin-agent-daemon";
 	}
 	return join(defaultDaemonSocketDir(), "daemon.sock");
 }
@@ -278,7 +278,11 @@ function assertSocketLeaseHeld(socketPath: string, lease: DaemonSocketPathLease)
 
 export function defaultDaemonSocketDir(): string {
 	const suffix = typeof process.getuid === "function" ? String(process.getuid()) : "user";
-	return join(tmpdir(), `prime-agent-${suffix}`);
+	// laurelin fork: its own service folder, never Prime Agent's (prime-agent-<uid>).
+	// LAURELIN_DAEMON_SOCKET_DIR lets the launcher use one folder per build.
+	const override = process.env.LAURELIN_DAEMON_SOCKET_DIR;
+	if (override) return override;
+	return join(tmpdir(), `laurelin-${suffix}`); // short: socket paths are capped at 104 characters
 }
 
 function ensureDefaultDaemonSocketDir(socketPath: string): void {

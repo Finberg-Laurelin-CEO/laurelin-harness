@@ -113,7 +113,7 @@ export async function probeMcpEndpoint(options: McpEndpointProbeOptions): Promis
 			},
 			fetch: boundedFetch,
 		});
-		const client = new Client({ name: "prime-agent", version: "mcp-verify" }, { capabilities: {} });
+		const client = new Client({ name: "laurelin-agent", version: "mcp-verify" }, { capabilities: {} });
 		try {
 			await client.connect(transport, { timeout: timeoutMs });
 			const result = await client.listTools(undefined, { timeout: timeoutMs });

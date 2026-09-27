@@ -42,7 +42,7 @@ export const INCIDENT_NOTICE_MAX_WINDOW_ENTRIES = 20_000;
 /** How often the agents view re-reads appended agent.jsonl bytes. */
 export const INCIDENT_NOTICE_POLL_INTERVAL_MS = 30_000;
 
-const INCIDENT_NOTICE_POINTER = "— run prime-agent incident for the timeline";
+const INCIDENT_NOTICE_POINTER = "· run laurelin-agent incident for the timeline";
 const NEWLINE_BYTE = 0x0a;
 const SEVERITY_RANK: Record<IncidentSeverity, number> = { critical: 3, error: 2, warn: 1, info: 0 };
 

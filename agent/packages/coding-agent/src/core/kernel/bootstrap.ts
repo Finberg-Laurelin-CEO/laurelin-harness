@@ -571,7 +571,7 @@ async function ensureUv(options: EnsureKernelPythonOptions): Promise<string> {
 	if (!shouldInstallUv) {
 		throw new Error(
 			`uv is required to set up the Python kernel. Install uv yourself: ${UV_INSTALL_COMMAND}, ` +
-				"or set PRIME_AGENT_INSTALL_UV=1 to let prime-agent run that installer.",
+				"or set PRIME_AGENT_INSTALL_UV=1 to let laurelin-agent run that installer.",
 		);
 	}
 
@@ -580,7 +580,7 @@ async function ensureUv(options: EnsureKernelPythonOptions): Promise<string> {
 		await run("sh", ["-c", UV_INSTALL_COMMAND], { stdio: options.onProgress ? "ignore" : "inherit" });
 	} catch (error) {
 		throw new Error(
-			`couldn't install uv from astral.sh; install it yourself: ${UV_INSTALL_COMMAND}, then re-run prime-agent. ${errorMessage(error)}`,
+			`couldn't install uv from astral.sh; install it yourself: ${UV_INSTALL_COMMAND}, then re-run laurelin-agent. ${errorMessage(error)}`,
 		);
 	}
 

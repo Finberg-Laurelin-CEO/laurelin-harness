@@ -143,7 +143,7 @@ function herdrAgentStateExtensionImpl(pi: ExtensionAPI, getLoadedExtensionPaths:
 	}
 
 	const source = "herdr:pi";
-	const agentLabel = "prime-agent";
+	const agentLabel = "laurelin-agent";
 	const idleDebounceMs = parseDurationEnv("HERDR_PI_IDLE_DEBOUNCE_MS", 250);
 	const retryGraceMs = parseDurationEnv("HERDR_PI_RETRY_GRACE_MS", 2500);
 

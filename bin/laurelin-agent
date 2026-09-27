@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# laurelin: start Prime Agent with the Laurelin package, and manage API keys.
+# laurelin-agent: start Laurelin Agent (a Prime Agent fork) with the Laurelin pack, and manage API keys.
 #
 # Plan: PLAN.md section 10, Steps 1b and 1e. Brief: docs/briefs/launcher.md.
 # Keys live in ~/.config/agent-keys/env (one NAME=value per line, mode 600).
@@ -46,11 +46,11 @@ Usage:
   laurelin-agent "task"               Open a session and start with this task.
   laurelin-agent -p "question"        Print one answer and exit. Good for scripts.
   laurelin-agent --autonomous "task"  Run until every gate in pack/gates passes,
-                                or Prime's limits stop it.
+                                or the agent's limits stop it.
   laurelin-agent --target <path> --claim "<text>" ...
                                 Record the file the task produces and the claim
                                 of done in .laurelin/task.json (in the current
-                                folder) before Prime starts, so the gates read
+                                folder) before the agent starts, so the gates read
                                 them. Either flag alone is fine. The agent can
                                 also set them with the set_task tool.
   laurelin-agent agents               See running and saved sessions, and reattach.
@@ -69,8 +69,8 @@ Usage:
   laurelin-agent keys check           Show which expected keys are present or missing.
   laurelin-agent --help               This text.
 
-Any other flag goes straight to prime-agent (for example --model, --thinking,
---continue). Run "prime-agent --help" for the full list.
+Any other flag goes straight to Laurelin Agent (for example --model, --thinking,
+--continue). Run "laurelin-agent help" for the full list.
 
 Keys are read from $STORE at launch. Values are never printed.
 
@@ -247,7 +247,7 @@ launch() {
       break
     fi
   done
-  prime-agent "${args[@]}" "$@"
+  run_agent "${args[@]}" "$@"
 }
 
 # Prefer the forked agent built in this repo (agent/, a Prime Agent fork named laurelin).
@@ -317,18 +317,17 @@ if d.get("theme")!=t:
 PY
   # The fork keeps its own background service so it never collides with an installed Prime.
   # Socket keyed to the build, so a rebuilt fork never attaches to a service running old code.
-  LAURELIN_SOCK_DIR="${TMPDIR:-/tmp}/laurelin-$(id -u)-$(stat -f %m "$FORK_CLI" 2>/dev/null || stat -c %Y "$FORK_CLI")"
+  # Short path: macOS caps a socket path at 104 characters, and worker sockets add about 45 more.
+  BUILD_KEY="$(stat -f %m "$FORK_CLI" 2>/dev/null || stat -c %Y "$FORK_CLI")"
+  LAURELIN_SOCK_DIR="/tmp/laurelin-$(id -u)-${BUILD_KEY: -6}"
   mkdir -p "$LAURELIN_SOCK_DIR"
-  # Main command takes --daemon-socket; subcommands (agents, status, ...) do not.
-  prime-agent() {
-    case "${1:-}" in
-      agents|attach|send|list|stop|schedule|status|doctor|shutdown|mcp|package|update|model|session|config|help) "$NODE_BIN" "$FORK_CLI" "$@" ;;
-      *) "$NODE_BIN" "$FORK_CLI" --daemon-socket "$LAURELIN_SOCK_DIR/daemon.sock" "$@" ;;
-    esac
-  }
+  # One service folder per build; every subcommand (agents, status, shutdown) uses it too, and none of them
+  # can reach Prime Agent's own service in prime-agent-<uid>.
+  export LAURELIN_DAEMON_SOCKET_DIR="$LAURELIN_SOCK_DIR"
+  run_agent() { "$NODE_BIN" "$FORK_CLI" "$@"; }
   export LAURELIN_USING_FORK=1
 else
-  command -v prime-agent >/dev/null 2>&1 || die "Neither the built fork (agent/) nor prime-agent on PATH. Run: cd agent && npm install && npm run build"
+  command -v prime-agent >/dev/null 2>&1 && run_agent() { prime-agent "$@"; } || die "Neither the built fork (agent/) nor prime-agent on PATH. Run: cd agent && npm install && npm run build"
 fi
 
 case "${1:-}" in
@@ -336,6 +335,6 @@ case "${1:-}" in
   keys) shift; keys "$@" ;;
   worktrees) shift; exec "${NODE_BIN:-node}" "$PACK/worktrees/tracker.mjs" "$@" ;;
   wt) shift; exec "${LAURELIN_WT:-wt}" "$@" ;;
-  agents | schedule | attach | send | list | stop | status | doctor | shutdown | mcp | package | update | model | session | config) load_store; prime-agent "$@" ;;
+  agents | schedule | attach | send | list | stop | status | doctor | shutdown | mcp | package | update | model | session | config) load_store; run_agent "$@" ;;
   *) launch "$@" ;;
 esac
