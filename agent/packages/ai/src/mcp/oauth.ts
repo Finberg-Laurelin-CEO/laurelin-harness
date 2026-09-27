@@ -15,7 +15,8 @@ const CALLBACK_HOST = process.env.PI_OAUTH_CALLBACK_HOST || "127.0.0.1";
 // A range (not one port) so a leaked/concurrent login can't wedge all logins with EADDRINUSE.
 // Distinct from the Anthropic callback port (53692). All candidates are registered as redirect URIs.
 const CALLBACK_PORT_BASE = Number(process.env.PI_MCP_OAUTH_CALLBACK_PORT || 53700);
-const CALLBACK_PORT_COUNT = 10;
+// laurelin fork: five callback ports; some servers (Polygres) reject a registration with ten redirect URIs.
+const CALLBACK_PORT_COUNT = 5;
 const CALLBACK_PATH = "/callback";
 const CALLBACK_PORTS = Array.from({ length: CALLBACK_PORT_COUNT }, (_, i) => CALLBACK_PORT_BASE + i);
 const redirectUriFor = (port: number) => `http://localhost:${port}${CALLBACK_PATH}`;
