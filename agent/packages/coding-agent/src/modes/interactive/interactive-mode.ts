@@ -532,42 +532,40 @@ export class BrandSplashHeader implements Component {
 		const safeWidth = Math.max(1, width);
 		const paddingX = safeWidth > 1 ? 1 : 0;
 		const contentWidth = Math.max(1, safeWidth - paddingX * 2);
-		const showLogo = this.logoCanvasWidth > 0 && contentWidth - this.logoCanvasWidth - this.gutter >= 24;
-		const metaWidth = showLogo ? contentWidth - this.logoCanvasWidth - this.gutter : contentWidth;
+		const showLogo = this.logoCanvasWidth > 0 && contentWidth - this.logoCanvasWidth - 1 - this.gutter >= 24;
+		const metaWidth = showLogo ? contentWidth - this.logoCanvasWidth - 1 - this.gutter : contentWidth;
 		const extraMetadata = this.options.getExtraMetadata?.() ?? [];
-		const version = theme.fg("muted", `v${this.version}`);
-		const titleText = "laurelin agent";
-		const title = theme.fg("text", titleText);
-		const modelLabel = "model ";
-		const cwdLabel = "cwd ";
+		// laurelin fork: Laurelin Visual System. Short accent rule over a tracked wordmark, a bracketed serial,
+		// then a quiet spec table (label dim and capitalised, value full).
+		const spec = (label: string, value: string) =>
+			`${theme.fg("dim", label.toUpperCase().padEnd(7))}${theme.fg("text", truncateToWidth(value, Math.max(1, metaWidth - 7)))}`;
 		const cwd = this.getCwd();
 		const metaLines = [
-			...(visibleWidth(`${titleText} v${this.version}`) <= metaWidth ? [`${title} ${version}`] : [title, version]),
-			...(this.options.getModelId
-				? [
-						`${theme.fg("dim", modelLabel)}${theme.fg(
-							"muted",
-							truncateToWidth(
-								this.options.getModelId() ?? "—",
-								Math.max(1, metaWidth - visibleWidth(modelLabel)),
-							),
-						)}`,
-					]
-				: []),
-			...extraMetadata.map(({ label, value }) => `${theme.fg("dim", `${label} `)}${theme.fg("muted", value)}`),
-			...(cwd === undefined
-				? []
-				: [
-						`${theme.fg("dim", cwdLabel)}${theme.fg("muted", truncatePathMiddle(formatSplashCwd(cwd), Math.max(1, metaWidth - visibleWidth(cwdLabel))))}`,
-					]),
+			theme.fg("accent", "━━━━"),
+			theme.bold(theme.fg("text", "L A U R E L I N")),
+			`${theme.fg("text", "AGENT")}  ${theme.fg("dim", "[LRL-AG-01]")}`,
+			"",
+			...(this.options.getModelId ? [spec("model", this.options.getModelId() ?? "none")] : []),
+			...extraMetadata.map(({ label, value }) => spec(label, value)),
+			spec("ver", this.version),
+			...(cwd === undefined ? [] : [spec("cwd", truncatePathMiddle(formatSplashCwd(cwd), Math.max(1, metaWidth - 7)))]),
 		];
 		const lines = this.options.topPadding ? [""] : [];
-		const rowCount = Math.max(showLogo ? this.logoRaw.length : 0, metaLines.length);
+		// Corner-bracket lockup around the mark (the system's .brackets device), drawn in dim ink.
+		const w = this.logoCanvasWidth;
+		const framed = showLogo
+			? [
+					theme.fg("dim", "┌─" + " ".repeat(Math.max(0, w - 4)) + "─┐"),
+					...this.logoRaw.map((l) => " " + l),
+					theme.fg("dim", "└─" + " ".repeat(Math.max(0, w - 4)) + "─┘"),
+				]
+			: [];
+		const rowCount = Math.max(framed.length, metaLines.length);
 		const metaStartIndex = showLogo ? Math.floor((rowCount - metaLines.length) / 2) : 0;
 		for (let index = 0; index < rowCount; index++) {
-			const logoLine = showLogo ? (this.logoRaw[index] ?? "") : "";
+			const logoLine = showLogo ? (framed[index] ?? "") : "";
 			const logo = showLogo
-				? theme.fg("text", logoLine) + " ".repeat(this.logoCanvasWidth - visibleWidth(logoLine) + this.gutter)
+				? theme.fg("text", logoLine) + " ".repeat(Math.max(0, this.logoCanvasWidth + 1 - visibleWidth(logoLine)) + this.gutter)
 				: "";
 			const metaIndex = index - metaStartIndex;
 			const metaLine = metaIndex >= 0 && metaIndex < metaLines.length ? metaLines[metaIndex] : "";

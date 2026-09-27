@@ -52,6 +52,12 @@ interface Approval {
 }
 
 const LEVELS: Level[] = ["green", "yellow", "red"];
+// Laurelin Visual System in the terminal: one accent (orange) at one value, hierarchy by ink opacity,
+// mono capitals for labels, a solid-accent chip behind two or three words.
+const ACCENT_RGB = [255, 79, 0];
+const chip = (text: string) =>
+	`\x1b[48;2;${ACCENT_RGB.join(";")}m\x1b[38;2;247;247;245m\x1b[1m ${text.toUpperCase()} \x1b[22m\x1b[39m\x1b[49m`;
+
 const CHECK_NAMES = ["prose", "numbers", "layout", "location", "word for word", "evidence"];
 // The mark must be the opposite colour of the terminal: black rings on a light
 // terminal, white rings on a dark one. The launcher sets LAURELIN_BG.
@@ -276,40 +282,31 @@ export default function laurelinUi(pi: ExtensionAPI) {
 	const badge = () => {
 		if (!ui?.hasUI) return;
 		const t = ui.ui.theme;
-		const color = classification === "green" ? "success" : classification === "yellow" ? "warning" : "error";
-		const dot = t.fg("dim", " · ");
+		const label = (l: string) => t.fg("dim", l);
+		const cls = classification === "red" ? chip("red") : t.bold(t.fg("text", classification.toUpperCase()));
 		const accept = acceptanceFooter();
 		ui.ui.setStatus(
 			"laurelin",
-			t.fg(color, t.bold(`■ ${classification.toUpperCase()}`)) +
-				dot +
-				t.fg("muted", ui.model?.id ?? "no model") +
-				dot +
-				t.fg("muted", worker) +
-				(accept ? dot + t.fg("muted", accept) : ""),
+			`${label("CLASS")} ${cls}   ${label("MODEL")} ${t.fg("text", ui.model?.id ?? "none")}   ${label("WORKER")} ${t.fg("text", worker)}` +
+				(accept ? `   ${label("ACCEPT")} ${t.fg("text", accept.replace(/^accept\s*/i, ""))}` : ""),
 		);
 	};
 
 	const checksWidget = () => {
 		if (!ui?.hasUI) return;
-		const theme = ui.ui.theme;
-		const lights = CHECK_NAMES.map((name) => {
+		const t = ui.ui.theme;
+		const cells = CHECK_NAMES.map((name) => {
 			const c = checks.get(name) ?? { state: "none" as CheckState };
-			const light =
-				c.state === "pass"
-					? theme.fg("success", "●")
-					: c.state === "fail"
-						? theme.fg("error", "●")
-						: c.state === "skipped"
-							? theme.fg("warning", "○")
-							: theme.fg("dim", "○");
-			return `${light} ${c.state === "none" ? theme.fg("dim", name) : name}`;
+			const label = name.toUpperCase();
+			if (c.state === "pass") return `${t.fg("text", "■")} ${t.fg("text", label)}`;
+			if (c.state === "fail") return `${t.fg("accent", "■")} ${t.bold(t.fg("accent", label))}`;
+			if (c.state === "skipped") return `${t.fg("dim", "□")} ${t.fg("dim", label)}`;
+			return `${t.fg("dim", "·")} ${t.fg("dim", label)}`;
 		});
-		// One line of lights; failures get their own line with the reason.
-		const lines = [" " + lights.join("   ")];
+		const lines = [` ${t.fg("dim", "GATES")}  ${cells.join("  ")}`];
 		for (const name of CHECK_NAMES) {
 			const c = checks.get(name);
-			if (c?.state === "fail" && c.detail) lines.push("   " + theme.fg("error", `${name}: ${c.detail}`));
+			if (c?.state === "fail" && c.detail) lines.push(`        ${t.fg("accent", "↳")} ${t.fg("text", `${name.toUpperCase()}  ${c.detail}`)}`);
 		}
 		ui.ui.setWidget("checks", lines, { placement: "belowEditor" });
 	};
@@ -320,7 +317,7 @@ export default function laurelinUi(pi: ExtensionAPI) {
 		const t = ui.ui.theme;
 		ui.ui.setWidget(
 			"approvals",
-			[` ${t.fg("accent", "■")} ${t.bold(`${approvals.length} waiting for your approval`)}  ${t.fg("dim", "/approvals to review")}`],
+			[` ${chip(`${approvals.length} approval${approvals.length === 1 ? "" : "s"}`)}  ${t.fg("dim", "waiting on you · /approvals to review")}`],
 			{ placement: "belowEditor" },
 		);
 	};
@@ -406,7 +403,7 @@ export default function laurelinUi(pi: ExtensionAPI) {
 			classification = level;
 			badge();
 			pi.events.emit("laurelin:classification", level);
-			ctx.ui.notify(`classification: ${level.toUpperCase()}`, "info");
+			// the CLASS chip in the footer shows the change
 		},
 	});
 

@@ -120,8 +120,8 @@ const start = async (e, reason) => {
 };
 // The widget is one row of lights ("● prose   ○ numbers ...") plus one line per failure ("name: detail").
 const plain = (t) => String(t).replace(/\x1b\[[0-9;]*m/g, "");
-const light = (name) => { const row = plain(widgets.get("checks")?.lines[0] ?? ""); const i = row.indexOf(" " + name); return i > 0 ? row[i - 1] : ""; };
-const detail = (name) => plain(widgets.get("checks")?.lines.slice(1).find((l) => plain(l).trim().startsWith(name + ":")) ?? "");
+const light = (name) => { const row = plain(widgets.get("checks")?.lines[0] ?? ""); const i = row.indexOf(" " + name.toUpperCase()); const ch = i > 0 ? row[i - 1] : ""; return ch === "■" ? "●" : ch === "□" || ch === "·" ? "○" : ch; };
+const detail = (name) => plain(widgets.get("checks")?.lines.slice(1).find((l) => plain(l).includes(name.toUpperCase() + "  ")) ?? "");
 const checkLine = (name) => `${light(name)} ${name} ${detail(name)}`;
 
 // ---- (d) a line already in the log is replayed at session_start; new lines arrive live
@@ -157,7 +157,7 @@ else {
 	await sleep(30);
 	const item = seen.approval[0];
 	if (!item || !item.id || !item.preview.includes("git push")) fail(`laurelin:approval not emitted with the call text: ${JSON.stringify(item)}`);
-	if (!widgets.get("approvals")?.lines[0]?.includes("1 waiting")) fail(`approvals line should say 1 waiting: ${widgets.get("approvals")?.lines[0]}`);
+	if (!widgets.get("approvals")?.lines[0]?.includes("1 APPROVAL")) fail(`approvals line should say 1 waiting: ${widgets.get("approvals")?.lines[0]}`);
 	if (!dialogSeen) fail("confirm dialog was not opened");
 	overlayKeys = ["a"]; // Joe approves in the list
 	selectCalls = 0;

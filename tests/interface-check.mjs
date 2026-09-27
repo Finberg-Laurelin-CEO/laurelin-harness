@@ -120,7 +120,7 @@ if (laurelinUi) {
 	process.env.LAURELIN_NO_IMAGE = "1";
 	for (const h of laurelinUi.handlers.get("session_start")) await h({ type: "session_start", reason: "startup" }, ctx);
 	await new Promise((r) => setTimeout(r, 50)); // the first draw is scheduled
-	if (!widgets.has("checks") || !["prose","numbers","layout","location","word for word","evidence"].every((n) => widgets.get("checks").lines[0]?.includes(n))) fail("checks widget should show all six checks in one row");
+	if (!widgets.has("checks") || !["PROSE","NUMBERS","LAYOUT","LOCATION","WORD FOR WORD","EVIDENCE"].every((n) => widgets.get("checks").lines[0]?.includes(n))) fail("checks widget should show all six checks in one row");
 	if (widgets.get("checks")?.placement !== "belowEditor") fail("checks widget should sit below the editor");
 	await run("checks", "demo");
 	await run("checks", "demo");
@@ -128,10 +128,10 @@ if (laurelinUi) {
 	await run("classify", "red");
 	if (!status || !status.includes("RED") || !status.includes("test-model") || !status.includes("coordinator")) fail(`badge wrong: ${status}`);
 	await run("approvals", "demo");
-	if (!widgets.get("approvals")?.lines[0]?.includes("3 waiting")) fail("approvals line should say 3 waiting");
+	if (!widgets.get("approvals")?.lines[0]?.includes("3 APPROVALS")) fail("approvals line should say 3 waiting");
 	await run("approvals", "");
 	if (!rendered.includes("approvals list")) fail("approvals list did not open");
-	if (!widgets.get("approvals")?.lines[0]?.includes("1 waiting")) fail("after one approve and one reject, 1 should remain");
+	if (!widgets.get("approvals")?.lines[0]?.includes("1 APPROVAL")) fail("after one approve and one reject, 1 should remain");
 	if (!failed) ok(`headless render at ${WIDTH} cols: checks widget, badge, approvals pick list`);
 }
 
