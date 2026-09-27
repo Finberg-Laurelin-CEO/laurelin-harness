@@ -2730,6 +2730,17 @@ export class InteractiveMode {
 			}
 		}
 
+		// laurelin fork: skills installed in two folders (for example ~/.claude/skills and ~/.agents/skills)
+		// are expected and harmless. Show one summary line; LAURELIN_SHOW_COLLISIONS=1 shows every pair.
+		if (collisions.size > 0 && process.env.LAURELIN_SHOW_COLLISIONS !== "1") {
+			lines.push(
+				theme.fg(
+					"dim",
+					`  ${collisions.size} skill${collisions.size === 1 ? "" : "s"} found in more than one folder; the first copy is used (LAURELIN_SHOW_COLLISIONS=1 lists them)`,
+				),
+			);
+			collisions.clear();
+		}
 		// Format collision diagnostics grouped by name
 		for (const [name, collisionList] of collisions) {
 			const first = collisionList[0]?.collision;
@@ -2934,7 +2945,11 @@ export class InteractiveMode {
 		}
 
 		if (showDiagnostics) {
-			const skillDiagnostics = resourceSnapshot?.diagnostics.skills ?? [];
+			// laurelin fork: a skill present in two folders is expected (Claude and agents folders share many).
+			// Hide those collisions at startup unless LAURELIN_SHOW_COLLISIONS=1; real problems still show.
+			const skillDiagnostics = (resourceSnapshot?.diagnostics.skills ?? []).filter(
+				(d) => d.type !== "collision" || process.env.LAURELIN_SHOW_COLLISIONS === "1",
+			);
 			if (skillDiagnostics.length > 0) {
 				const warningLines = this.formatDiagnostics(skillDiagnostics, sourceInfos);
 				this.chatContainer.addChild(

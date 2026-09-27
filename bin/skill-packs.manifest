@@ -9,7 +9,7 @@
 #   name     folder name under pack/skills; must equal the SKILL.md name field
 #   flags    comma list: note (add the harness note at the top of SKILL.md),
 #            local (copy from the installed Claude Code plugin when present); or -
-# Survey and reasons: docs/briefs/skill-packs.md. Conflicts: pack/skills/SOURCES.md.
+# Survey and reasons: docs/briefs/skill-packs.md. Conflicts: pack/SKILL-SOURCES.md.
 
 # Karpathy behaviour guidelines: always on. Installed as a Claude Code plugin; copied from there.
 forrestchang/andrej-karpathy-skills 2c606141936f1eeef17fa3043a72095b4765b9c2 2026-09-25 declared:MIT skills/karpathy-guidelines karpathy-guidelines local

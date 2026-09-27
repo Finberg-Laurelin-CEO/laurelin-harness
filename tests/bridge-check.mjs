@@ -84,6 +84,11 @@ const fakeUi = {
 		const lines = Array.isArray(content) ? content : content({ requestRender() {} }, theme).render(80);
 		widgets.set(key, { lines, placement: opts?.placement });
 	},
+	// /approvals is a pick list: pick the first item, then answer with the scripted decision.
+	select: async (_title, options) => {
+		if (options.includes("Approve")) return overlayKeys[0] === "r" ? "Reject" : "Approve";
+		return options[0] === "Done" ? "Done" : selectCalls++ === 0 ? options[0] : "Done";
+	},
 	custom: (factory, opts) =>
 		new Promise((done) => {
 			const comp = factory({ requestRender() {} }, theme, {}, done);
@@ -92,6 +97,7 @@ const fakeUi = {
 			for (const k of overlayKeys) comp.handleInput(k);
 		}),
 };
+let selectCalls = 0;
 const timers = new Set();
 const ctx = {
 	hasUI: true,
@@ -112,7 +118,11 @@ const ctx = {
 const start = async (e, reason) => {
 	for (const h of e.handlers.get("session_start") ?? []) await h({ type: "session_start", reason }, ctx);
 };
-const checkLine = (name) => widgets.get("checks")?.lines.find((l) => l.includes(name)) ?? "";
+// The widget is one row of lights ("● prose   ○ numbers ...") plus one line per failure ("name: detail").
+const plain = (t) => String(t).replace(/\x1b\[[0-9;]*m/g, "");
+const light = (name) => { const row = plain(widgets.get("checks")?.lines[0] ?? ""); const i = row.indexOf(" " + name); return i > 0 ? row[i - 1] : ""; };
+const detail = (name) => plain(widgets.get("checks")?.lines.slice(1).find((l) => plain(l).trim().startsWith(name + ":")) ?? "");
+const checkLine = (name) => `${light(name)} ${name} ${detail(name)}`;
 
 // ---- (d) a line already in the log is replayed at session_start; new lines arrive live
 const row = (check, res, answer, confidence = 1) =>
@@ -120,13 +130,13 @@ const row = (check, res, answer, confidence = 1) =>
 writeFileSync(gateLog, row("prose", "pass", "0 hits", 0.9));
 await start(ui, "new");
 await start(bridge, "new");
-if (!checkLine("prose").includes("●") || !checkLine("prose").includes("jev 0.90")) fail(`prose light not replayed at session_start: ${checkLine("prose")}`);
+if (light("prose") !== "●") fail(`prose light not replayed at session_start: ${checkLine("prose")}`);
 appendFileSync(gateLog, row("verbatim", "fail", "1 of 3 sentences missing"));
 appendFileSync(gateLog, row("evidence", "skipped", "no claim", 0));
 await sleep(1200);
 const w4w = checkLine("word for word");
 if (!w4w.includes("●") || !w4w.includes("1 of 3 sentences missing")) fail(`word for word light not lit from a live log line: ${w4w}`);
-if (!checkLine("evidence").includes("○") || !checkLine("evidence").includes("no claim")) fail(`evidence skipped light wrong: ${checkLine("evidence")}`);
+if (light("evidence") !== "○") fail(`evidence skipped light wrong: ${checkLine("evidence")}`);
 if (!failed) ok("(d) gate log lines reach the checks widget: replay at start, live fail, live skipped, pass with confidence");
 
 // ---- (+) an outward tool call is mirrored in the approvals panel; the panel's answer settles it
@@ -149,7 +159,8 @@ else {
 	if (!item || !item.id || !item.preview.includes("git push")) fail(`laurelin:approval not emitted with the call text: ${JSON.stringify(item)}`);
 	if (!widgets.get("approvals")?.lines[0]?.includes("1 waiting")) fail(`approvals line should say 1 waiting: ${widgets.get("approvals")?.lines[0]}`);
 	if (!dialogSeen) fail("confirm dialog was not opened");
-	overlayKeys = ["a"]; // Joe approves in the panel
+	overlayKeys = ["a"]; // Joe approves in the list
+	selectCalls = 0;
 	await ui.commands.get("approvals").handler("", ctx);
 	const decision = await pending;
 	if (decision !== undefined) fail(`panel approval should let the call through, got ${JSON.stringify(decision)}`);

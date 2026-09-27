@@ -9,6 +9,7 @@ The description budget for the whole folder is about 4,000 tokens (counted as ch
 The Laurelin behavior set. Links into `~/.claude/skills` (see `../README.md`), except where noted.
 
 - `karpathy-guidelines`: coding behavior, think before coding, minimal change, surgical edits, verifiable goals. A copy from the installed plugin. The one Karpathy skill, kept on for every job.
+- `fusion-cad`: Autodesk Fusion through the `fusion` MCP server, with Adam and CADAM for generated parts.
 - `writing-ste`: Simplified Technical English with the house rules, for every prose deliverable.
 - `humanizer`: content-level signs of machine-written text.
 - `jev`, `jev-triage`, `jev-documents`, `jev-eval`, `jev-act`, `jev-patterns`, `building-with-jev`: every typed judgment goes to Jev.

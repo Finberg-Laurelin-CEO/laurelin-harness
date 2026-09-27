@@ -53,6 +53,14 @@ export class FooterComponent implements Component {
 	}
 
 	render(width: number): string[] {
+		// laurelin fork: show extension status items (the Laurelin badge, model, worker, acceptance).
+		const statuses = [...this.footerData.getExtensionStatuses().values()].filter(Boolean);
+		if (statuses.length > 0) {
+			const line = " " + statuses.join(theme.fg("dim", "  ·  "));
+			const out = [visibleWidth(line) > width ? truncateToWidth(line, width, "…") : line];
+			if (this.speedEnabled && this.speedText) out.push(theme.fg("dim", this.speedText));
+			return out;
+		}
 		if (!this.speedEnabled || !this.speedText) {
 			return [];
 		}

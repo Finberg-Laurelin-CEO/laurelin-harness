@@ -29,6 +29,15 @@ const extractFrontmatter = (content: string): { yamlString: string | null; body:
 	};
 };
 
+const looseFrontmatter = (yamlString: string): Record<string, string> | null => {
+	const out: Record<string, string> = {};
+	for (const line of yamlString.split("\n")) {
+		const m = /^([A-Za-z_][A-Za-z0-9_-]*):\s?(.*)$/.exec(line);
+		if (m) out[m[1]] = m[2].trim().replace(/^(["'])(.*)\1$/, "$2");
+	}
+	return out.name || out.description ? out : null;
+};
+
 export const parseFrontmatter = <T extends Record<string, unknown> = Record<string, unknown>>(
 	content: string,
 ): ParsedFrontmatter<T> => {
@@ -36,7 +45,16 @@ export const parseFrontmatter = <T extends Record<string, unknown> = Record<stri
 	if (!yamlString) {
 		return { frontmatter: {} as T, body };
 	}
-	const parsed = parse(yamlString);
+	let parsed: unknown;
+	try {
+		parsed = parse(yamlString);
+	} catch (error) {
+		// laurelin fork: many published skills put an unquoted colon in a one-line description,
+		// which strict YAML rejects. Fall back to reading top-level "key: value" lines literally.
+		const loose = looseFrontmatter(yamlString);
+		if (!loose) throw error;
+		parsed = loose;
+	}
 	return { frontmatter: (parsed ?? {}) as T, body };
 };
 

@@ -11,8 +11,8 @@ Built 2026-09-25 from `docs/briefs/skill-packs.md`. Test: `tests/test-skill-pack
 | `bin/skill-pack-descriptions.tsv` | The fourteen trimmed descriptions, each 300 characters or fewer |
 | `bin/skill-frontmatter.py` | Reads or rewrites one frontmatter field. Handles `>` and `\|` block scalars, which six upstream skills use and the one-line awk in `tests/test-pack.sh` cannot read |
 | `pack/skills/<24 folders>` | The copies: `karpathy-guidelines` plus the 23 pack skills. Each has `SKILL.md` and `LICENSE` |
-| `pack/skills/SOURCES.md` | Generated table (skill, repo, path, commit, commit date, license, adopted) between markers, plus hand-kept prose: what the installer changes, conflicts and the choice made, known gaps |
-| `pack/skills/TIERS.md` | Always on, loaded when needed, off; the budget rule |
+| `pack/SKILL-SOURCES.md` | Generated table (skill, repo, path, commit, commit date, license, adopted) between markers, plus hand-kept prose: what the installer changes, conflicts and the choice made, known gaps |
+| `pack/SKILL-TIERS.md` | Always on, loaded when needed, off; the budget rule |
 | `bin/laurelin-agent` | `EXA_API_KEY` and `FIRECRAWL_API_KEY` added as optional rows in the key table |
 | `pack/README.md`, `tests/README.md`, `tests/run-all.sh`, `tests/test-pack.sh` | Docs rows, the new test in the run order, and one prompt wording change (below) |
 

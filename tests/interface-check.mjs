@@ -86,9 +86,17 @@ if (laurelinUi) {
 		rendered.push(label);
 	};
 	const keys = { title: ["x"], approvals: ["\x1b[B", "a", "\x1b[A", "r", "\x1b"] };
+	// Scripted answers for the approvals pick list: approve the first item, reject the next, then finish.
+	const picks = [(o) => o[0], () => "Approve", (o) => o[0], () => "Reject", () => "Done"];
 	const ui = {
 		theme,
 		notify() {},
+		select: async (title, options) => {
+			checkLines("approvals list", [title.split("\n")[0], ...options]);
+			rendered.push("approvals list");
+			const f = picks.shift();
+			return f ? f(options) : undefined;
+		},
 		setStatus: (_k, text) => (status = text),
 		setWidget: (key, content, opts) => {
 			if (content === undefined) return widgets.delete(key);
@@ -111,8 +119,8 @@ if (laurelinUi) {
 	const run = (name, args) => laurelinUi.commands.get(name).handler(args, ctx);
 	process.env.LAURELIN_NO_IMAGE = "1";
 	for (const h of laurelinUi.handlers.get("session_start")) await h({ type: "session_start", reason: "startup" }, ctx);
-	if (!rendered.includes("title screen")) fail("title screen did not render on startup");
-	if (!widgets.has("checks") || widgets.get("checks").lines.length !== 6) fail("checks widget should have 6 lines");
+	await new Promise((r) => setTimeout(r, 50)); // the first draw is scheduled
+	if (!widgets.has("checks") || !["prose","numbers","layout","location","word for word","evidence"].every((n) => widgets.get("checks").lines[0]?.includes(n))) fail("checks widget should show all six checks in one row");
 	if (widgets.get("checks")?.placement !== "belowEditor") fail("checks widget should sit below the editor");
 	await run("checks", "demo");
 	await run("checks", "demo");
@@ -122,9 +130,9 @@ if (laurelinUi) {
 	await run("approvals", "demo");
 	if (!widgets.get("approvals")?.lines[0]?.includes("3 waiting")) fail("approvals line should say 3 waiting");
 	await run("approvals", "");
-	if (!rendered.includes("approvals overlay")) fail("approvals overlay did not render");
+	if (!rendered.includes("approvals list")) fail("approvals list did not open");
 	if (!widgets.get("approvals")?.lines[0]?.includes("1 waiting")) fail("after one approve and one reject, 1 should remain");
-	if (!failed) ok(`headless render at ${WIDTH} cols: title screen, checks widget, badge, approvals overlay`);
+	if (!failed) ok(`headless render at ${WIDTH} cols: checks widget, badge, approvals pick list`);
 }
 
 process.exit(failed ? 1 : 0);

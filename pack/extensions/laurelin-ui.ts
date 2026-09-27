@@ -292,27 +292,26 @@ export default function laurelinUi(pi: ExtensionAPI) {
 
 	const checksWidget = () => {
 		if (!ui?.hasUI) return;
-		ui.ui.setWidget(
-			"checks",
-			(_tui, theme) => {
-				const lines = CHECK_NAMES.map((name) => {
-					const c = checks.get(name) ?? { state: "none" as CheckState };
-					const light =
-						c.state === "pass"
-							? theme.fg("success", "●")
-							: c.state === "fail"
-								? theme.fg("error", "●")
-								: c.state === "skipped"
-									? theme.fg("warning", "○")
-									: theme.fg("dim", "○");
-					const label = c.state === "none" ? theme.fg("dim", name) : name;
-					const detail = c.detail ? "  " + theme.fg(c.state === "fail" ? "error" : "muted", c.detail) : "";
-					return ` ${light} ${label}${detail}`;
-				});
-				return { render: (w: number) => lines.map((l) => truncateToWidth(l, w, "…")), invalidate() {} };
-			},
-			{ placement: "belowEditor" },
-		);
+		const theme = ui.ui.theme;
+		const lights = CHECK_NAMES.map((name) => {
+			const c = checks.get(name) ?? { state: "none" as CheckState };
+			const light =
+				c.state === "pass"
+					? theme.fg("success", "●")
+					: c.state === "fail"
+						? theme.fg("error", "●")
+						: c.state === "skipped"
+							? theme.fg("warning", "○")
+							: theme.fg("dim", "○");
+			return `${light} ${c.state === "none" ? theme.fg("dim", name) : name}`;
+		});
+		// One line of lights; failures get their own line with the reason.
+		const lines = [" " + lights.join("   ")];
+		for (const name of CHECK_NAMES) {
+			const c = checks.get(name);
+			if (c?.state === "fail" && c.detail) lines.push("   " + theme.fg("error", `${name}: ${c.detail}`));
+		}
+		ui.ui.setWidget("checks", lines, { placement: "belowEditor" });
 	};
 
 	const approvalsWidget = () => {
@@ -321,7 +320,7 @@ export default function laurelinUi(pi: ExtensionAPI) {
 		const t = ui.ui.theme;
 		ui.ui.setWidget(
 			"approvals",
-			[` ${t.fg("warning", "■")} ${t.fg("warning", `approvals: ${approvals.length} waiting`)}  ${t.fg("dim", "/approvals")}`],
+			[` ${t.fg("accent", "■")} ${t.bold(`${approvals.length} waiting for your approval`)}  ${t.fg("dim", "/approvals to review")}`],
 			{ placement: "belowEditor" },
 		);
 	};
@@ -339,13 +338,20 @@ export default function laurelinUi(pi: ExtensionAPI) {
 	};
 
 	// ---- lifecycle
-	pi.on("session_start", async (event, ctx) => {
-		ui = ctx;
-		if (!ctx.hasUI) return;
+	const drawAll = () => {
 		badge();
 		checksWidget();
 		approvalsWidget();
-		if (event.reason === "startup") await showTitle(ctx);
+	};
+	// The session starts in the background worker before the screen attaches, and draws sent before the
+	// attach are dropped. Draw now, then again over the first seconds and on the first message.
+	pi.on("session_start", async (_event, ctx) => {
+		ui = ctx;
+		for (const ms of [0, 800, 2000, 4000, 8000]) setTimeout(() => ctx.hasUI && drawAll(), ms);
+	});
+	pi.on("input", async (_event, ctx) => {
+		ui = ctx;
+		if (ctx.hasUI) drawAll();
 	});
 	pi.on("session_shutdown", async () => {
 		ui = undefined;
@@ -425,7 +431,7 @@ export default function laurelinUi(pi: ExtensionAPI) {
 			}
 			checksWidget();
 			const fails = [...checks.values()].filter((c) => c.state === "fail").length;
-			ctx.ui.notify(`checks: ${checks.size} run, ${fails} failed`, fails ? "warning" : "info");
+			void fails; // the lights below the editor show the result
 		},
 	});
 
@@ -437,13 +443,21 @@ export default function laurelinUi(pi: ExtensionAPI) {
 			if (args.trim() === "demo") {
 				for (const item of DEMO_APPROVALS) if (!approvals.some((a) => a.id === item.id)) approvals.push({ ...item });
 				approvalsWidget();
-				return ctx.ui.notify(`approvals: ${approvals.length} waiting`, "info");
+				return;
 			}
-			await ctx.ui.custom<void>(
-				(tui, theme, _kb, done) =>
-					new ApprovalsOverlay(theme, approvals, decide, () => tui.requestRender(), () => done()),
-				{ overlay: true, overlayOptions: { width: "70%", minWidth: 50, maxHeight: "80%", anchor: "center" } },
-			);
+			// Pick an item, read its preview, then approve, reject or go back. Repeats until the list is empty or Esc.
+			if (typeof ctx.ui.select !== "function") return; // no screen to ask on
+			while (approvals.length > 0) {
+				const labels = approvals.map((a, i) => `${i + 1}. [${a.kind}] ${a.title}`);
+				const picked = await ctx.ui.select(`${approvals.length} waiting for your approval`, [...labels, "Done"]);
+				if (picked === undefined || picked === "Done") break;
+				const item = approvals[labels.indexOf(picked)];
+				if (!item) break;
+				const choice = await ctx.ui.select(`${item.title}\n\n${item.preview}`, ["Approve", "Reject", "Back"]);
+				if (choice === "Approve") decide(item, "approve");
+				else if (choice === "Reject") decide(item, "reject");
+			}
+			if (approvals.length === 0) ctx.ui.notify("Nothing waiting for approval.", "info");
 		},
 	});
 

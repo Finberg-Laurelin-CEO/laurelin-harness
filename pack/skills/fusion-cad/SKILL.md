@@ -1,6 +1,6 @@
 ---
 name: fusion-cad
-description: Model, edit, check and export CAD in Autodesk Fusion, and generate parts with Adam or CADAM and bring them into Fusion. Use for "open the model", "change the part", "export STEP", "check interference", "build the assembly", "render the CAD", ANOR drawing and model work.
+description: Fusion CAD work (edit, check, export) and Adam or CADAM parts brought into Fusion. Use for model changes, STEP export, interference checks, ANOR CAD.
 ---
 
 # Fusion CAD

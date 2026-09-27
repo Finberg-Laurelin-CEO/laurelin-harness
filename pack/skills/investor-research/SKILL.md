@@ -1,6 +1,6 @@
 ---
 name: investor-research
-description: Research investors and keep the investor database in the Obsidian vault. Use when Joe says "research these investors", "find investors for", "who at <firm>", "update the investor CRM", "dossier for <person>", or hands over a list, a post or a screenshot of firms. Builds and enriches firm folders, person notes, deck guidance and work logs to the vault's own playbook, grades fit with Jev, runs the validator, and ranks follow-ups. Research and vault-writing authority only. No contact, no drafting to send, no forms, no guessed emails.
+description: Research investors and build the vault investor records by the playbook: firm hubs, person notes, fit grades with Jev, follow-up triage. Research only, never outreach. Use for "research these investors", "who at <firm>", "update the investor CRM".
 ---
 
 # investor-research

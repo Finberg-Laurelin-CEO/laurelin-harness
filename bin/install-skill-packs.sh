@@ -7,7 +7,7 @@
 # the skill folder to pack/skills/<name>, puts the upstream LICENSE beside it, replaces a
 # description over 300 characters with the one in bin/skill-pack-descriptions.tsv, adds
 # the harness note at the top of SKILL.md where the manifest says "note", and rewrites the
-# generated table in pack/skills/SOURCES.md.
+# generated table in pack/SKILL-SOURCES.md.
 #
 # Idempotent: a second run makes the same tree byte for byte. Nothing outside the repo is
 # written (AGENTS.md rule 17). The Karpathy skill is read from the installed Claude Code
@@ -28,7 +28,7 @@ MANIFEST="$REPO/bin/skill-packs.manifest"
 DESCS="$REPO/bin/skill-pack-descriptions.tsv"
 FM="$REPO/bin/skill-frontmatter.py"
 DEST="$REPO/pack/skills"
-SOURCES="$DEST/SOURCES.md"
+SOURCES="$(dirname "$DEST")/SKILL-SOURCES.md"
 SRC="${LAURELIN_SKILL_SRC:-$REPO/tests/tmp/skill-packs/src}"
 KARPATHY_PLUGIN="${KARPATHY_PLUGIN_DIR:-$HOME/.claude/plugins/marketplaces/karpathy-skills}"
 MAX_DESC=300

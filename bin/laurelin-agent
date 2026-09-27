@@ -248,7 +248,13 @@ launch() {
 # Prefer the forked agent built in this repo (agent/, a Prime Agent fork named laurelin).
 # Fall back to a system prime-agent when the fork is not built.
 FORK_CLI="$REPO/agent/packages/coding-agent/dist/bundle/cli.js"
+# A working Node: prefer LAURELIN_NODE, then Homebrew's, then any node on PATH that actually starts.
+NODE_BIN=""
+for n in "${LAURELIN_NODE:-}" /opt/homebrew/bin/node "$(command -v node 2>/dev/null)"; do
+  [ -n "$n" ] && [ -x "$n" ] && "$n" -e 0 >/dev/null 2>&1 && { NODE_BIN="$n"; break; }
+done
 if [ -f "$FORK_CLI" ]; then
+  [ -n "$NODE_BIN" ] || die "No working Node found. Install Node 22 or newer (brew install node), or set LAURELIN_NODE."
   # The fork keeps its own settings folder, ~/.laurelin/agent, so the installed Prime
   # Agent's folder (~/.prime/agent) is never read or written by it. Only the sign-in
   # file is linked, so the ChatGPT and Claude subscriptions work without a new login.
@@ -261,6 +267,10 @@ if [ -f "$FORK_CLI" ]; then
     echo "laurelin: created $LAURELIN_AGENT_DIR (sign-in linked from ~/.prime/agent, settings fresh)" >&2
   fi
   export LAURELIN_CODING_AGENT_DIR="$LAURELIN_AGENT_DIR"
+  # The background worker looks themes up by name in <agent dir>/themes; link the Laurelin themes there
+  # so extensions color with the same theme as the screen.
+  mkdir -p "$LAURELIN_AGENT_DIR/themes"
+  for t in "$PACK"/themes/*.json; do [ -f "$t" ] && ln -sfn "$t" "$LAURELIN_AGENT_DIR/themes/$(basename "$t")"; done
   # Match the terminal: light background gets the light theme and the black mark,
   # dark background gets the dark theme and the white mark. LAURELIN_THEME overrides.
   detect_bg() {
@@ -307,8 +317,8 @@ PY
   # Main command takes --daemon-socket; subcommands (agents, status, ...) do not.
   prime-agent() {
     case "${1:-}" in
-      agents|attach|send|list|stop|schedule|status|doctor|shutdown|mcp|package|update|model|session|config|help) node "$FORK_CLI" "$@" ;;
-      *) node "$FORK_CLI" --daemon-socket "$LAURELIN_SOCK_DIR/daemon.sock" "$@" ;;
+      agents|attach|send|list|stop|schedule|status|doctor|shutdown|mcp|package|update|model|session|config|help) "$NODE_BIN" "$FORK_CLI" "$@" ;;
+      *) "$NODE_BIN" "$FORK_CLI" --daemon-socket "$LAURELIN_SOCK_DIR/daemon.sock" "$@" ;;
     esac
   }
   export LAURELIN_USING_FORK=1

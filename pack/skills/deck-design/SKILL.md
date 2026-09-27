@@ -1,6 +1,6 @@
 ---
 name: deck-design
-description: Build, revise and file a Laurelin investor deck in the live Laurelin Visual System. Use when Joe says "build the deck", "new version of the deck", "make the orange rule thinner", "move the ask to sheet 3", "swap the cover photo", "file v9", or names a sheet by number. Pulls the current style at run time, builds from a copy JSON, renders, runs the layout, numbers, prose, verbatim, location, evidence and deck gates, and registers the version. Build, layout and delivery authority only. Joe writes the words. Figure conflicts are flagged, never resolved.
+description: Build, revise and file a Laurelin investor deck in the live visual system: pull the current style, apply the change Joe describes as one edit, run the deck gates, register the version. Use for "new deck version", "make the rule thinner", "move the ask".
 ---
 
 # deck-design

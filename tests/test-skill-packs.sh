@@ -3,11 +3,11 @@
 #
 # 1. Every entry in pack/skills has a SKILL.md whose name field matches its folder.
 # 2. Every skill in bin/skill-packs.manifest is installed, has a LICENSE beside it, is
-#    listed in pack/skills/SOURCES.md, carries the harness note where the manifest says
+#    listed in pack/SKILL-SOURCES.md, carries the harness note where the manifest says
 #    so, and has a description of 300 characters or fewer.
 # 3. The description budget over the whole folder is under 4,000 tokens (characters
 #    divided by four, plus 80 characters per skill for the XML around it).
-# 4. pack/skills/TIERS.md names every folder in pack/skills exactly once.
+# 4. pack/SKILL-TIERS.md names every folder in pack/skills exactly once.
 # 5. laurelin-agent keys check lists EXA_API_KEY and FIRECRAWL_API_KEY as optional.
 # 6. Prime lists the always-on skills through the launcher (bin/laurelin-agent
 #    --no-session -p ... --mode json). Without a model this prints "skipped: no model".
@@ -23,8 +23,8 @@ cd "$repo"
 
 FM=bin/skill-frontmatter.py
 MANIFEST=bin/skill-packs.manifest
-SOURCES=pack/skills/SOURCES.md
-TIERS=pack/skills/TIERS.md
+SOURCES=pack/SKILL-SOURCES.md
+TIERS=pack/SKILL-TIERS.md
 NOTE='Laurelin harness note'
 MAX_DESC=300
 BUDGET=4000
