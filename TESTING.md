@@ -134,6 +134,26 @@ laurelin-agent
 
 Each opens a browser page; approve it, and the session reports the server as connected. Fusion and Jacobian need no sign-in.
 
+Servers brought over from Codex and Claude Code:
+
+```
+/mcp login higgsfield                         # browser sign-in, once
+aws sso login --profile josephfinberg         # in a shell, when the AWS session has expired
+```
+
+Paper connects only while the Paper app is open.
+
+## claude.ai connectors (Gmail, Calendar, Drive, Superhuman, Figma, DocuSign, Claude Docs)
+
+The harness reaches these through Claude Code, which is already signed in to them. No sign-in in the harness.
+
+```
+/connectors                 # list them with their tool counts
+/connectors refresh         # after adding a connector on claude.ai
+```
+
+Then ask in plain words, for example "what's on my calendar tomorrow" or "find the last thread from DocuSign". Sending, replying, sharing, deploying, buying and deleting ask you first. Each call takes a few seconds, because Claude Code starts once per call.
+
 ## Worktrees (instead of Orca)
 
 worktrunk (`wt`) makes the worktrees; the harness tracks them.

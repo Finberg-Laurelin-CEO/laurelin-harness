@@ -8,4 +8,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 if [ -z "${TYPESAFE_API_KEY:-}" ] && [ -f "$HOME/.config/agent-keys/env" ]; then
   set -a; . "$HOME/.config/agent-keys/env" >/dev/null 2>&1; set +a
 fi
+# The learn extension stores rules only under the launcher's settings folder. Name a throwaway one:
+# the store request goes to the test's stand-in, nothing is written there.
+export LAURELIN_CODING_AGENT_DIR="${LAURELIN_CODING_AGENT_DIR:-$PWD/tests/tmp/learning-loop-agent}"
 exec node tests/learning-loop-test.mjs "$@"
