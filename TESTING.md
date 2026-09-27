@@ -121,3 +121,15 @@ The child branches did not touch anything outside the repo. These are the comman
 ## 6. What to tell me
 
 Anything that did not match this guide, and whether the image drew. I will fix it on `ideation` and fast-forward `testing`.
+
+## One-time sign-ins inside laurelin-agent
+
+Two servers sign in through the browser the first time, inside an interactive session:
+
+```
+laurelin-agent
+/mcp login adam
+/mcp login polygres
+```
+
+Each opens a browser page; approve it, and the session reports the server as connected. Fusion and Jacobian need no sign-in.
