@@ -18,6 +18,7 @@ email.cli: \b(sendmail|mailx?\s+-s|mutt\s+-s|swaks)\b
 email.tool: \b(send_?email|send_?message|send_?draft|gmail\.users\.messages\.send|messages/send|reply_?all|forward_?email)\b
 email.smtp: \bsmtp(s)?://
 email.superhuman: \bsuperhuman\b.*\bsend\b
+email.superhuman-actions: \b(send_draft|undo_send|create_or_update_event|respond_to_event|unsubscribe|mark_spam|trash_thread|forward)\b
 
 # Posts and messages to social or chat services
 post.social: \b(api\.(x|twitter)\.com|x\.com/i/api|tweet|post_?tweet|substack\.com/api|linkedin\.com/v2/(ugcPosts|posts|shares)|graph\.instagram\.com|instagram\.com/api)\b

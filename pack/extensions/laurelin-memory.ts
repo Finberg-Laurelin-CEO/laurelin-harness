@@ -426,6 +426,21 @@ export default function (pi: ExtensionAPI) {
 		}
 		d.mode = result.mode;
 		d.query_ms = result.ms;
+		// Running logs and machine-written ledgers answer nothing; skip them. The same note can sit in two
+		// folders (a mirror); keep one copy of each note section.
+		const exclude = new RegExp(
+			process.env.LAURELIN_MEMORY_EXCLUDE ??
+				"(^|/)(Archive|_superseded|Signals|Intro Offer Ingestion|Agent Handoffs)/|/revisions/|/before/|Engagement Ledger|Changelog\\.md$|Last Successful Check",
+			"i",
+		);
+		const seenNote = new Set<string>();
+		result.results = result.results.filter((r: any) => {
+			if (exclude.test(r.path)) return false;
+			const key = `${String(r.path).split("/").pop()}#${r.heading ?? r.section}`;
+			if (seenNote.has(key)) return false;
+			seenNote.add(key);
+			return true;
+		});
 		d.candidates = result.results.length;
 		if (result.note) d.note += `${result.note}. `;
 		// 3. rerank
@@ -477,7 +492,10 @@ export default function (pi: ExtensionAPI) {
 			return undefined;
 		}
 		if (d.skipped || !lastMessage) return undefined;
-		return { message: { customType: "laurelin-memory", content: lastMessage, display: true } };
+		// The model gets the sections; the chat shows one quiet line. /memory shows what was loaded.
+		const n = (d as any).kept?.length ?? 0;
+		if (n > 0 && ctx.hasUI) ctx.ui.notify(`memory · ${n} vault section${n === 1 ? "" : "s"} loaded · /memory to see`, "info");
+		return { message: { customType: "laurelin-memory", content: lastMessage, display: false } };
 	});
 
 	pi.registerCommand("memory", {

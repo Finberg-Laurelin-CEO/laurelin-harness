@@ -115,7 +115,7 @@ process.env.LAURELIN_MEMORY_JEV = "off";
 	const out = await runOne(task, undefined);
 	const content = out?.message?.content ?? "";
 	const d = lastLog();
-	if (out?.message?.customType === "laurelin-memory" && out.message.display === true && content.includes(FIXTURE_NOTE) && /^\[Laurelin memory\] \d vault sections? for this task \(local, search order\)/.test(content)) pass("injects without Jev", `${d?.kept?.length} sections, ${FIXTURE_NOTE} named, ${d?.candidates} candidates in ${d?.query_ms} ms`);
+	if (out?.message?.customType === "laurelin-memory" && out.message.display === false && content.includes(FIXTURE_NOTE) && /^\[Laurelin memory\] \d vault sections? for this task \(local, search order\)/.test(content)) pass("injects without Jev", `${d?.kept?.length} sections, ${FIXTURE_NOTE} named, ${d?.candidates} candidates in ${d?.query_ms} ms`);
 	else fail("injects without Jev", JSON.stringify(out).slice(0, 400));
 	if (d && d.mode === "local" && d.intent?.source === "heuristic" && d.candidates > 0 && d.kept.length <= 5 && d.reranked === false && !JSON.stringify(d).includes("Vendor Alpha")) pass("decision log", `mode local, heuristic intent, ${d.kept.length} kept, no section text in the log`);
 	else fail("decision log", JSON.stringify(d));

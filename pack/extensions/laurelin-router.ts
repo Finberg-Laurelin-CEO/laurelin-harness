@@ -653,6 +653,9 @@ export default function (pi: ExtensionAPI) {
 
 	/** Ask Joe on screen for each abstained worker, skill or classification. */
 	async function askJoe(d: Decision, menu: Menu, ctx: any): Promise<void> {
+		// Joe (2026-09-27): never interrupt to ask which skill or worker. When Jev is unsure the defaults
+		// stand: no skill (the model works normally), the coordinator, GREEN. LAURELIN_ROUTER_ASK=1 asks again.
+		if (process.env.LAURELIN_ROUTER_ASK !== "1") return;
 		if (!ctx.hasUI) return;
 		const menus: Partial<Record<QuestionName, string[]>> = {
 			worker: menu.workers.filter((w) => w !== "abstain"),
