@@ -8,7 +8,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -216,6 +216,90 @@ export function remove(cwd, name) {
 	return out.trim();
 }
 
+/** Last non-empty line a worktree's worker wrote, trimmed for one row. */
+function lastLine(path) {
+	try {
+		const t = readFileSync(join(path, ".laurelin", "worker.log"), "utf8").trimEnd().split("\n").filter((l) => l.trim());
+		return (t[t.length - 1] ?? "").replace(/\x1b\[[0-9;]*m/g, "").trim();
+	} catch {
+		return "";
+	}
+}
+
+function since(iso) {
+	if (!iso) return "";
+	const s = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 1000));
+	return s < 60 ? `${s}s` : s < 3600 ? `${Math.floor(s / 60)}m` : `${Math.floor(s / 3600)}h${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}`;
+}
+
+/** Live dashboard in the terminal, Laurelin Visual System: ink, dim, one orange accent. q quits. */
+export function watch(cwd, intervalMs = 2000) {
+	const ink = (t) => `\x1b[38;2;16;18;20m${t}\x1b[39m`;
+	const dim = (t) => `\x1b[2m${t}\x1b[22m`;
+	const acc = (t) => `\x1b[38;2;255;79;0m${t}\x1b[39m`;
+	const bold = (t) => `\x1b[1m${t}\x1b[22m`;
+	const root = mainRoot(cwd);
+	const draw = () => {
+		const cols = process.stdout.columns || 100;
+		let rows = [];
+		try {
+			rows = list(cwd);
+		} catch {}
+		const recs = loadState(root).worktrees;
+		const trees = rows.filter((r) => !r.main);
+		const n = (f) => trees.filter(f).length;
+		const summary = [
+			`${ink(String(trees.length))} ${dim("TOTAL")}`,
+			`${ink(String(n((r) => r.running)))} ${dim("RUNNING")}`,
+			`${acc(String(n((r) => !r.running && r.status === "review")))} ${dim("REVIEW")}`,
+			`${ink(String(n((r) => r.status === "blocked")))} ${dim("BLOCKED")}`,
+			`${ink(String(n((r) => r.status === "done")))} ${dim("DONE")}`,
+		].join("   ");
+		const out = [
+			acc("━━━━"),
+			`${bold(ink("W O R K T R E E S"))}  ${dim(basename(root))}  ${dim(new Date().toLocaleTimeString())}`,
+			`${summary}`,
+			"",
+		];
+		if (trees.length === 0) out.push(dim('  No worktrees. Start one: laurelin-agent worktrees start <name> --worker claude "task"'));
+		for (const r of trees) {
+			const rec = recs[r.branch] ?? {};
+			const st = r.running ? "RUNNING" : String(r.status).toUpperCase();
+			const stc = r.running ? ink(bold(st)) : r.status === "review" ? acc(bold(st)) : dim(st);
+			const time = r.running ? since(rec.started) : rec.finished ? `done ${since(rec.finished)} ago` : "";
+			const changes = r.dirty ? `+${r.added} -${r.deleted}` : r.ahead ? `${r.ahead} ahead` : "clean";
+			const gates = Object.entries(r.gates)
+				.map(([k, v]) => (v === "fail" ? acc(`■ ${k}`) : v === "pass" ? ink(`■ ${k}`) : dim(`□ ${k}`)))
+				.join("  ");
+			out.push(`  ${bold(ink(r.branch.padEnd(22)))} ${stc}${" ".repeat(Math.max(1, 9 - st.length))} ${dim((r.worker || "none").padEnd(8))} ${dim(time.padEnd(12))} ${ink(changes)}`);
+			if (r.task || r.comment) out.push(`      ${dim("TASK ")} ${ink((r.comment || r.task).slice(0, cols - 14))}`);
+			if (gates) out.push(`      ${dim("GATES")} ${gates}`);
+			const ll = r.path ? lastLine(r.path) : "";
+			if (ll) out.push(`      ${dim("LAST ")} ${dim(ll.slice(0, cols - 14))}`);
+			out.push("");
+		}
+		out.push(dim("  q quit   ·   laurelin-agent worktrees log|comment|status|stop|merge|remove <name>"));
+		process.stdout.write("\x1b[H\x1b[2J" + out.join("\n") + "\n");
+	};
+	process.stdout.write("\x1b[?25l");
+	draw();
+	const timer = setInterval(draw, intervalMs);
+	const quit = () => {
+		clearInterval(timer);
+		process.stdout.write("\x1b[?25h\n");
+		process.exit(0);
+	};
+	if (process.stdin.isTTY) {
+		process.stdin.setRawMode(true);
+		process.stdin.resume();
+		process.stdin.on("data", (b) => {
+			const k = b.toString();
+			if (k === "q" || k === "\u0003" || k === "\u001b") quit();
+		});
+	}
+	process.on("SIGINT", quit);
+}
+
 /** A plain-text table for the shell (no colors). */
 export function table(rows) {
 	const g = (r) => {
@@ -243,7 +327,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 	const [cmd = "list", ...rest] = process.argv.slice(2);
 	const cwd = process.cwd();
 	try {
-		if (cmd === "list") console.log(rest.includes("--json") ? JSON.stringify(list(cwd), null, 2) : table(list(cwd)));
+		if (cmd === "watch") watch(cwd, Number(rest[0] ?? 2000));
+		else if (cmd === "list") console.log(rest.includes("--json") ? JSON.stringify(list(cwd), null, 2) : table(list(cwd)));
 		else if (cmd === "start") {
 			const [name, ...t] = rest;
 			const wi = t.indexOf("--worker");
@@ -256,7 +341,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 		else if (cmd === "merge") console.log(merge(cwd, rest[0]));
 		else if (cmd === "remove") console.log(remove(cwd, rest[0]));
 		else {
-			console.log("usage: worktrees [list [--json] | start <name> [--worker laurelin|claude|codex|none] <task> | comment <name> <text> | status <name> <todo|running|review|done|blocked> | log <name> [n] | stop <name> | merge <name> | remove <name>]");
+			console.log("usage: worktrees [watch | list [--json] | start <name> [--worker laurelin|claude|codex|none] <task> | comment <name> <text> | status <name> <todo|running|review|done|blocked> | log <name> [n] | stop <name> | merge <name> | remove <name>]");
 			process.exit(2);
 		}
 	} catch (e) {

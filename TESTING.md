@@ -141,8 +141,9 @@ worktrunk (`wt`) makes the worktrees; the harness tracks them.
 ```
 laurelin-agent worktrees start fix-footer --worker claude "Tighten the footer spacing"
 laurelin-agent worktrees                      # status, worker, changes, gates, comment
+laurelin-agent worktrees watch                # live dashboard, refreshes every 2 seconds, q quits
 laurelin-agent worktrees log fix-footer
 laurelin-agent worktrees merge fix-footer
 ```
 
-Inside `laurelin-agent`: `/worktrees`, and the agent can call `worktree_start`, `worktree_list`, `worktree_log`, `worktree_merge` and the rest. Merges and removals ask you first. A TREES line under the gates shows how many are running and how many wait for review.
+Inside `laurelin-agent`: `/worktrees` opens a picker (a worktree, then Log, Comment, Status, Stop, Merge or Remove), and the agent can call `worktree_start`, `worktree_list`, `worktree_log`, `worktree_merge` and the rest. Merges and removals ask you first. A TREES line under the gates shows how many are running and how many wait for review.

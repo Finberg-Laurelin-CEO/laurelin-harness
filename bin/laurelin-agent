@@ -60,6 +60,7 @@ Usage:
   laurelin stop <agent>         Stop an agent.
   laurelin-agent schedule ...         Prompts that run later or on a schedule.
   laurelin-agent worktrees           Worktrees of this repo: status, worker, changes, gates.
+  laurelin-agent worktrees watch     Live dashboard of every worktree and its worker (q quits).
   laurelin-agent worktrees start <name> [--worker laurelin|claude|codex|none] <task>
                                 Create a worktree with worktrunk and start a worker in it.
   laurelin-agent worktrees log|comment|status|stop|merge|remove <name> ...

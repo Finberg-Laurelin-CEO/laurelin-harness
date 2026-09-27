@@ -24,6 +24,8 @@ echo more >> "$P/a.txt"; git -C "$P" commit -qam "add line"
 tbl="$(cd "$T" && "$NODE" "$TR" list)"
 echo "$tbl" | grep -E '^feat-one +review +none +1 ahead +ready for a look' >/dev/null && ok "list shows status, commits ahead and comment" || bad "list: $tbl"
 (cd "$T" && "$NODE" "$TR" status feat-one nonsense >/dev/null 2>&1) && bad "bad status accepted" || ok "a bad status is refused"
+w="$(cd "$T" && timeout 3 "$NODE" "$TR" watch 1000 2>&1 | sed 's/\x1b\[[0-9;?]*[A-Za-z]//g')"
+echo "$w" | grep -q 'W O R K T R E E S' && echo "$w" | grep -q 'feat-one' && echo "$w" | grep -q 'REVIEW' && ok "watch draws the dashboard with the worktree and its status" || bad "watch: $(echo "$w" | head -5)"
 (cd "$T" && "$NODE" "$TR" merge feat-one >/dev/null 2>&1)
 git -C "$T" log --oneline -1 | grep -q 'add line' && ok "merge lands the branch on main" || bad "merge: $(git -C "$T" log --oneline -1)"
 (cd "$T" && "$NODE" "$TR" remove feat-one >/dev/null 2>&1)

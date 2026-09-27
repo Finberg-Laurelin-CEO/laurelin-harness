@@ -6,7 +6,7 @@
  *
  * Tools the model can call: worktree_start, worktree_list, worktree_update, worktree_log, worktree_stop,
  * worktree_merge and worktree_remove (the last two ask Joe first).
- * Command: /worktrees [list | log <name> | comment <name> <text> | status <name> <state> | stop <name>
+ * Command: /worktrees (a picker: worktree, then Log, Comment, Status, Stop, Merge, Remove) or /worktrees [list | log <name> | comment <name> <text> | status <name> <state> | stop <name>
  *          | merge <name> | remove <name>]
  * Widget: one line under the gates, refreshed every 15 seconds: TREES n · running · review.
  */
@@ -164,9 +164,39 @@ export default function (pi: ExtensionAPI) {
 		description: "Worktrees: list | log <name> | comment <name> <text> | status <name> <state> | stop | merge | remove",
 		handler: async (args, ctx) => {
 			ui = ctx;
-			const [sub = "list", name, ...rest] = (args ?? "").trim().split(/\s+/).filter(Boolean);
+			const [sub = "", name, ...rest] = (args ?? "").trim().split(/\s+/).filter(Boolean);
 			try {
-				if (sub === "list") return ctx.ui.notify(tracker.table(tracker.list(ctx.cwd)), "info");
+				// No arguments: pick a worktree, then an action, until Done or Esc.
+				if (sub === "" && typeof ctx.ui.select === "function") {
+					for (;;) {
+						const rows = tracker.list(ctx.cwd).filter((r: any) => !r.main);
+						if (rows.length === 0) return ctx.ui.notify('No worktrees. Ask me to start one, or: laurelin-agent worktrees start <name> --worker claude "task"', "info");
+						const label = (r: any) =>
+							`${r.branch}  ${r.running ? "RUNNING" : String(r.status).toUpperCase()}  ${r.worker || "none"}  ${r.dirty ? `+${r.added} -${r.deleted}` : r.ahead ? `${r.ahead} ahead` : "clean"}${r.comment || r.task ? `  ·  ${(r.comment || r.task).slice(0, 50)}` : ""}`;
+						const labels = rows.map(label);
+						const picked = await ctx.ui.select(`${rows.length} worktree${rows.length === 1 ? "" : "s"}`, [...labels, "Done"]);
+						if (picked === undefined || picked === "Done") return;
+						const r = rows[labels.indexOf(picked)];
+						const action = await ctx.ui.select(r.branch, ["Log", "Comment", "Status", "Stop", "Merge", "Remove", "Back"]);
+						if (action === undefined || action === "Back") continue;
+						if (action === "Log") ctx.ui.notify(tracker.logTail(ctx.cwd, r.branch, 30), "info");
+						else if (action === "Comment") {
+							const c = await ctx.ui.input?.(`Comment for ${r.branch}`, r.comment || "");
+							if (c !== undefined) tracker.update(ctx.cwd, r.branch, { comment: c });
+						} else if (action === "Status") {
+							const st = await ctx.ui.select(`Status for ${r.branch}`, ["todo", "running", "review", "done", "blocked"]);
+							if (st) tracker.update(ctx.cwd, r.branch, { status: st });
+						} else if (action === "Stop") tracker.stop(ctx.cwd, r.branch);
+						else if (action === "Merge") {
+							if (await guard(ctx, `Merge ${r.branch} into the main branch?`, "worktrunk squashes, rebases and merges it, then cleans up."))
+								ctx.ui.notify(tracker.merge(ctx.cwd, r.branch) || `Merged ${r.branch}.`, "info");
+						} else if (action === "Remove") {
+							if (await guard(ctx, `Remove worktree ${r.branch}?`, "The worktree folder and its branch are deleted.")) tracker.remove(ctx.cwd, r.branch);
+						}
+						widget();
+					}
+				}
+				if (sub === "list" || sub === "") return ctx.ui.notify(tracker.table(tracker.list(ctx.cwd)), "info");
 				if (!name) return ctx.ui.notify("usage: /worktrees list | log <name> | comment <name> <text> | status <name> <state> | stop <name> | merge <name> | remove <name>", "warning");
 				if (sub === "log") return ctx.ui.notify(tracker.logTail(ctx.cwd, name, 30), "info");
 				if (sub === "comment") tracker.update(ctx.cwd, name, { comment: rest.join(" ") });
