@@ -30,15 +30,17 @@ const ui = {
 const ctx = { hasUI: true, ui, model: { id: "test-model" }, cwd: repo };
 process.env.LAURELIN_NO_IMAGE = "1";
 for (const h of ext.handlers.get("session_start")) await h({ type: "session_start", reason: "resume" }, ctx);
+await new Promise((r) => setTimeout(r, 50)); // the badge draws on a short timer
+status = status.replace(/\x1b\[[0-9;]*m/g, "");
 
 if (expected) {
-	if (status.includes(expected)) {
+	if (status.toLowerCase().includes(expected.toLowerCase())) {
 		console.log(`ok   footer shows "${expected}"`);
 	} else {
 		console.log(`FAIL footer should show "${expected}", got: ${status}`);
 		process.exit(1);
 	}
-} else if (status.includes("accept")) {
+} else if (/accept/i.test(status)) {
 	console.log(`FAIL footer should omit the acceptance item when there is no number, got: ${status}`);
 	process.exit(1);
 } else {

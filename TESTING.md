@@ -133,3 +133,16 @@ laurelin-agent
 ```
 
 Each opens a browser page; approve it, and the session reports the server as connected. Fusion and Jacobian need no sign-in.
+
+## Worktrees (instead of Orca)
+
+worktrunk (`wt`) makes the worktrees; the harness tracks them.
+
+```
+laurelin-agent worktrees start fix-footer --worker claude "Tighten the footer spacing"
+laurelin-agent worktrees                      # status, worker, changes, gates, comment
+laurelin-agent worktrees log fix-footer
+laurelin-agent worktrees merge fix-footer
+```
+
+Inside `laurelin-agent`: `/worktrees`, and the agent can call `worktree_start`, `worktree_list`, `worktree_log`, `worktree_merge` and the rest. Merges and removals ask you first. A TREES line under the gates shows how many are running and how many wait for review.
