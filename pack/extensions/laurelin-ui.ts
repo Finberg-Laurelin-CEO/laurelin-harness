@@ -271,6 +271,19 @@ class ApprovalsOverlay {
 
 // ---------------------------------------------------------------- extension
 
+/** Prime's host timer when present (cancelled on /reload, a throw is reported); else a guarded global one. */
+function later(ctx: any, fn: () => void, ms: number): void {
+	const safe = () => {
+		try {
+			fn();
+		} catch {
+			/* stale ctx after /reload: nothing to draw */
+		}
+	};
+	if (typeof ctx?.setTimeout === "function") ctx.setTimeout(safe, ms);
+	else setTimeout(safe, ms);
+}
+
 export default function laurelinUi(pi: ExtensionAPI) {
 	let classification: Level = "green";
 	let worker = "coordinator";
@@ -344,7 +357,9 @@ export default function laurelinUi(pi: ExtensionAPI) {
 	// attach are dropped. Draw now, then again over the first seconds and on the first message.
 	pi.on("session_start", async (_event, ctx) => {
 		ui = ctx;
-		for (const ms of [0, 800, 2000, 4000, 8000]) setTimeout(() => ctx.hasUI && drawAll(), ms);
+		// Prime's host timers: cancelled on /reload and session replacement, and a throw is reported, not fatal.
+		// (Global setTimeout here outlived a /reload, touched the stale ctx and crashed the worker, 9/27.)
+		for (const ms of [0, 800, 2000, 4000, 8000]) later(ctx, () => { if (ctx.hasUI) drawAll(); }, ms);
 	});
 	pi.on("input", async (_event, ctx) => {
 		ui = ctx;

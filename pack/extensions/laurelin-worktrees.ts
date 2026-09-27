@@ -50,11 +50,21 @@ export default function (pi: ExtensionAPI) {
 
 	pi.on("session_start", async (_e, ctx) => {
 		ui = ctx;
-		for (const ms of [0, 800, 2000, 4000, 8000]) setTimeout(() => ctx.hasUI && widget(), ms);
-		if (!timer) timer = setInterval(() => ui?.hasUI && widget(), REFRESH_MS);
+		// Host timers: cancelled on /reload, and a throw is reported instead of crashing the worker.
+		const safe = () => {
+			try {
+				if (ctx.hasUI) widget();
+			} catch {
+				/* stale ctx after /reload */
+			}
+		};
+		const host = typeof (ctx as any).setTimeout === "function";
+		for (const ms of [0, 800, 2000, 4000, 8000]) host ? ctx.setTimeout(safe, ms) : setTimeout(safe, ms);
+		if (timer) host ? ctx.clearInterval(timer) : clearInterval(timer);
+		timer = host ? ctx.setInterval(safe, REFRESH_MS) : setInterval(safe, REFRESH_MS);
 	});
-	pi.on("session_shutdown", async () => {
-		if (timer) clearInterval(timer);
+	pi.on("session_shutdown", async (_e, ctx) => {
+		if (timer) typeof (ctx as any)?.clearInterval === "function" ? ctx.clearInterval(timer) : clearInterval(timer);
 		timer = undefined;
 	});
 
