@@ -125,5 +125,48 @@ def fusion_exec(code: str, edits: bool = False) -> dict:
     r = _bridge(PRE + code)
     return {"stdout": r.get("stdout", ""), "value": r.get("value"), "checkpoint": ckpt, "seconds": r.get("seconds")}
 
+@mcp.tool()
+def fusion_import(path: str, target: str = "component") -> dict:
+    """Import a CAD file (STEP, IGES, F3D, SAT/SMT, STL/OBJ mesh) into Fusion. target="component" adds it to the
+    active design as a new component (checkpoint first, protected documents refused); target="document" opens it
+    as a new document. Use it to bring Adam or CADAM output into the model, then fusion_check_interference."""
+    path = os.path.expanduser(path)
+    if not os.path.exists(path):
+        raise RuntimeError(f"no file at {path}")
+    ext = os.path.splitext(path)[1].lower()
+    ckpt = None
+    if target == "component":
+        doc = _guard_edit()
+        ckpt = fusion_export("f3d", f"checkpoint-{doc}")["path"]
+    p = json.dumps(path)
+    if ext in (".stl", ".obj", ".3mf"):
+        if target != "component":
+            raise RuntimeError("mesh files import into the active design only (target=component)")
+        code = PRE + f"""
+occ=design.rootComponent.occurrences.addNewComponent(adsk.core.Matrix3D.create())
+occ.component.name={json.dumps(os.path.basename(path))}
+mb=occ.component.meshBodies.add({p}, adsk.fusion.MeshUnits.MillimeterMeshUnit)
+print(json.dumps({{'component':occ.component.name,'mesh_bodies':mb.count}}))"""
+    else:
+        opt = {".step": "createSTEPImportOptions", ".stp": "createSTEPImportOptions", ".iges": "createIGESImportOptions",
+               ".igs": "createIGESImportOptions", ".f3d": "createFusionArchiveImportOptions",
+               ".sat": "createSATImportOptions", ".smt": "createSMTImportOptions"}.get(ext)
+        if not opt:
+            raise RuntimeError(f"unsupported file type {ext}")
+        if target == "component":
+            code = PRE + f"""
+im=app.importManager; o=im.{opt}({p})
+n0=design.rootComponent.occurrences.count
+im.importToTarget(o, design.rootComponent)
+occ=design.rootComponent.occurrences.item(design.rootComponent.occurrences.count-1)
+print(json.dumps({{'component':occ.component.name,'added_occurrences':design.rootComponent.occurrences.count-n0,'bodies':occ.component.bRepBodies.count}}))"""
+        else:
+            code = PRE + f"""
+im=app.importManager; doc=im.importToNewDocument(im.{opt}({p}))
+print(json.dumps({{'document':doc.name}}))"""
+    r = _json(code) or {}
+    r.update(checkpoint=ckpt, source=path)
+    return r
+
 if __name__ == "__main__":
     mcp.run("stdio")

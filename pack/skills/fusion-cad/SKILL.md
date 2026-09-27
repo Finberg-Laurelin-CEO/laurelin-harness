@@ -1,6 +1,6 @@
 ---
 name: fusion-cad
-description: Model, edit, check and export CAD in Autodesk Fusion through the local AnorBridge add-in, or hand a design task to Adam (the adam MCP server). Use for "open the model", "change the part", "export STEP", "check interference", "build the assembly", "render the CAD", ANOR drawing and model work.
+description: Model, edit, check and export CAD in Autodesk Fusion, and generate parts with Adam or CADAM and bring them into Fusion. Use for "open the model", "change the part", "export STEP", "check interference", "build the assembly", "render the CAD", ANOR drawing and model work.
 ---
 
 # Fusion CAD
@@ -14,6 +14,7 @@ The `fusion` MCP server gives these as native tools in laurelin-agent and Claude
 - `fusion_exec(code, edits)`: Python inside Fusion with `app` and `design` predefined; `edits=true` takes a checkpoint first.
 - `fusion_check_interference`, `fusion_screenshot`: verify, and look at the model before claiming a change is right.
 - `fusion_export(format)`: STEP, F3D, STL or IGES, always a new timestamped file.
+- `fusion_import(path, target)`: bring a STEP, IGES, F3D, SAT or mesh file in as a new component (checkpoint first) or a new document.
 Fallback when the server is not loaded:
 - `bin/fusion-bridge health`: is Fusion up and which document is open. Run this first.
 - `bin/fusion-bridge run <script.py>`: run a Fusion API script. Put scripts in the task's working folder, never in the vault.
@@ -21,6 +22,12 @@ Fallback when the server is not loaded:
 - **Adam** (MCP server `adam`, https://adam.new/mcp): mechanical design and CAD generation as a hosted task. Use it for a new part or a design study; follow its server instructions (pass the direct work as the prompt, poll the task, show 3D files only when asked). Adam runs on credits; when it reports none, use Fusion.
 - `jacobian` MCP server: exact computation and independent checks for dimensions, tolerances and derived figures.
 - `laurelin-reactor-calcs` skill: any reactor-physics number. Never do that algebra inline.
+
+## Adam, CADAM and Fusion together
+- **Adam** (MCP server `adam`, signed in as Joe): a mechanical-design agent. `adam_create_task` with the direct work as the prompt, poll with `adam_get_task`, list and fetch outputs with `adam_list_files` and `adam_get_file`. Pick a model with `adam_list_models` first. Adam runs on credits; when it reports none, model in Fusion directly.
+- **CADAM**: Adam's text-to-CAD workspace (https://adam.new/cadam, open source). Use it for a quick parametric part from a description; its output is a CAD or mesh file.
+- **The loop**: generate in Adam or CADAM, save the STEP locally, `fusion_import` it as a component, `fusion_check_interference`, `fusion_screenshot`, then `fusion_export` the result. The Fusion model stays the record.
+- **Adam inside Fusion**: Adam's Fusion add-in (Autodesk App Store, "Adam AI CAD Copilot") puts Adam in a palette beside the model and lets Adam's own tasks drive Fusion. Adam's desktop connector can also bridge this repo's `fusion` MCP server to Adam (integration "Custom MCP connector"). Both are installs Joe does once.
 
 ## Steps
 1. `health`. If Fusion is not reachable, say so and stop; do not start Fusion yourself.
