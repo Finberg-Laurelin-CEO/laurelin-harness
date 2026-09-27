@@ -10,7 +10,7 @@ import { test } from "node:test";
 
 import { decideCall, loadPatterns, classifyCall, callText, listPending, readReceipts, approvalsLogPath, maskPreview } from "../pack/extensions/laurelin-approvals.ts";
 import { scrub, logScrub, scrubberAvailable, scrubberLogPath } from "../pack/extensions/laurelin-scrubber.ts";
-import { createLimiter, lastCompletedToolCall, resumeLine } from "../pack/extensions/laurelin-limits.ts";
+import { limitsFromEnv, createLimiter, lastCompletedToolCall, resumeLine } from "../pack/extensions/laurelin-limits.ts";
 import { worthChecking } from "../pack/extensions/laurelin-refusals.ts";
 
 const LOG_DIR = process.env.LAURELIN_DECISION_LOG;
@@ -176,4 +176,17 @@ test("short prompts and slash commands skip the refusal check", () => {
 	assert.equal(worthChecking("/limits"), false);
 	assert.equal(worthChecking("hi"), false);
 	assert.equal(worthChecking("filter the candidates by nationality"), true);
+});
+
+test("no spend cap by default: subscription runs never block on list API prices", () => {
+	const prev = process.env.LAURELIN_MAX_SPEND;
+	delete process.env.LAURELIN_MAX_SPEND;
+	try {
+		const lim = createLimiter(limitsFromEnv());
+		assert.equal(lim.onAssistantCost(500), undefined);
+		assert.equal(lim.onToolCall("bash").block, false);
+		assert.match(lim.summary(), /no spend cap/);
+	} finally {
+		if (prev !== undefined) process.env.LAURELIN_MAX_SPEND = prev;
+	}
 });

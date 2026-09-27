@@ -5,7 +5,9 @@
  * keeps two counters per run and blocks past either:
  *   LAURELIN_MAX_ACTIONS  tool calls per run (default 200)
  *   LAURELIN_MAX_SPEND    dollars per run, summed from usage.cost on every
- *                         assistant message (default 5)
+ *                         assistant message. OFF unless set: Joe's models run on
+ *                         subscriptions, and usage.cost is the list API price,
+ *                         not money spent (Joe, 2026-09-27).
  *
  * A run is the session since it started or since `/limits reset`. The
  * counters are saved in the session after every change (pi.appendEntry), so
@@ -35,7 +37,7 @@ export function limitsFromEnv(): Limits {
 	const s = Number(process.env.LAURELIN_MAX_SPEND);
 	return {
 		maxActions: Number.isFinite(a) && a > 0 ? Math.floor(a) : 200,
-		maxSpend: Number.isFinite(s) && s > 0 ? s : 5,
+		maxSpend: Number.isFinite(s) && s > 0 ? s : Infinity,
 	};
 }
 
@@ -81,7 +83,8 @@ export function createLimiter(limits: Limits = limitsFromEnv(), initial?: Partia
 			Object.assign(state, fresh());
 		},
 		summary() {
-			return `Run limits: ${state.actions}/${limits.maxActions} actions, ${money(state.spend)}/${money(limits.maxSpend)} spent, since ${state.startedAt}${state.blockedBy ? `, BLOCKED (${state.blockedBy})` : ""}`;
+			const spend = Number.isFinite(limits.maxSpend) ? `${money(state.spend)}/${money(limits.maxSpend)} spent` : `no spend cap (${money(state.spend)} at list API prices)`;
+			return `Run limits: ${state.actions}/${limits.maxActions} actions, ${spend}, since ${state.startedAt}${state.blockedBy ? `, BLOCKED (${state.blockedBy})` : ""}`;
 		},
 	};
 }
@@ -160,6 +163,8 @@ export default function (pi: ExtensionAPI) {
 				restored = true;
 			}
 		}
+		// A run saved as blocked on spend is unblocked once the spend cap is off.
+		if (limiter.state.blockedBy === "spend" && !Number.isFinite(limiter.limits.maxSpend)) limiter.state.blockedBy = null;
 		if (restored || event.reason === "resume") {
 			say(ctx, resumeLine(lastCompletedToolCall(entries as any)));
 			say(ctx, limiter.summary());
