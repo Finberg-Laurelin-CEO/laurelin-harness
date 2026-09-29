@@ -230,6 +230,8 @@ export interface EditorTheme {
 	autocompleteBackgroundColor?: (str: string) => string;
 	selectList: SelectListTheme;
 	commandColor?: (str: string) => string;
+	/** Color for the typed text itself (Laurelin: International Orange on a dark background). */
+	textColor?: (str: string) => string;
 }
 
 export interface EditorOptions {
@@ -279,6 +281,7 @@ export class Editor implements Component, Focusable {
 
 	public borderColor: (str: string) => string;
 	public backgroundColor: ((str: string) => string) | undefined;
+	public textColor: ((str: string) => string) | undefined;
 	public autocompleteBackgroundColor: ((str: string) => string) | undefined;
 	public commandColor: ((str: string) => string) | undefined;
 
@@ -340,6 +343,7 @@ export class Editor implements Component, Focusable {
 		this.theme = theme;
 		this.borderColor = theme.borderColor;
 		this.backgroundColor = theme.backgroundColor;
+		this.textColor = theme.textColor;
 		this.autocompleteBackgroundColor = theme.autocompleteBackgroundColor;
 		this.commandColor = theme.commandColor;
 		const paddingX = options.paddingX ?? 0;
@@ -640,6 +644,15 @@ export class Editor implements Component, Focusable {
 				layoutLine.sourceLine,
 				layoutLine.sourceStart,
 			);
+
+			if (this.textColor) {
+				// Re-open the text color after each reset (the cursor and command highlight emit them).
+				const color = this.textColor;
+				displayText = displayText
+					.split(/(\x1b\[0m|\x1b\[39m)/)
+					.map((part, i) => (i % 2 === 1 || part === "" ? part : color(part)))
+					.join("");
+			}
 
 			const padding = " ".repeat(Math.max(0, inputWidth - lineVisibleWidth));
 			const lineRightPadding = cursorInPadding ? rightPadding.slice(1) : rightPadding;

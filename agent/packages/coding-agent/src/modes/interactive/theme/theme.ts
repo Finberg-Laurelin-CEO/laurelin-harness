@@ -1424,6 +1424,8 @@ export function getEditorTheme(): EditorTheme {
 		autocompleteBackgroundColor: (text: string) => theme.getPopupBackgroundColor()(text),
 		selectList: getSelectListTheme(),
 		commandColor: (text: string) => theme.fg("accent", text),
+		// Laurelin: on a dark background the typed text is the accent, International Orange (Joe, 9/28).
+		textColor: process.env.LAURELIN_BG === "dark" ? (text: string) => theme.fg("accent", text) : undefined,
 	};
 }
 

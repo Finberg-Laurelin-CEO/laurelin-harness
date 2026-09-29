@@ -279,25 +279,12 @@ if [ -f "$FORK_CLI" ]; then
   for t in "$PACK"/themes/*.json; do [ -f "$t" ] && ln -sfn "$t" "$LAURELIN_AGENT_DIR/themes/$(basename "$t")"; done
   # Match the terminal: light background gets the light theme and the black mark,
   # dark background gets the dark theme and the white mark. LAURELIN_THEME overrides.
+  # Asks the terminal itself (bin/detect-bg.py, OSC 11, BEL or ST reply). macOS's bash 3.2 cannot
+  # read with a fractional timeout, so the old in-shell query always failed and fell back to dark.
   detect_bg() {
-    local reply="" r g b
-    if [ -t 0 ] && [ -t 1 ] && [ -r /dev/tty ] && [ -w /dev/tty ]; then
-      local old; old=$(stty -g < /dev/tty 2>/dev/null)
-      stty raw -echo min 0 time 3 < /dev/tty 2>/dev/null
-      printf '\033]11;?\007' > /dev/tty
-      IFS= read -r -t 0.4 -d $'\\' reply < /dev/tty 2>/dev/null || true
-      [ -n "$old" ] && stty "$old" < /dev/tty 2>/dev/null
-      # reply looks like: ESC]11;rgb:ffff/ffff/ffff
-      case "$reply" in *rgb:*)
-        r=$(printf '%s' "$reply" | sed -n 's/.*rgb:\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\).*/\1/p' | cut -c1-2)
-        g=$(printf '%s' "$reply" | sed -n 's/.*rgb:\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\).*/\2/p' | cut -c1-2)
-        b=$(printf '%s' "$reply" | sed -n 's/.*rgb:\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\)\/\([0-9a-fA-F]*\).*/\3/p' | cut -c1-2)
-        if [ -n "$r$g$b" ]; then
-          local lum=$(( (0x$r * 299 + 0x$g * 587 + 0x$b * 114) / 1000 ))
-          [ "$lum" -gt 127 ] && { echo light; return; } || { echo dark; return; }
-        fi ;;
-      esac
-    fi
+    local kind=""
+    if [ -t 0 ] && [ -t 1 ]; then kind=$(python3 "$REPO/bin/detect-bg.py" 2>/dev/null); fi
+    if [ -n "$kind" ]; then echo "$kind"; return; fi
     # No answer from the terminal: follow the macOS appearance.
     if defaults read -g AppleInterfaceStyle 2>/dev/null | grep -qi dark; then echo dark; else echo light; fi
   }
