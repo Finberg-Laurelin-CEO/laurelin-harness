@@ -433,7 +433,9 @@ export class Theme {
 	}
 
 	getEditorBackgroundColor(): ((str: string) => string) | undefined {
-		return this.surfaceBackgroundColor("userMessageBg");
+		// Laurelin: the input box has no fill, only its hairline rules, so it is always the
+		// terminal's own background (Laurelin Visual System: no fills; Joe, 9/28).
+		return undefined;
 	}
 
 	getUserMessageBackgroundColor(): (str: string) => string {
