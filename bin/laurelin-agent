@@ -201,6 +201,32 @@ write_task() {
 }
 
 # Start Prime with the pack, the theme if it exists, and the gates on autonomous runs.
+# A rebuild gets a new service folder, but the old build's service keeps running and keeps holding
+# its sessions, so `--continue` then fails with "Session is already active". When an old-build service
+# is alive and every live service is idle (no window attached, nothing streaming or running tools),
+# stop them all; the fork's shutdown stops every Laurelin service, never Prime Agent's. Otherwise
+# leave everything alone: an open window or a background worker must not be cut off.
+retire_old_services() {
+  [ "${LAURELIN_USING_FORK:-}" = 1 ] || return 0
+  local d old="" live=""
+  for d in /tmp/laurelin-"$(id -u)"-*; do
+    [ -S "$d/daemon.sock" ] || continue
+    python3 -c 'import socket,sys; s=socket.socket(socket.AF_UNIX); s.settimeout(0.5); s.connect(sys.argv[1])' "$d/daemon.sock" 2>/dev/null || continue
+    live="$live $d"
+    [ "$d" != "$LAURELIN_SOCK_DIR" ] && old=1
+  done
+  [ -n "$old" ] || return 0
+  for d in $live; do
+    LAURELIN_DAEMON_SOCKET_DIR="$d" run_agent list --json 2>/dev/null | python3 -c '
+import json, sys
+try: sessions = json.load(sys.stdin).get("sessions", [])
+except Exception: sys.exit(1)
+keys = ("attachedClients", "isStreaming", "isRunningTools", "isBashRunning", "hasRunningRlmChildren", "isCompacting")
+sys.exit(1 if any(any(s.get(k) for k in keys) for s in sessions) else 0)' || return 0
+  done
+  run_agent shutdown --force >/dev/null 2>&1 || true
+}
+
 launch() {
   local args a g fwd target="" claim=""
   load_store
@@ -283,7 +309,7 @@ if [ -f "$FORK_CLI" ]; then
   # read with a fractional timeout, so the old in-shell query always failed and fell back to dark.
   detect_bg() {
     local kind=""
-    if [ -t 0 ] && [ -t 1 ]; then kind=$(python3 "$REPO/bin/detect-bg.py" 2>/dev/null); fi
+    kind=$(python3 "$REPO/bin/detect-bg.py" 2>/dev/null)
     if [ -n "$kind" ]; then echo "$kind"; return; fi
     # No answer from the terminal: follow the macOS appearance.
     if defaults read -g AppleInterfaceStyle 2>/dev/null | grep -qi dark; then echo dark; else echo light; fi
@@ -324,5 +350,5 @@ case "${1:-}" in
   worktrees) shift; exec "${NODE_BIN:-node}" "$PACK/worktrees/tracker.mjs" "$@" ;;
   wt) shift; exec "${LAURELIN_WT:-wt}" "$@" ;;
   agents | schedule | attach | send | list | stop | status | doctor | shutdown | mcp | package | update | model | session | config) load_store; run_agent "$@" ;;
-  *) launch "$@" ;;
+  *) retire_old_services; launch "$@" ;;
 esac
