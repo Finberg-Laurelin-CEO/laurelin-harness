@@ -4,7 +4,7 @@
 # Lines starting with # are comments. Blank lines are ignored.
 
 # Deploys, pushes, merges, releases
-deploy.vercel: \bvercel\b(?!\s+(--help|-h|ls|list|whoami|inspect|logs|env\s+(ls|pull)))
+deploy.vercel: (^|[\n;&|(]\s*|\b(npx|bunx|pnpm\s+dlx)\s+|[\"']\s*,?\s*)vercel\b(?!\s+(--help|-h|ls|list|whoami|inspect|logs|login|link|pull|dev|build|env\s+(ls|pull)))
 deploy.wisp: \bwisp\s+(deploy|publish)\b
 deploy.gh-merge: \bgh\s+pr\s+merge\b
 deploy.gh-release: \bgh\s+release\s+(create|upload|edit|delete)\b
@@ -15,10 +15,10 @@ deploy.fly: \b(fly|flyctl)\s+deploy\b
 
 # Email sends
 email.cli: \b(sendmail|mailx?\s+-s|mutt\s+-s|swaks)\b
-email.tool: \b(send_?email|send_?message|send_?draft|gmail\.users\.messages\.send|messages/send|reply_?all|forward_?email)\b
+email.tool: \b(send_?email|gmail_send_message|send_?draft|gmail\.users\.messages\.send|messages\(\)\.send\(|messages/send|reply_?all|forward_?email)\b
 email.smtp: \bsmtp(s)?://
 email.superhuman: \bsuperhuman\b.*\bsend\b
-email.superhuman-actions: \b(send_draft|undo_send|create_or_update_event|respond_to_event|unsubscribe|mark_spam|trash_thread|forward)\b
+email.superhuman-actions: \b(send_draft|undo_send|create_or_update_event|respond_to_event|mark_spam|trash_thread)\b|\"(unsubscribe|forward)\"
 
 # Posts and messages to social or chat services
 post.social: \b(api\.(x|twitter)\.com|x\.com/i/api|tweet|post_?tweet|substack\.com/api|linkedin\.com/v2/(ugcPosts|posts|shares)|graph\.instagram\.com|instagram\.com/api)\b
@@ -27,7 +27,7 @@ post.chat: \b(discord(app)?\.com/api/webhooks|discord\.com/api/v\d+/channels|osa
 # Money
 pay.stripe-live: \bsk_live_
 pay.stripe-cli: \bstripe\s+(charges|payment_?intents|invoices|payouts|transfers)\s+create\b
-pay.generic: \b(create_?charge|create_?payment|purchase|checkout\.session|transfer_?funds|place_?order|buy_?now)\b
+pay.generic: \b(create_?charge|create_?payment|purchase_\w+|\w+_purchase|checkout\.session|transfer_?funds|place_?order|buy_?now|buy_(domains?|single_domain|credits(_endpoint)?|pro|addon))\b
 pay.boat: \bboat\s+(prompt|create|start|up)\b
 pay.cloud-gpu: \b(runpod|lambda-?labs|vast\.ai|modal\s+deploy|replicate\.com/v1/predictions)\b
 

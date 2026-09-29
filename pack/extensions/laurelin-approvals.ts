@@ -114,9 +114,27 @@ export function callText(toolName: string, input: unknown): string {
 	return `${toolName} ${body}`;
 }
 
+/**
+ * Rules keyed on ordinary words ("purchase", "tweet", "vercel", "send_message"). They read the call with
+ * its prose removed, so an essay, a review or a prompt inside the code does not look like an action
+ * (52 prompts on 9/28-29 were all prose hits). Command-shaped rules (git push, stripe ... create, DNS)
+ * still read the full text, so a command inside a string is still caught.
+ */
+const WORDY = new Set(["pay.generic", "email.tool", "email.superhuman-actions", "post.social", "deploy.vercel", "form.tool"]);
+
+/** Replace prose string literals with empty ones: triple-quoted strings, and quoted strings of 60+
+ *  characters that contain a space. Short strings (paths, flags, tool names) stay. */
+export function stripProse(text: string): string {
+	return text
+		.replace(/[rRbBuUfF]{0,2}("""|''')[\s\S]*?\1/g, '""')
+		.replace(/"(?:[^"\\\n]|\\.){60,}"/g, (m) => (/\s|\\n/.test(m) ? '""' : m))
+		.replace(/'(?:[^'\\\n]|\\.){60,}'/g, (m) => (/\s|\\n/.test(m) ? "''" : m));
+}
+
 export function classifyCall(text: string, patterns: OutwardPattern[]): OutwardPattern | undefined {
 	if (!text) return undefined;
-	return patterns.find((p) => p.regex.test(text));
+	const prose = stripProse(text);
+	return patterns.find((p) => p.regex.test(WORDY.has(p.name) ? prose : text));
 }
 
 // ---------- receipts ----------
