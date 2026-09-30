@@ -6117,6 +6117,18 @@ export class AgentSession {
 				const result = this._admitSessionInput(action, {
 					immediatelyEligible: !visibleQueued && this._canStartSessionActionImmediately(),
 				});
+				// Laurelin: a person's message sent while the agent works stops the current step, so the
+				// run reaches its turn boundary now and the message is read next (Joe, 9/29).
+				if (
+					result.accepted &&
+					schedule === "steer" &&
+					!isInternalPrompt &&
+					!acceptedAgentMessage &&
+					(options?.source ?? "interactive") !== "extension" &&
+					this.isStreaming
+				) {
+					this.agent.interruptStep();
+				}
 				commitFence?.release();
 				if (!result.accepted || !result.ticket) {
 					if (prefixMessages) this._pendingNextTurnMessages.unshift(...prefixMessages);

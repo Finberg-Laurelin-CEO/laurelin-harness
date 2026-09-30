@@ -214,6 +214,8 @@ export interface AgentLoopConfig extends SimpleStreamOptions {
 	 * Contract: must not throw or reject. Return [] when no steering messages are available.
 	 */
 	getSteeringMessages?: () => Promise<AgentMessage[]>;
+	/** Subscribe to "a person just steered": the loop stops the current step and continues with it. */
+	onSteer?: (listener: () => void) => () => void;
 
 	/**
 	 * Returns follow-up messages to process after the agent would otherwise stop.

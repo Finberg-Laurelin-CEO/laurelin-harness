@@ -290,6 +290,9 @@ export async function createAgentSession(options: CreateAgentSessionOptions = {}
 	const extensionRunnerRef: { current?: ExtensionRunner } = {};
 
 	agent = new Agent({
+		// Laurelin: a message typed while the agent works stops the current step and is read at once
+		// (Joe, 9/29). LAURELIN_STEER_INTERRUPT=0 restores Prime's wait-for-the-turn behavior.
+		steerInterrupts: process.env.LAURELIN_STEER_INTERRUPT !== "0",
 		initialState: {
 			systemPrompt: "",
 			model,

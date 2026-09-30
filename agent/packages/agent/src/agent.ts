@@ -97,6 +97,11 @@ function createMutableAgentState(
 }
 
 export interface AgentOptions {
+	/**
+	 * Stop the current step (the model's reply, or the running tools) as soon as a user-role steering
+	 * message arrives, and continue at once with that message. Off by default; Laurelin turns it on.
+	 */
+	steerInterrupts?: boolean;
 	initialState?: Partial<Omit<AgentState, "pendingToolCalls" | "isStreaming" | "streamingMessage" | "errorMessage">>;
 	convertToLlm?: (messages: AgentMessage[]) => Message[] | Promise<Message[]>;
 	transformContext?: (messages: AgentMessage[], signal?: AbortSignal) => Promise<AgentMessage[]>;
@@ -200,6 +205,8 @@ export class Agent {
 	private _state: MutableAgentState;
 	private readonly listeners = new Set<(event: AgentEvent, signal: AbortSignal) => Promise<void> | void>();
 	private readonly steeringQueue: PendingMessageQueue;
+	private readonly steerInterrupts: boolean;
+	private readonly steerListeners = new Set<() => void>();
 	private readonly followUpQueue: PendingMessageQueue;
 
 	public convertToLlm: (messages: AgentMessage[]) => Message[] | Promise<Message[]>;
@@ -252,6 +259,7 @@ export class Agent {
 		this.shouldStopBeforeTurn = options.shouldStopBeforeTurn;
 		this.getContinuationMessages = options.getContinuationMessages;
 		this.steeringQueue = new PendingMessageQueue(options.steeringMode ?? "one-at-a-time");
+		this.steerInterrupts = options.steerInterrupts ?? false;
 		this.followUpQueue = new PendingMessageQueue(options.followUpMode ?? "one-at-a-time");
 		this.sessionId = options.sessionId;
 		this.thinkingBudgets = options.thinkingBudgets;
@@ -302,6 +310,23 @@ export class Agent {
 	/** Queue a message batch to be injected after the current assistant turn finishes. */
 	steer(message: AgentMessage | AgentMessage[]): void {
 		this.steeringQueue.enqueue(message);
+		if (!this.steerInterrupts) return;
+		const list = Array.isArray(message) ? message : [message];
+		// Only words from a person interrupt; agent-to-agent and extension messages wait for the turn boundary.
+		if (list.some((m) => (m as { role?: string }).role === "user")) {
+			for (const listener of [...this.steerListeners]) listener();
+		}
+	}
+
+	/**
+	 * Stop the current step (model reply or running tools) so the run reaches its next turn boundary now.
+	 * Used when a person's message was queued elsewhere (the coding agent's own input queue). No-op unless
+	 * steerInterrupts is on. Returns whether a running step was told to stop.
+	 */
+	interruptStep(): boolean {
+		if (!this.steerInterrupts || this.steerListeners.size === 0) return false;
+		for (const listener of [...this.steerListeners]) listener();
+		return true;
 	}
 
 	/** Queue a message batch to run only after the agent would otherwise stop. */
@@ -505,6 +530,14 @@ export class Agent {
 				}
 				return this.steeringQueue.drain();
 			},
+			onSteer: this.steerInterrupts
+				? (listener: () => void) => {
+						this.steerListeners.add(listener);
+						return () => {
+							this.steerListeners.delete(listener);
+						};
+					}
+				: undefined,
 			getFollowUpMessages: async () => this.followUpQueue.drain(),
 			getContinuationMessages: async (context, signal) => this.getContinuationMessages?.(context, signal) ?? [],
 		};

@@ -301,6 +301,34 @@ function createAgentStream(): EventStream<AgentEvent, AgentMessage[]> {
 	);
 }
 
+const STEER_NOT_RUN = "Not run: Joe sent a new message while this step was running. Read it before you continue.";
+
+/** A per-step abort signal: aborts with the run, and with a person's steering message when onSteer is set. */
+function createStepSignal(
+	runSignal: AbortSignal | undefined,
+	onSteer: ((listener: () => void) => () => void) | undefined,
+): { signal: AbortSignal | undefined; steered: () => boolean; dispose: () => void } {
+	if (!onSteer) return { signal: runSignal, steered: () => false, dispose: () => {} };
+	const controller = new AbortController();
+	let steered = false;
+	const onRunAbort = () => controller.abort(runSignal?.reason);
+	if (runSignal?.aborted) controller.abort(runSignal.reason);
+	else runSignal?.addEventListener("abort", onRunAbort, { once: true });
+	const unsubscribe = onSteer(() => {
+		if (controller.signal.aborted) return;
+		steered = true;
+		controller.abort(new Error("Interrupted by a steering message"));
+	});
+	return {
+		signal: controller.signal,
+		steered: () => steered,
+		dispose: () => {
+			unsubscribe();
+			runSignal?.removeEventListener("abort", onRunAbort);
+		},
+	};
+}
+
 async function runLoop(
 	currentContext: AgentContext,
 	newMessages: AgentMessage[],
@@ -337,28 +365,71 @@ async function runLoop(
 				pendingMessages = [];
 			}
 
-			const message = await streamAssistantResponse(currentContext, config, signal, emit, streamFn);
-			newMessages.push(message);
-
-			if (message.stopReason === "error" || message.stopReason === "aborted") {
-				await emit({ type: "turn_end", message, toolResults: [] });
-				await emit({ type: "agent_end", messages: newMessages });
-				return;
-			}
-
-			const toolCalls = message.content.filter((c) => c.type === "toolCall");
-
+			// One step = the model's reply plus its tool calls. A person's steering message stops the step
+			// at once (config.onSteer); the run's own abort still ends the whole run.
+			const step = createStepSignal(signal, config.onSteer);
+			let message: AssistantMessage;
 			const toolResults: ToolResultMessage[] = [];
-			hasMoreToolCalls = false;
-			if (toolCalls.length > 0) {
-				const executedToolBatch = await executeToolCalls(currentContext, message, config, signal, emit);
-				toolResults.push(...executedToolBatch.messages);
-				hasMoreToolCalls = !executedToolBatch.terminate;
+			try {
+				message = await streamAssistantResponse(currentContext, config, step.signal, emit, streamFn);
+				newMessages.push(message);
 
-				for (const result of toolResults) {
-					currentContext.messages.push(result);
-					newMessages.push(result);
+				if (message.stopReason === "aborted" && step.steered() && !signal?.aborted) {
+					// Steered mid-reply: the partial reply is kept as aborted (providers skip it on replay),
+					// and the next turn starts with the steering message.
+					await emit({ type: "turn_end", message, toolResults: [] });
+					pendingMessages = await pollMessagesUnlessAborted(config.getSteeringMessages, signal);
+					// The steer may live in the host's own queue: then the host asks to stop before the next
+					// turn and starts a fresh run with it.
+					if (pendingMessages.length === 0 && (config.shouldStopBeforeTurn?.() ?? false)) {
+						await emit({ type: "agent_end", messages: newMessages });
+						return;
+					}
+					hasMoreToolCalls = true;
+					continue;
 				}
+
+				if (message.stopReason === "error" || message.stopReason === "aborted") {
+					await emit({ type: "turn_end", message, toolResults: [] });
+					await emit({ type: "agent_end", messages: newMessages });
+					return;
+				}
+
+				const toolCalls = message.content.filter((c) => c.type === "toolCall");
+
+				hasMoreToolCalls = false;
+				if (toolCalls.length > 0) {
+					const executedToolBatch = await executeToolCalls(currentContext, message, config, step.signal, emit);
+					toolResults.push(...executedToolBatch.messages);
+					hasMoreToolCalls = !executedToolBatch.terminate;
+
+					if (step.steered() && !signal?.aborted) {
+						// Every tool call needs a result. Calls that never started get a plain note.
+						const done = new Set(toolResults.map((r) => r.toolCallId));
+						for (const call of toolCalls) {
+							if (done.has(call.id)) continue;
+							const note: ToolResultMessage = {
+								role: "toolResult",
+								toolCallId: call.id,
+								toolName: call.name,
+								content: [{ type: "text", text: STEER_NOT_RUN }],
+								isError: true,
+								timestamp: Date.now(),
+							};
+							await emit({ type: "message_start", message: note });
+							await emit({ type: "message_end", message: note });
+							toolResults.push(note);
+						}
+						hasMoreToolCalls = true;
+					}
+
+					for (const result of toolResults) {
+						currentContext.messages.push(result);
+						newMessages.push(result);
+					}
+				}
+			} finally {
+				step.dispose();
 			}
 
 			await emit({ type: "turn_end", message, toolResults });
