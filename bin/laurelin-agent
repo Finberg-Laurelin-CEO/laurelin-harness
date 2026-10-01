@@ -82,11 +82,19 @@ EOF
 
 # Read the key store into the environment. Prints nothing.
 load_store() {
-  [ -f "$STORE" ] || return 0
-  set -a
-  # shellcheck disable=SC1090
-  . "$STORE" >/dev/null 2>&1 || true
-  set +a
+  if [ -f "$STORE" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$STORE" >/dev/null 2>&1 || true
+    set +a
+  fi
+  # Amazon Bedrock signs in with an AWS profile. Use the company profile (IAM user laurelin-claude)
+  # unless AWS credentials are already set. LAURELIN_AWS_PROFILE picks another one.
+  if [ -z "${AWS_PROFILE:-}${AWS_ACCESS_KEY_ID:-}${AWS_BEARER_TOKEN_BEDROCK:-}" ]; then
+    local prof="${LAURELIN_AWS_PROFILE:-laurelin}"
+    grep -q "^\[profile $prof\]" "$HOME/.aws/config" 2>/dev/null && export AWS_PROFILE="$prof"
+  fi
+  return 0
 }
 
 # Names defined in the store, one per line. Values are not read.
@@ -347,6 +355,7 @@ fi
 case "${1:-}" in
   -h | --help | help) usage ;;
   keys) shift; keys "$@" ;;
+  providers) shift; load_store; exec python3 "$REPO/bin/providers.py" "$@" ;;
   worktrees) shift; exec "${NODE_BIN:-node}" "$PACK/worktrees/tracker.mjs" "$@" ;;
   wt) shift; exec "${LAURELIN_WT:-wt}" "$@" ;;
   agents | schedule | attach | send | list | stop | status | doctor | shutdown | mcp | package | update | model | session | config) load_store; run_agent "$@" ;;

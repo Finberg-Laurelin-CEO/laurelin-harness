@@ -167,3 +167,16 @@ laurelin-agent worktrees merge fix-footer
 ```
 
 Inside `laurelin-agent`: `/worktrees` opens a picker (a worktree, then Log, Comment, Status, Stop, Merge or Remove), and the agent can call `worktree_start`, `worktree_list`, `worktree_log`, `worktree_merge` and the rest. Merges and removals ask you first. A TREES line under the gates shows how many are running and how many wait for review.
+
+## Model providers (any API key)
+
+Built in, key only: OpenRouter (`OPENROUTER_API_KEY`), Amazon Bedrock (the `laurelin` AWS profile is used automatically), OpenAI, Anthropic, Vercel AI Gateway. Any other OpenAI-compatible service is one key plus one command:
+
+```
+laurelin-agent providers                                # what is ready
+laurelin-agent keys add CHEAPER_INFERENCE_API_KEY       # paste the ci_live_ key (hidden)
+laurelin-agent providers add cheaperinference           # lists its models, writes them to the harness
+laurelin-agent providers add NAME --base-url https://api.example.com/v1 --key-env EXAMPLE_API_KEY
+```
+
+Then pick a model with `/model` in a session, or `laurelin-agent --provider cheaperinference --model <id>`.
