@@ -2,6 +2,8 @@
 
 Status: draft, 2026-09-30. Owner: Joe. Internal.
 
+The customer-input launch plan is [LAUNCH.md](LAUNCH.md). It is on hold until classifier.dev and TypeSafe agree to sponsor the harness.
+
 ## Position
 
 Agents you can trust to finish unattended, for a fraction of the frontier price.
