@@ -180,3 +180,7 @@ laurelin-agent providers add NAME --base-url https://api.example.com/v1 --key-en
 ```
 
 Then pick a model with `/model` in a session, or `laurelin-agent --provider cheaperinference --model <id>`.
+
+## Writing in your voice (Fulcrum Echo)
+
+The agent has an `echo_write` tool: it gathers the facts, and Echo writes them in a named person's voice (default Joe Finberg; set LAURELIN_ECHO_PERSONA to change). Echo can invent quotes, links, dates and numbers, so every one in the draft that is not in the facts comes back marked UNSUPPORTED. For a closer match to your voice, ask the agent to pass a few of your past emails as samples. Key: FULCRUM_ECHO_API_KEY.
