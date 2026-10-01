@@ -148,6 +148,30 @@ def item_text(state: str, q: dict) -> str:
 USAGE = {"input_tokens": 0, "output_tokens": 0}
 
 
+def post_with_retry(url: str, body: dict, key: str, attempts: int = 3) -> dict:
+    """Three tries: a 429 waits for Retry-After (at most 5 s); 5xx, resets and timeouts back off 0.5 s, 1.5 s."""
+    import time
+    last = ""
+    for n in range(attempts):
+        try:
+            return post(url, body, key, timeout=int(os.environ.get("LAURELIN_CLASSIFIER_TIMEOUT", "15")))
+        except urllib.error.HTTPError as e:
+            text = e.read().decode(errors="replace")[:300]
+            last = f"HTTP {e.code} (classifier.dev): {text}"
+            if e.code == 429:
+                wait = min(5.0, float(e.headers.get("Retry-After") or 1))
+            elif e.code >= 500:
+                wait = 0.5 * 3**n
+            else:
+                break  # a bad request does not get better
+        except Exception as e:  # URLError, timeouts, connection resets
+            last = f"classifier.dev unreachable: {type(e).__name__}: {e}"
+            wait = 0.5 * 3**n
+        if n < attempts - 1:
+            time.sleep(wait)
+    sys.exit(last)
+
+
 def classify(inputs: list, labels: list) -> list:
     """classifier.dev requests for these texts over these labels; one score dict per text, in order."""
     key = store_value("CLASSIFIER_API_KEY") or store_value("CLASSIFY_API_KEY")
@@ -164,12 +188,7 @@ def classify(inputs: list, labels: list) -> list:
     out = []
     for b in batches:
         body = {"inputs": b, "labels": labels, "instructions": "Answer the Question about the text with exactly one label."}
-        try:
-            res = post(CL_BASE + "/v1/classify", body, key)
-        except urllib.error.HTTPError as e:
-            sys.exit(f"HTTP {e.code} (classifier.dev): {e.read().decode(errors='replace')[:300]}")
-        except (urllib.error.URLError, TimeoutError) as e:
-            sys.exit(f"classifier.dev unreachable: {e}")
+        res = post_with_retry(CL_BASE + "/v1/classify", body, key)
         for r in res.get("results", []):
             scores = r.get("scores") or {r.get("label"): r.get("confidence", 1.0)}
             out.append({l: float(scores.get(l, 0.0)) for l in labels})
@@ -200,8 +219,12 @@ def via_classifier(body: dict) -> dict:
     for name, q in qs.items():
         groups.setdefault(tuple(labels_for(q)), []).append(name)
     answers = {}
-    for labels, names in groups.items():
-        dists = classify_many([item_text(state, qs[n]) for n in names], list(labels))
+    # Label groups run in parallel, at most four at once (the free tier's limit per IP address).
+    from concurrent.futures import ThreadPoolExecutor
+    items = list(groups.items())
+    with ThreadPoolExecutor(max_workers=min(4, len(items) or 1)) as pool:
+        all_dists = list(pool.map(lambda kv: classify_many([item_text(state, qs[n]) for n in kv[1]], list(kv[0])), items))
+    for (labels, names), dists in zip(items, all_dists):
         for name, dist in zip(names, dists):
             q, total = qs[name], sum(dist.values()) or 1.0
             p = {l: v / total for l, v in dist.items()}
