@@ -148,7 +148,11 @@ def item_text(state: str, q: dict) -> str:
 USAGE = {"input_tokens": 0, "output_tokens": 0}
 
 
-def post_with_retry(url: str, body: dict, key: str, attempts: int = 3) -> dict:
+class FreeTierRefused(Exception):
+    """The free tier said no (rate or quota); the paid key may still answer."""
+
+
+def post_with_retry(url: str, body: dict, key: str, attempts: int = 3, free: bool = False) -> dict:
     """Three tries: a 429 waits for Retry-After (at most 5 s); 5xx, resets and timeouts back off 0.5 s, 1.5 s."""
     import time
     last = ""
@@ -158,6 +162,8 @@ def post_with_retry(url: str, body: dict, key: str, attempts: int = 3) -> dict:
         except urllib.error.HTTPError as e:
             text = e.read().decode(errors="replace")[:300]
             last = f"HTTP {e.code} (classifier.dev): {text}"
+            if free and e.code in (402, 403, 429):
+                raise FreeTierRefused(last)
             if e.code == 429:
                 wait = min(5.0, float(e.headers.get("Retry-After") or 1))
             elif e.code >= 500:
@@ -188,7 +194,17 @@ def classify(inputs: list, labels: list) -> list:
     out = []
     for b in batches:
         body = {"inputs": b, "labels": labels, "instructions": "Answer the Question about the text with exactly one label."}
-        res = post_with_retry(CL_BASE + "/v1/classify", body, key)
+        # Free tier first ($0.50 a day per IP); the paid key only when the free tier refuses,
+        # so the key's balance covers overflow, not every call. LAURELIN_CLASSIFIER_PREFER=key always uses it.
+        if key and os.environ.get("LAURELIN_CLASSIFIER_PREFER") == "key":
+            res = post_with_retry(CL_BASE + "/v1/classify", body, key)
+        else:
+            try:
+                res = post_with_retry(CL_BASE + "/v1/classify", body, "", free=True)
+            except FreeTierRefused as why:
+                if not key:
+                    sys.exit(str(why))
+                res = post_with_retry(CL_BASE + "/v1/classify", body, key)
         for r in res.get("results", []):
             scores = r.get("scores") or {r.get("label"): r.get("confidence", 1.0)}
             out.append({l: float(scores.get(l, 0.0)) for l in labels})

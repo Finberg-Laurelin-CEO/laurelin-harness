@@ -16,6 +16,8 @@ class H(http.server.BaseHTTPRequestHandler):
         if self.path == "/v1/systemone":
             self.send_response(402); self.end_headers()
             self.wfile.write(b'{"detail":{"error_type":"billing_error"}}'); return
+        if any("FREE_LIMIT" in t for t in body["inputs"]) and not self.headers.get("Authorization"):
+            self.send_response(429); self.send_header("Retry-After", "1"); self.end_headers(); return
         labels = body["labels"]
         log.write(json.dumps({"n_inputs": len(body["inputs"]), "n_labels": len(labels)}) + "\n"); log.flush()
         res = []
@@ -50,6 +52,9 @@ r="$(printf '%s' "$BIG" | bin/jev --raw 2>/dev/null | python3 -c 'import json,sy
 [ "$r" = "skill-150" ] && python3 -c "
 import json;c=[json.loads(l)['n_labels'] for l in open('$T/calls.log')];assert max(c)<=100,c" && ok "over 100 options: groups of 100, then a final pick" || bad "tournament: $r $(cat "$T/calls.log")"
 LAURELIN_JEV_BACKEND=typesafe bin/jev --raw <<<"$REQ" >/dev/null 2>&1 && bad "forced typesafe should fail on 402" || ok "LAURELIN_JEV_BACKEND=typesafe does not fall back"
+R2='{"state":"FREE_LIMIT","questions":{"q":{"type":"noul","instructions":"YES"}}}'
+CLASSIFIER_API_KEY=paid-key bin/jev --raw <<<"$R2" 2>/dev/null | grep -q '"noul"' && ok "free tier refused: the paid key answers" || bad "paid fallback"
+HOME="$T" CLASSIFIER_API_KEY= bin/jev --raw <<<"$R2" >/dev/null 2>&1 && bad "no key should fail when the free tier refuses" || ok "free tier refused and no key: a clear failure"
 rm -rf "$T"
 echo "$pass passed, $fail failed"
 [ "$fail" -eq 0 ]
