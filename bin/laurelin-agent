@@ -348,6 +348,10 @@ PY
   export LAURELIN_DAEMON_SOCKET_DIR="$LAURELIN_SOCK_DIR"
   run_agent() { "$NODE_BIN" "$FORK_CLI" "$@"; }
   export LAURELIN_USING_FORK=1
+  # Jev for every harness caller (router, memory, context, gates): TypeSafe first, classifier.dev when
+  # TypeSafe has no key or no credits. bin/path holds only the jev link, so no other command is shadowed.
+  export JEV_BIN="$REPO/bin/jev"
+  export PATH="$REPO/bin/path:$PATH"
 else
   command -v prime-agent >/dev/null 2>&1 && run_agent() { prime-agent "$@"; } || die "Neither the built fork (agent/) nor prime-agent on PATH. Run: cd agent && npm install && npm run build"
 fi

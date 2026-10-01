@@ -1,0 +1,278 @@
+#!/usr/bin/env python3
+"""jev for the Laurelin harness: TypeSafe's Jev first, classifier.dev when TypeSafe cannot answer.
+
+Same interface and output as ~/.local/bin/jev:
+  jev request.json | cat request.json | jev        # {state, questions[, model]}
+  jev --raw request.json                           # raw JSON: {"model", "answers", "usage"}
+
+Order: TypeSafe (/v1/systemone, TYPESAFE_API_KEY). On no key, no credits (HTTP 402), or a network
+failure, the same questions go to classifier.dev, TypeSafe's labelling service on the same Jev model
+(free tier without a key; CLASSIFIER_API_KEY for a paid plan). LAURELIN_JEV_BACKEND=typesafe or
+=classifier forces one backend.
+
+Mapping to classifier.dev labels:
+  noul    -> labels ["yes", "no"]; noul = P(yes)
+  choice  -> labels = options (over 100 options: best of each group of 100, then a final pick)
+  score   -> labels = criteria levels; score = sum(index * P(level)), confidence = top P
+Questions with the same labels share one request (up to 1,000 texts per request).
+"""
+import json, os, re, sys, urllib.error, urllib.request
+
+TS_BASE = os.environ.get("TYPESAFE_BASE_URL", "https://api.typesafe.ai")
+CL_BASE = os.environ.get("CLASSIFIER_BASE_URL", "https://classifier.dev")
+MAX_LABELS = 100
+MAX_INPUT_CHARS = int(os.environ.get("LAURELIN_CLASSIFIER_MAX_CHARS", "24000"))
+MAX_BODY = 900_000  # the service caps a request body at 1 MB
+
+
+def store_value(name: str) -> str:
+    v = os.environ.get(name)
+    if v:
+        return v
+    f = os.path.expanduser("~/.config/agent-keys/env")
+    if os.path.exists(f):
+        for line in open(f):
+            m = re.match(rf"\s*(?:export\s+)?{name}=[\"']?([^\"'\s]+)", line)
+            if m:
+                return m.group(1)
+    return ""
+
+
+class Unavailable(Exception):
+    """TypeSafe cannot answer (no key, no credits, network); the fallback may."""
+
+
+def post(url: str, body: dict, key: str = "", timeout: int = 60) -> dict:
+    headers = {"Content-Type": "application/json", "User-Agent": "laurelin-agent"}
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    req = urllib.request.Request(url, method="POST", headers=headers, data=json.dumps(body).encode())
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.load(r)
+
+
+# ---------- TypeSafe ----------
+
+def typesafe(body: dict) -> dict:
+    key = store_value("TYPESAFE_API_KEY")
+    if not key:
+        raise Unavailable("no TYPESAFE_API_KEY")
+    body = {**body, "model": body.get("model") or os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-latest")}
+    try:
+        return post(TS_BASE + "/v1/systemone", body, key, timeout=30)
+    except urllib.error.HTTPError as e:
+        text = e.read().decode(errors="replace")
+        if e.code in (401, 402, 403, 429) or e.code >= 500:
+            raise Unavailable(f"TypeSafe HTTP {e.code}: {text[:160]}")
+        sys.exit(f"HTTP {e.code}: {text}")  # a bad request stays an error
+    except (urllib.error.URLError, TimeoutError) as e:
+        raise Unavailable(f"TypeSafe unreachable: {e}")
+
+
+# ---------- classifier.dev ----------
+
+def state_text(state) -> str:
+    return state if isinstance(state, str) else json.dumps(state, ensure_ascii=False)
+
+
+def describe(v) -> str:
+    """A criterion's description: a string, or an object such as {what, examples}."""
+    if isinstance(v, str):
+        return v
+    if isinstance(v, dict):
+        parts = [str(v.get("what") or v.get("description") or "")]
+        if v.get("examples"):
+            parts.append("for example: " + "; ".join(map(str, v["examples"])))
+        rest = {k: x for k, x in v.items() if k not in ("what", "description", "examples")}
+        if rest:
+            parts.append(json.dumps(rest, ensure_ascii=False))
+        return ". ".join(p for p in parts if p)
+    return json.dumps(v, ensure_ascii=False)
+
+
+def choice_map(q: dict) -> dict:
+    """Options of a choice as {name: description} from `options` (list or map) or `criteria` (list or map)."""
+    for field in ("options", "criteria"):
+        v = q.get(field)
+        if isinstance(v, dict) and v:
+            return {str(k): describe(x) for k, x in v.items()}
+        if isinstance(v, list) and v:
+            return {str(x): "" for x in v}
+    return {}
+
+
+def labels_for(q: dict) -> list:
+    t = q.get("type")
+    if t == "noul":
+        return ["yes", "no"]
+    if t == "choice":
+        labels = list(choice_map(q))
+        if not labels:
+            raise SystemExit("jev: a choice question has no options")
+        return labels
+    if t == "score":
+        c = q.get("criteria") or q.get("levels") or []
+        return [describe(x) for x in c] if isinstance(c, list) else [describe(x) for x in c.values()]
+    raise SystemExit(f"jev: unknown question type {t!r}")
+
+
+def instructions_text(instr) -> str:
+    if isinstance(instr, str):
+        return instr
+    if isinstance(instr, dict):
+        order = ["question", "focus", "note", "inspect"]
+        keys = order + [k for k in instr if k not in order]
+        return "\n".join(f"{k}: {instr[k]}" if k != "question" else str(instr[k]) for k in keys if instr.get(k))
+    return json.dumps(instr, ensure_ascii=False)
+
+
+def item_text(state: str, q: dict) -> str:
+    instr = instructions_text(q.get("instructions", ""))
+    extra = ""
+    t = q.get("type")
+    if t == "choice":
+        described = {k: d for k, d in choice_map(q).items() if d}
+        if described:
+            extra = "\nOptions:\n" + "\n".join(f"- {k}: {d}" for k, d in described.items())
+    elif t == "noul" and isinstance(q.get("criteria"), dict):
+        c = q["criteria"]
+        yes, no = c.get("true", c.get(True)), c.get("false", c.get(False))
+        extra = (f"\nyes means: {describe(yes)}" if yes else "") + (f"\nno means: {describe(no)}" if no else "")
+    elif t == "score":
+        extra = "\nLevels, lowest first:\n" + "\n".join(f"{i}. {c}" for i, c in enumerate(labels_for(q)))
+    room = MAX_INPUT_CHARS - len(instr) - len(extra) - 40
+    s = state if len(state) <= room else state[: max(0, room)] + "\n[...cut]"
+    return f"{s}\n\nQuestion: {instr}{extra}"
+
+
+USAGE = {"input_tokens": 0, "output_tokens": 0}
+
+
+def classify(inputs: list, labels: list) -> list:
+    """classifier.dev requests for these texts over these labels; one score dict per text, in order."""
+    key = store_value("CLASSIFIER_API_KEY") or store_value("CLASSIFY_API_KEY")
+    batches, batch, size = [], [], 0
+    for t in inputs:
+        n = len(t.encode()) + 16
+        if batch and (size + n > MAX_BODY or len(batch) >= 1000):
+            batches.append(batch)
+            batch, size = [], 0
+        batch.append(t)
+        size += n
+    if batch:
+        batches.append(batch)
+    out = []
+    for b in batches:
+        body = {"inputs": b, "labels": labels, "instructions": "Answer the Question about the text with exactly one label."}
+        try:
+            res = post(CL_BASE + "/v1/classify", body, key)
+        except urllib.error.HTTPError as e:
+            sys.exit(f"HTTP {e.code} (classifier.dev): {e.read().decode(errors='replace')[:300]}")
+        except (urllib.error.URLError, TimeoutError) as e:
+            sys.exit(f"classifier.dev unreachable: {e}")
+        for r in res.get("results", []):
+            scores = r.get("scores") or {r.get("label"): r.get("confidence", 1.0)}
+            out.append({l: float(scores.get(l, 0.0)) for l in labels})
+        u = res.get("usage") or {}
+        USAGE["input_tokens"] += int(u.get("input_tokens", 0))
+        USAGE["output_tokens"] += int(u.get("output_tokens", 0))
+    return out
+
+
+def classify_many(inputs: list, labels: list) -> list:
+    """Like classify, for any number of labels: over 100, best of each group of 100, then a final pick."""
+    if len(labels) <= MAX_LABELS:
+        return classify(inputs, labels)
+    groups = [labels[i : i + MAX_LABELS] for i in range(0, len(labels), MAX_LABELS)]
+    per_group = [classify(inputs, g) for g in groups]
+    results = []
+    for i, text in enumerate(inputs):
+        finalists = [max(g[i], key=g[i].get) for g in per_group]
+        final = classify([text], finalists)[0]
+        results.append({l: final.get(l, 0.0) for l in labels})
+    return results
+
+
+def via_classifier(body: dict) -> dict:
+    state = state_text(body.get("state", ""))
+    qs = body.get("questions") or {}
+    groups: dict = {}
+    for name, q in qs.items():
+        groups.setdefault(tuple(labels_for(q)), []).append(name)
+    answers = {}
+    for labels, names in groups.items():
+        dists = classify_many([item_text(state, qs[n]) for n in names], list(labels))
+        for name, dist in zip(names, dists):
+            q, total = qs[name], sum(dist.values()) or 1.0
+            p = {l: v / total for l, v in dist.items()}
+            top = max(p, key=p.get)
+            if q["type"] == "noul":
+                answers[name] = {"type": "noul", "noul": p["yes"]}
+            elif q["type"] == "choice":
+                answers[name] = {"type": "choice", "choice": top, "confidence": p[top], "probabilities": p}
+            else:
+                levels = list(labels)
+                answers[name] = {
+                    "type": "score",
+                    "score": sum(i * p[l] for i, l in enumerate(levels)),
+                    "confidence": p[top],
+                    "legend": {str(i): l for i, l in enumerate(levels)},
+                }
+    return {"model": "jev via classifier.dev", "backend": "classifier.dev", "answers": answers, "usage": dict(USAGE)}
+
+
+# ---------- main ----------
+
+def judge(body: dict) -> dict:
+    mode = os.environ.get("LAURELIN_JEV_BACKEND", "auto")
+    if mode == "classifier":
+        return via_classifier(body)
+    try:
+        res = typesafe(body)
+        res.setdefault("backend", "typesafe")
+        return res
+    except Unavailable as why:
+        if mode == "typesafe":
+            sys.exit(str(why))
+        code = re.search(r"HTTP (\d+)", str(why))
+        print(f"jev: TypeSafe {code.group(1) if code else 'unavailable'}; using classifier.dev", file=sys.stderr)
+        try:
+            return via_classifier(body)
+        except SystemExit:
+            # Keep the request that failed, for diagnosis (no keys are in it).
+            log = os.path.join(os.environ.get("LAURELIN_CODING_AGENT_DIR") or os.path.expanduser("~/.laurelin/agent"), "logs", "jev-fallback-failed.json")
+            try:
+                os.makedirs(os.path.dirname(log), exist_ok=True)
+                with open(log, "w") as f:
+                    json.dump(body, f, indent=1)
+            except OSError:
+                pass
+            raise
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    if "--models" in args:
+        os.execv(os.path.expanduser("~/.local/bin/jev"), ["jev", *args])
+    raw = "--raw" in args
+    files = [a for a in args if not a.startswith("--")]
+    body = json.load(open(files[0]) if files else sys.stdin)
+    res = judge(body)
+    if raw:
+        print(json.dumps(res, indent=1))
+        return
+    for k, a in res["answers"].items():
+        t = a["type"]
+        if t == "noul":
+            print(f"{k:24} noul   {a['noul']:.2f}")
+        elif t == "choice":
+            dist = {o: round(p, 2) for o, p in sorted(a["probabilities"].items(), key=lambda x: -x[1]) if p >= 0.02}
+            print(f"{k:24} choice {a['choice']}  conf={a['confidence']:.2f}  {dist}")
+        else:
+            print(f"{k:24} score  {a['score']:.2f}  conf={a['confidence']:.2f}  ({a['legend'][str(round(a['score']))]})")
+    u = res.get("usage", {})
+    print(f"-- {res.get('model')} ({res.get('backend')})  in={u.get('input_tokens', 0)} out={u.get('output_tokens', 0)}")
+
+
+if __name__ == "__main__":
+    main()
