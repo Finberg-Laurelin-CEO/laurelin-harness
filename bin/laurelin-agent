@@ -348,6 +348,10 @@ PY
   export LAURELIN_DAEMON_SOCKET_DIR="$LAURELIN_SOCK_DIR"
   run_agent() { "$NODE_BIN" "$FORK_CLI" "$@"; }
   export LAURELIN_USING_FORK=1
+  # Nothing about Laurelin's sessions goes to Prime's servers: no usage metrics, no version check.
+  # (The fork's /update would install upstream Prime, not this fork.) Set LAURELIN_TELEMETRY=1 to allow metrics.
+  [ "${LAURELIN_TELEMETRY:-0}" = 1 ] || export PRIME_AGENT_TELEMETRY=0
+  export PI_SKIP_VERSION_CHECK=1
   # Jev for every harness caller (router, memory, context, gates): TypeSafe first, classifier.dev when
   # TypeSafe has no key or no credits. bin/path holds only the jev link, so no other command is shadowed.
   export JEV_BIN="$REPO/bin/jev"
