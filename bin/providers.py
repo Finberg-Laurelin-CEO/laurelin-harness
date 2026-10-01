@@ -92,10 +92,35 @@ def per_million(v) -> float:
     return round(x * 1_000_000, 4) if 0 < x < 0.01 else x  # per-token prices become per-million
 
 
+def caps_of(m: dict) -> set:
+    """Capabilities as a set of names: a list of names, or a dict of name -> true/false (only the true ones)."""
+    raw = m.get("capabilities") or m.get("features") or []
+    if isinstance(raw, dict):
+        return {str(k).lower() for k, v in raw.items() if v}
+    return {str(x).lower() for x in raw}
+
+
+def price(pricing: dict, *keys: str, per_token: tuple = ()) -> float:
+    for k in keys:  # already per million tokens
+        if pricing.get(k) not in (None, ""):
+            try:
+                return round(float(pricing[k]), 6)
+            except (TypeError, ValueError):
+                pass
+    for k in per_token:  # per token (OpenRouter style)
+        if pricing.get(k) not in (None, ""):
+            return per_million(pricing[k])
+    return 0.0
+
+
+def is_chat_model(m: dict) -> bool:
+    kind = str(m.get("type") or "text").lower()
+    return kind in ("text", "chat", "llm", "language")
+
+
 def to_model(m: dict) -> dict:
     mid = m["id"]
-    caps_raw = m.get("capabilities") or m.get("features") or []
-    caps = (" ".join(map(str, caps_raw)) if isinstance(caps_raw, list) else json.dumps(caps_raw)).lower()
+    caps = caps_of(m)
     pricing = m.get("pricing") or {}
     ctx = (
         m.get("context_length")
@@ -107,15 +132,15 @@ def to_model(m: dict) -> dict:
     return {
         "id": mid,
         "name": m.get("name") or mid,
-        "reasoning": "reason" in caps or bool(m.get("reasoning")),
-        "input": ["text", "image"] if ("vision" in caps or "image" in caps) else ["text"],
+        "reasoning": bool({"reasoning", "thinking"} & caps) or bool(m.get("reasoning")),
+        "input": ["text", "image"] if ({"vision", "image", "image_input"} & caps) else ["text"],
         "contextWindow": int(ctx),
         "maxTokens": int(m.get("max_output_tokens") or m.get("max_tokens") or 16384),
         "cost": {
-            "input": per_million(pricing.get("input") or pricing.get("prompt")),
-            "output": per_million(pricing.get("output") or pricing.get("completion")),
-            "cacheRead": 0,
-            "cacheWrite": 0,
+            "input": price(pricing, "input_per_million", per_token=("input", "prompt")),
+            "output": price(pricing, "output_per_million", per_token=("output", "completion")),
+            "cacheRead": price(pricing, "cache_read_input_per_million", per_token=("input_cache_read",)),
+            "cacheWrite": price(pricing, "cache_write_input_per_million", per_token=("input_cache_write",)),
         },
     }
 
@@ -128,7 +153,7 @@ def fetch_models(base: str, key: str) -> list:
     with urllib.request.urlopen(req, timeout=30) as r:
         body = json.load(r)
     items = body.get("data", body.get("models", [])) if isinstance(body, dict) else body
-    return [to_model(m) for m in items if isinstance(m, dict) and m.get("id")]
+    return [to_model(m) for m in items if isinstance(m, dict) and m.get("id") and is_chat_model(m)]
 
 
 def add(argv: list) -> int:
@@ -170,7 +195,7 @@ def add(argv: list) -> int:
         return 1
     # Keep hand-tuned entries (compat flags, prices) for models that are still listed.
     old = {m.get("id"): m for m in existing.get("models", [])}
-    merged = [old.get(m["id"], m) for m in models]
+    merged = [({**m, "compat": old[m["id"]]["compat"]} if old.get(m["id"], {}).get("compat") else m) for m in models]
     d.setdefault("providers", {})[name] = {
         **{k: v for k, v in existing.items() if k != "models"},
         "baseUrl": opts["baseUrl"],
