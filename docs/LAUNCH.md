@@ -1,12 +1,17 @@
 # Launch plan: customer input for the harness
 
-Status: ON HOLD until sponsorship from classifier.dev and TypeSafe is agreed.
+Status: ON HOLD until classifier.dev or TypeSafe agrees to co-marketing or a listing.
 Written 2026-10-01 from an office-hours session. Owner: Joe. Internal.
 Goes with [GTM.md](GTM.md).
 
 ## Start condition
 
-Begin this plan only when classifier.dev or TypeSafe has agreed to sponsor the harness: credits, a pro plan, a listing, co-marketing or a paid contract. Until then the harness stays Laurelin's internal tool, Frege keeps its name and product, and the two Frege memory customers keep their service.
+Credits and the classifier.dev pro plan are a given. Begin this plan when classifier.dev or TypeSafe agrees to one of these:
+
+1. Co-marketing: they share or feature the write-up and the harness.
+2. A listing: the harness appears on their site or docs as a harness built on Jev.
+
+A paid contract is unlikely and is not a condition. Until then the harness stays Laurelin's internal tool, Frege keeps its name and product, and the two Frege memory customers keep their service.
 
 ## What office hours found
 

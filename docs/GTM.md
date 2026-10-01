@@ -2,7 +2,7 @@
 
 Status: draft, 2026-09-30. Owner: Joe. Internal.
 
-The customer-input launch plan is [LAUNCH.md](LAUNCH.md). It is on hold until classifier.dev and TypeSafe agree to sponsor the harness.
+The customer-input launch plan is [LAUNCH.md](LAUNCH.md). It is on hold until classifier.dev or TypeSafe agrees to co-marketing or a listing.
 
 ## Position
 
@@ -61,10 +61,10 @@ The pattern: the tool is free to spread. Money comes from resold inference, team
 | Partner | They give | They get |
 |---|---|---|
 | classifier.dev | Pro plan now. Later: listing, keys bundled with the harness. | A public write-up and a reference harness for their users. |
-| TypeSafe | Credits, co-marketing, possibly a paid contract to maintain the reference harness. | Proof that Jev is useful in a real agent, in five minutes. |
+| TypeSafe | Credits, co-marketing, a listing as a harness built on Jev. | Proof that Jev is useful in a real agent, in five minutes. |
 | Cheaper Inference | Wholesale rates for bundled plans. | Usage routed through the harness. |
 
-Our estimate of direct TypeSafe money is small: credits worth thousands to tens of thousands of dollars, or a contract in the low tens of thousands. The value is distribution and credibility.
+Credits are expected. A paid contract is unlikely, so the plan does not count on one. The value is distribution and credibility: co-marketing and a listing.
 
 ## Phases
 
@@ -86,7 +86,7 @@ Exit: 100 weekly active users, or partners asking for more.
 
 ### Phase 3: spin-out decision
 
-Spin out only on traction. Signals: weekly active users growing for six weeks, teams asking for shared features, or a partner offering a paid contract. Without them, the harness stays Laurelin's internal tool, and nothing is lost.
+Spin out only on traction. Signals: weekly active users growing for six weeks, or teams asking for shared features. Without them, the harness stays Laurelin's internal tool, and nothing is lost.
 
 ## Risks
 
