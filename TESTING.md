@@ -184,3 +184,7 @@ Then pick a model with `/model` in a session, or `laurelin-agent --provider chea
 ## Writing in your voice (Fulcrum Echo)
 
 The agent has an `echo_write` tool: it gathers the facts, and Echo writes them in a named person's voice (default Joe Finberg; set LAURELIN_ECHO_PERSONA to change). Echo can invent quotes, links, dates and numbers, so every one in the draft that is not in the facts comes back marked UNSUPPORTED. For a closer match to your voice, ask the agent to pass a few of your past emails as samples. Key: FULCRUM_ECHO_API_KEY.
+
+## classifier.dev for bulk sorting
+
+The MCP server `classifier` (https://classifier.dev/mcp) is in the harness, free, no key. The `classifier-dev` skill tells the agent when to use it: many search results, emails, logs or notes to triage, tag or count. Every call sends `X-Classifier-Share-Data: false`; classifier.dev otherwise keeps request text for model training. Test: tests/test-classifier-mcp.sh.

@@ -13,6 +13,7 @@ The Laurelin behavior set. Links into `~/.claude/skills` (see `../README.md`), e
 - `writing-ste`: Simplified Technical English with the house rules, for every prose deliverable.
 - `humanizer`: content-level signs of machine-written text.
 - `jev`, `jev-triage`, `jev-documents`, `jev-eval`, `jev-act`, `jev-patterns`, `building-with-jev`: every typed judgment goes to Jev.
+- `classifier-dev`: bulk sorting of many texts into labels through the free classifier.dev MCP server, with data sharing off.
 - `fastbrowse`: the headless web agent. The only browser.
 - `investor-research`: the investor playbook. In this repo, not a link.
 - `laurelin-reactor-calcs`: every reactor-physics number through the verified module.
