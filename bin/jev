@@ -43,7 +43,8 @@ class Unavailable(Exception):
 
 
 def post(url: str, body: dict, key: str = "", timeout: int = 60) -> dict:
-    headers = {"Content-Type": "application/json", "User-Agent": "laurelin-agent"}
+    # Never let classifier.dev keep Laurelin text for training (its default is to share).
+    headers = {"Content-Type": "application/json", "User-Agent": "laurelin-agent", "X-Classifier-Share-Data": "false"}
     if key:
         headers["Authorization"] = f"Bearer {key}"
     req = urllib.request.Request(url, method="POST", headers=headers, data=json.dumps(body).encode())
@@ -193,7 +194,9 @@ def classify(inputs: list, labels: list) -> list:
         batches.append(batch)
     out = []
     for b in batches:
-        body = {"inputs": b, "labels": labels, "instructions": "Answer the Question about the text with exactly one label."}
+        # share_data false: classifier.dev keeps request text for model training unless told not to.
+        body = {"inputs": b, "labels": labels, "share_data": False,
+                "instructions": "Answer the Question about the text with exactly one label."}
         # Free tier first ($0.50 a day per IP); the paid key only when the free tier refuses,
         # so the key's balance covers overflow, not every call. LAURELIN_CLASSIFIER_PREFER=key always uses it.
         if key and os.environ.get("LAURELIN_CLASSIFIER_PREFER") == "key":
