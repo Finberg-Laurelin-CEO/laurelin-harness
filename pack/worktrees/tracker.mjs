@@ -119,6 +119,8 @@ export function list(cwd) {
 }
 
 function workerCommand(worker, task, path) {
+	// Tests only: a stand-in script receives the task as its one argument and runs in the worktree.
+	if (process.env.LAURELIN_FAKE_WORKER) return [process.env.LAURELIN_FAKE_WORKER, [task]];
 	if (worker === "laurelin") {
 		const bin = existsSync(join(REPO, "bin", "laurelin-agent")) ? join(REPO, "bin", "laurelin-agent") : "laurelin-agent";
 		return [bin, ["--no-session", "--autonomous", "-p", task]];
