@@ -364,6 +364,7 @@ case "${1:-}" in
   -h | --help | help) usage ;;
   keys) shift; keys "$@" ;;
   providers) shift; load_store; exec python3 "$REPO/bin/providers.py" "$@" ;;
+  graph) shift; exec "${NODE_BIN:-node}" "$PACK/graph/graph.mjs" "$@" ;;
   worktrees) shift; exec "${NODE_BIN:-node}" "$PACK/worktrees/tracker.mjs" "$@" ;;
   wt) shift; exec "${LAURELIN_WT:-wt}" "$@" ;;
   agents | schedule | attach | send | list | stop | status | doctor | shutdown | mcp | package | update | model | session | config) load_store; run_agent "$@" ;;

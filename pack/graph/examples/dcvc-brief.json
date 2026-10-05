@@ -1,0 +1,11 @@
+{
+  "id": "dcvc-brief",
+  "goal": "A one-page brief on DCVC for Joe",
+  "steps": [
+    { "id": "partners", "kind": "work", "task": "List DCVC's partners", "expects": "names with a source link each" },
+    { "id": "thesis", "kind": "work", "task": "Summarise DCVC's fusion thesis", "expects": "3 bullets with sources" },
+    { "id": "fit", "kind": "branch", "inputs": ["thesis"], "question": "Does the thesis cover fusion directly?", "options": { "yes": [], "no": ["adjacent"] } },
+    { "id": "adjacent", "kind": "work", "task": "Find their nearest fusion-adjacent deals", "expects": "deals with sources" },
+    { "id": "brief", "kind": "merge", "inputs": ["partners", "thesis", "adjacent"], "task": "Write the brief", "expects": "one page, every claim sourced" }
+  ]
+}
