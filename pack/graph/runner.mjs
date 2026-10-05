@@ -31,6 +31,7 @@ import { fileURLToPath } from "node:url";
 import { branchRequest, check, finished, promptFor, ready, skips } from "./graph.mjs";
 import { verify } from "./verify.mjs";
 import * as tracker from "../worktrees/tracker.mjs";
+import { buildTrace, renderTrace, watchGraph } from "./trace.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, "..", "..");
@@ -336,7 +337,7 @@ export function runs(root) {
 if (import.meta.url === `file://${process.argv[1]}`) {
 	const [cmd, arg, a2, a3] = process.argv.slice(2);
 	const root = tracker.mainRoot(process.cwd());
-	const usage = "usage: graph run <file> [--foreground] | resume <id> | status <id> | list | stop <id> | decide <id> <step> [choice] | loop <id>";
+	const usage = "usage: graph run <file> [--foreground] | resume <id> | status <id> | trace <id> [--json] | watch <id> | list | stop <id> | decide <id> <step> [choice] | loop <id>";
 	try {
 		if (cmd === "run" && arg) {
 			const graph = JSON.parse(readFileSync(arg, "utf8"));
@@ -346,6 +347,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 		} else if (cmd === "resume" && arg) console.log(`resumed ${arg} (pid ${detach(root, arg)})`);
 		else if (cmd === "loop" && arg) await loop(root, arg);
 		else if (cmd === "status" && arg) console.log(status(root, arg));
+		else if (cmd === "trace" && arg) console.log(a2 === "--json" ? JSON.stringify(buildTrace(root, arg), null, 2) : renderTrace(buildTrace(root, arg)));
+		else if (cmd === "watch" && arg) watchGraph(root, arg);
 		else if (cmd === "list") console.log(runs(root).map((id) => status(root, id).split("\n").slice(0, 2).join("  ")).join("\n") || "no graphs");
 		else if (cmd === "stop" && arg) {
 			stopRun(root, arg);

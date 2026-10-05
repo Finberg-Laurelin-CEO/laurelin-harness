@@ -10,6 +10,7 @@ import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from "no
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { graphLines, runIds } from "../graph/trace.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PACK = resolve(HERE, "..");
@@ -263,6 +264,19 @@ export function watch(cwd, intervalMs = 2000) {
 			`${summary}`,
 			"",
 		];
+		// Graph runs (pack/graph): each drawn wave by wave above the worktree list.
+		let graphs = [];
+		try {
+			graphs = runIds(root);
+		} catch {}
+		if (graphs.length) {
+			out.push(`${dim("GRAPHS")}`);
+			for (const gid of graphs) {
+				try {
+					out.push(...graphLines(root, gid, { ink, dim, acc, bold }).map((l) => `  ${l}`), "");
+				} catch {}
+			}
+		}
 		if (trees.length === 0) out.push(dim('  No worktrees. Start one: laurelin-agent worktrees start <name> --worker claude "task"'));
 		for (const r of trees) {
 			const rec = recs[r.branch] ?? {};
