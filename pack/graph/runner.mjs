@@ -29,6 +29,7 @@ import { appendFileSync, existsSync, mkdirSync, openSync, readdirSync, readFileS
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { branchRequest, check, finished, promptFor, ready, skips } from "./graph.mjs";
+import { verify } from "./verify.mjs";
 import * as tracker from "../worktrees/tracker.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -83,12 +84,7 @@ const alive = (pid) => {
 	}
 };
 
-// ---------- verify hook (graph-verify fills this in) ----------
-
-/** Decide whether a step's output meets its contract. Returns { ok, reason }. The runner's default accepts. */
-export async function verify(_graph, _step, _output, _ctx) {
-	return { ok: true, reason: "" };
-}
+// ---------- verify: pack/graph/verify.mjs (sources, named gates, Jev contract check) ----------
 
 // ---------- Jev ----------
 
@@ -192,14 +188,14 @@ export async function tick(root, id) {
 			Object.assign(s, { status: "blocked", reason: text.slice(8).trim().split("\n")[0] });
 			event(dir, sid, "blocked", { reason: s.reason });
 		} else if (text) {
-			const v = await verify(graph, byId.get(sid), text, { root, dir, state });
+			const v = await verify(graph, byId.get(sid), text, { root, dir, state, outFile });
 			if (v.ok) {
 				writeFileSync(join(dir, "outputs", `${sid}.md`), text + "\n");
-				Object.assign(s, { status: "done", output: `outputs/${sid}.md`, reason: undefined });
-				event(dir, sid, "done", { chars: text.length });
+				Object.assign(s, { status: "done", output: `outputs/${sid}.md`, reason: undefined, checks: v.checks });
+				event(dir, sid, "done", { chars: text.length, checks: v.checks });
 			} else {
-				Object.assign(s, { status: s.attempt < ATTEMPTS ? "pending" : "failed", reason: v.reason });
-				event(dir, sid, s.status === "pending" ? "retry" : "failed", { reason: v.reason, attempt: s.attempt });
+				Object.assign(s, { status: s.attempt < ATTEMPTS ? "pending" : "failed", reason: v.reason, checks: v.checks });
+				event(dir, sid, s.status === "pending" ? "retry" : "failed", { reason: v.reason, attempt: s.attempt, checks: v.checks });
 			}
 		} else {
 			const reason = tooLong ? `no result after ${STEP_TIMEOUT_S} s` : "the worker stopped without writing .laurelin/out.md";
