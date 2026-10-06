@@ -212,6 +212,12 @@ def _fields(r):
 
 
 def _result_id(r, fields):
+    # Context (vector) results carry the section id inside properties.source_key / source_record, not at the
+    # top level; without this the whole vector lane was dropped (found 2026-10-06).
+    for key in ('source_key', 'source_record'):
+        v = fields.get(key)
+        if isinstance(v, dict) and v.get('id'):
+            return str(v['id'])
     for v in (fields.get('id'), getattr(r, 'source_key', None), getattr(r, 'id', None)):
         if v:
             return str(v)
@@ -237,7 +243,7 @@ def text_query(query, limit=8):
             break
     return ' OR '.join(words) if words else query
 
-def polygres_search(query, k, root, min_words, max_words):
+def polygres_search(query, k, root, min_words, max_words, lanes_wanted=('vector', 'text')):
     """Context (vector) plus tsvector (text), reciprocal-rank fused, then one graph hop."""
     schema = os.environ.get('POLYGRES_SCHEMA', 'public')
     collection = os.environ.get('POLYGRES_COLLECTION', 'sections')
@@ -245,17 +251,19 @@ def polygres_search(query, k, root, min_words, max_words):
     client, project = polygres_project()
     lanes = {}
     notes = []
-    try:
-        page = project.context.search(collection, text=query, limit=k)
-        lanes['vector'] = list(getattr(page, 'results', []) or [])
-    except Exception as e:  # noqa: BLE001
-        notes.append(f'vector lane off: {_err(e)}')
-    try:
+    if 'vector' in lanes_wanted:
+        try:
+            page = project.context.search(collection, text=query, limit=k)  # about 6 s: Polygres embeds the query
+            lanes['vector'] = list(getattr(page, 'results', []) or [])
+        except Exception as e:  # noqa: BLE001
+            notes.append(f'vector lane off: {_err(e)}')
+    if 'text' in lanes_wanted:
+      try:
         # Full-text search ANDs every word, so a whole sentence matches nothing. Send the
         # content words joined with OR instead; ranking still favours sections with more of them.
-        page = project.text.tsvector(text_query(query), config=text_config, limit=k)
+        page = project.text.tsvector(text_query(query), config=text_config, limit=k)  # about 0.3 s
         lanes['text'] = list(getattr(page, 'results', []) or [])
-    except Exception as e:  # noqa: BLE001
+      except Exception as e:  # noqa: BLE001
         notes.append(f'text lane off: {_err(e)}')
     if not lanes:
         raise RuntimeError('; '.join(notes) or 'no lane answered')
@@ -337,6 +345,12 @@ def run(query, k=20, mode='auto', source=None, min_words=vaultlib.MIN_WORDS, max
     note = ''
     results = []
     used = 'local'
+    lanes_wanted = {'polygres-text': ('text',), 'polygres-vector': ('vector',)}.get(mode, ('vector', 'text'))
+    if mode in ('polygres-text', 'polygres-vector'):
+        if not polygres_configured():
+            raise RuntimeError('POLYGRES_API_KEY and POLYGRES_RUNTIME_URL are not both set')
+        results, note = polygres_search(query, k, root, min_words, max_words, lanes_wanted)
+        return {'mode': mode, 'query': query, 'ms': int((time.time() - t0) * 1000), 'note': note, 'results': results}
     if mode in ('auto', 'polygres') and polygres_configured():
         try:
             results, note = polygres_search(query, k, root, min_words, max_words)
@@ -357,6 +371,64 @@ def run(query, k=20, mode='auto', source=None, min_words=vaultlib.MIN_WORDS, max
     return {'mode': used, 'query': query, 'ms': int((time.time() - t0) * 1000), 'note': note.strip(), 'results': results}
 
 
+# ---------------------------------------------------------------- warm server
+
+_INDEX_MEMO = {}  # root -> (checked_at, key, data): the local index stays in memory between searches
+_INDEX_RECHECK_S = float(os.environ.get('LAURELIN_MEMORY_RECHECK_S', '30'))
+
+
+def _memo_build_index(root, min_words, max_words, _orig=build_index):
+    """build_index, kept in memory; notes are re-checked for changes at most every 30 seconds."""
+    now = time.time()
+    hit = _INDEX_MEMO.get((root, min_words, max_words))
+    if hit and now - hit[0] < _INDEX_RECHECK_S:
+        return hit[2], True
+    if hit:
+        key = index_key(root, vaultlib.iter_notes(root))
+        if key == hit[1]:
+            _INDEX_MEMO[(root, min_words, max_words)] = (now, key, hit[2])
+            return hit[2], True
+    data, cached = _orig(root, min_words, max_words)
+    _INDEX_MEMO[(root, min_words, max_words)] = (now, data.get('key'), data)
+    return data, cached
+
+
+def serve():
+    """One JSON request per line on stdin: {"id", "query", "k", "mode"} with mode local | polygres | auto.
+    One JSON answer per line on stdout: {"id", ...run() result} or {"id", "error"}. Requests run on threads,
+    so a local search and a Polygres search for the same message run at the same time."""
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    global build_index
+    build_index = _memo_build_index
+    lock = threading.Lock()
+    pool = ThreadPoolExecutor(max_workers=int(os.environ.get('LAURELIN_MEMORY_THREADS', '4')))
+
+    def answer(req):
+        rid = req.get('id')
+        try:
+            out = run(req['query'], int(req.get('k', 20)), req.get('mode', 'auto'))
+            out['id'] = rid
+        except Exception as e:  # noqa: BLE001
+            out = {'id': rid, 'error': _err(e)}
+        with lock:
+            sys.stdout.write(json.dumps(out, ensure_ascii=False) + '\n')
+            sys.stdout.flush()
+
+    print(json.dumps({'id': None, 'ready': True}), flush=True)
+    for line in sys.stdin:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            req = json.loads(line)
+        except ValueError:
+            continue
+        pool.submit(answer, req)
+    pool.shutdown(wait=True)
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('query', nargs='*', help='the search text (or use --stdin)')
@@ -366,12 +438,15 @@ def main(argv=None):
     ap.add_argument('--local', action='store_true', help='search the copy on disk only')
     ap.add_argument('--polygres', action='store_true', help='search Polygres only, fail if unreachable')
     ap.add_argument('--check', action='store_true', help='report whether Polygres is configured and ready')
+    ap.add_argument('--serve', action='store_true', help='stay running: one JSON request per stdin line, one answer per stdout line')
     ap.add_argument('--source', help='folder with the safe vault copy')
     ap.add_argument('--min-words', type=int, default=int(os.environ.get('LAURELIN_MEMORY_MIN_WORDS', vaultlib.MIN_WORDS)))
     ap.add_argument('--max-words', type=int, default=int(os.environ.get('LAURELIN_MEMORY_MAX_WORDS', vaultlib.MAX_WORDS)))
     args = ap.parse_args(argv)
     if args.check:
         return check()
+    if args.serve:
+        return serve()
     query = sys.stdin.read() if args.stdin else ' '.join(args.query)
     if not query.strip():
         ap.error('give a query, or --stdin')

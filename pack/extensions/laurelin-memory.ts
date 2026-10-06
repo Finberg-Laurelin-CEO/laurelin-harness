@@ -205,10 +205,132 @@ export function runQuery(query: string, k: number, cwd?: string): Promise<QueryR
 	});
 }
 
+// ---------------------------------------------------------------- warm search server (speed)
+
+/**
+ * query.py --serve stays running: no Python start per message, and the local index stays in memory
+ * (a local search drops from about 1.1 s to about 25 ms). Requests are answered on threads, so the local
+ * and Polygres lanes for one message run at the same time. If the server cannot run, runQuery is used.
+ */
+class SearchServer {
+	private child: ReturnType<typeof spawn> | undefined;
+	private waiting = new Map<string, { res: (r: QueryResult) => void; rej: (e: Error) => void; timer: ReturnType<typeof setTimeout> }>();
+	private buf = "";
+	private n = 0;
+	broken = false;
+
+	private start(cwd?: string) {
+		const child = spawn(python(), [QUERY_PY, "--serve"], { stdio: ["pipe", "pipe", "ignore"], cwd: cwd && existsSync(cwd) ? cwd : undefined, env: process.env });
+		child.stdout!.on("data", (d) => {
+			this.buf += String(d);
+			let i: number;
+			while ((i = this.buf.indexOf("\n")) >= 0) {
+				const line = this.buf.slice(0, i);
+				this.buf = this.buf.slice(i + 1);
+				let msg: any;
+				try {
+					msg = JSON.parse(line);
+				} catch {
+					continue;
+				}
+				const w = msg?.id ? this.waiting.get(msg.id) : undefined;
+				if (!w) continue;
+				clearTimeout(w.timer);
+				this.waiting.delete(msg.id);
+				if (msg.error) w.rej(new Error(msg.error));
+				else w.res(msg as QueryResult);
+			}
+		});
+		const fail = (why: string) => {
+			this.child = undefined;
+			for (const [, w] of this.waiting) {
+				clearTimeout(w.timer);
+				w.rej(new Error(why));
+			}
+			this.waiting.clear();
+		};
+		child.on("error", (e) => {
+			this.broken = true;
+			fail(`search server not runnable: ${e.message}`);
+		});
+		child.on("exit", () => fail("search server stopped"));
+		child.stdin!.on("error", () => {});
+		this.child = child;
+	}
+
+	search(query: string, k: number, mode: "local" | "polygres-text" | "polygres-vector" | "auto", cwd?: string, timeoutMs = QUERY_TIMEOUT_MS): Promise<QueryResult> {
+		if (this.broken) return runQuery(query, k, cwd);
+		if (!this.child) this.start(cwd);
+		const id = `q${++this.n}`;
+		return new Promise((res, rej) => {
+			const timer = setTimeout(() => {
+				this.waiting.delete(id);
+				rej(new Error(`${mode} search timed out`));
+			}, timeoutMs);
+			this.waiting.set(id, { res, rej, timer });
+			this.child!.stdin!.write(JSON.stringify({ id, query, k, mode }) + "\n");
+		});
+	}
+
+	stop() {
+		try {
+			this.child?.kill();
+		} catch {}
+		this.child = undefined;
+	}
+}
+
+/** Resolve to the promise's value if it settles before the deadline, else undefined. Never throws. */
+export function within<T>(p: Promise<T>, deadline: number): Promise<T | undefined> {
+	const ms = Math.max(0, deadline - Date.now());
+	return new Promise((res) => {
+		const t = setTimeout(() => res(undefined), ms);
+		p.then(
+			(v) => {
+				clearTimeout(t);
+				res(v);
+			},
+			() => {
+				clearTimeout(t);
+				res(undefined);
+			},
+		);
+	});
+}
+
+/** Merge the local and Polygres lanes by reciprocal rank, one copy per section. */
+export function mergeLanes(lanes: (QueryResult | undefined)[], k: number): QueryResult | undefined {
+	const live = lanes.filter((l): l is QueryResult => !!l && Array.isArray(l.results));
+	if (live.length === 0) return undefined;
+	if (live.length === 1) return live[0];
+	const score = new Map<string, { c: Candidate; s: number }>();
+	for (const lane of live)
+		lane.results.forEach((c, rank) => {
+			const key = `${c.path}#${c.section}`;
+			const prev = score.get(key);
+			score.set(key, { c: prev?.c ?? c, s: (prev?.s ?? 0) + 1 / (60 + rank) });
+		});
+	const results = [...score.values()].sort((a, b) => b.s - a.s).slice(0, k).map((x) => x.c);
+	return {
+		mode: live.map((l) => l.mode).join("+"),
+		query: live[0].query,
+		ms: Math.max(...live.map((l) => l.ms)),
+		note: live.map((l) => l.note).filter(Boolean).join(" "),
+		results,
+	};
+}
+
+/** Sections that answer nothing: reference lists, and timestamped or pre-edit copies of a draft. */
+export const NOISE_HEADING = /^(references|bibliography|sources|citations|works cited|footnotes|notes and references)$/i;
+export const NOISE_PATH = /\.(pre|bak|old|orig)[-.]|\.\d{8}T\d{6}Z\.md$/i;
+
 // ---------------------------------------------------------------- jev
 
 function jevBin(): string {
 	if (process.env.JEV_BIN) return process.env.JEV_BIN;
+	// The repo's own jev: TypeSafe first, classifier.dev when TypeSafe has no key or credits.
+	const repoJev = join(REPO, "bin", "jev");
+	if (existsSync(repoJev)) return repoJev;
 	const local = join(homedir(), ".local", "bin", "jev");
 	return existsSync(local) ? local : "jev";
 }
@@ -379,6 +501,41 @@ export default function (pi: ExtensionAPI) {
 		return { choice: isTask ? "new_task" : "steer", confidence: 0.5, source: "heuristic" };
 	}
 
+	const server = new SearchServer();
+	// Lanes, all started together: local index (about 25 ms warm), Polygres text (about 0.5 to 2 s), and in deep
+	// mode Polygres vector (about 6 to 9 s, Polygres embeds the query server-side). Whatever is in by the budget is used.
+	let deep = process.env.LAURELIN_MEMORY_DEEP === "1";
+	const searchBudget = () => (deep ? num("LAURELIN_MEMORY_DEEP_BUDGET_MS", 9000) : num("LAURELIN_MEMORY_BUDGET_MS", 2000));
+	const totalBudget = () => searchBudget() + num("LAURELIN_MEMORY_RERANK_MS", 2500); // all of memory, rerank included
+	type Pending = { text: string; started: number; intent?: Promise<Record<string, RawAnswer>>; lanes: Promise<QueryResult>[] };
+	let pending: Pending | undefined;
+
+	/** Start the intent check and both search lanes at once, as soon as the message arrives. */
+	function prefetch(prompt: string, ctx: any): Pending {
+		const s = settings();
+		const cwd = ctx?.cwd ?? process.cwd();
+		const task = readTask(cwd);
+		const state: Record<string, unknown> = { message: prompt.slice(0, MESSAGE_CHARS) };
+		const la = lastAssistant(ctx);
+		if (la) state.last_assistant = la;
+		if (task) state.task = task;
+		const q = buildQuery(prompt, task);
+		const mode = process.env.LAURELIN_MEMORY_MODE ?? "auto";
+		const p: Pending = {
+			text: prompt,
+			started: Date.now(),
+			intent: s.jev ? askJev(state, intentQuestion()) : undefined,
+			lanes: [
+				...(mode === "polygres" ? [] : [server.search(q, s.candidates, "local", cwd)]),
+				...(mode === "local" ? [] : [server.search(q, s.candidates, "polygres-text", cwd)]),
+				...(mode !== "local" && deep ? [server.search(q, s.candidates, "polygres-vector", cwd)] : []),
+			],
+		};
+		for (const l of p.lanes) l.catch(() => {});
+		p.intent?.catch(() => {});
+		return p;
+	}
+
 	async function remember(prompt: string, ctx: any): Promise<MemoryDecision> {
 		const s = settings();
 		const cwd = ctx?.cwd ?? process.cwd();
@@ -397,68 +554,73 @@ export default function (pi: ExtensionAPI) {
 			kept: [],
 			note: "",
 		};
-		// 1. is this a new task?
-		const state: Record<string, unknown> = { message: prompt.slice(0, MESSAGE_CHARS) };
-		const la = lastAssistant(ctx);
-		if (la) state.last_assistant = la;
-		if (task) state.task = task;
-		if (s.jev) {
-			try {
-				const a = (await askJev(state, intentQuestion())).intent;
-				d.intent = { choice: a?.choice ?? "new_task", confidence: a?.confidence ?? 0, source: "jev" };
-			} catch (e) {
-				d.note += `intent: jev failed (${(e as Error).message}); heuristic used. `;
-			}
-		}
-		if (!d.intent) d.intent = heuristicIntent(prompt, cwd);
-		// Jev's verdict counts when it clears the threshold; the heuristic's always counts (it has no real confidence)
-		if (d.intent.choice !== "new_task" && (d.intent.source === "heuristic" || d.intent.confidence >= s.threshold)) {
-			d.skipped = `intent ${d.intent.choice} at ${d.intent.confidence.toFixed(2)}`;
-			return d;
-		}
-		// 2. retrieve
-		let result: QueryResult;
-		try {
-			result = await runQuery(buildQuery(prompt, task), s.candidates, cwd);
-		} catch (e) {
-			d.error = (e as Error).message;
-			return d;
-		}
-		d.mode = result.mode;
-		d.query_ms = result.ms;
-		// Running logs and machine-written ledgers answer nothing; skip them. The same note can sit in two
-		// folders (a mirror); keep one copy of each note section.
+		const p = pending && pending.text === prompt ? pending : prefetch(prompt, ctx);
+		pending = undefined;
+		const searchBy = p.started + searchBudget();
+		const totalBy = p.started + totalBudget();
+		// Everything below overlaps: the intent check (started on input), the two search lanes, and the
+		// rerank, which starts as soon as the lanes are in instead of waiting for the intent answer.
 		const exclude = new RegExp(
 			process.env.LAURELIN_MEMORY_EXCLUDE ??
 				"(^|/)(Archive|_superseded|Signals|Intro Offer Ingestion|Agent Handoffs)/|/revisions/|/before/|Engagement Ledger|Changelog\\.md$|Last Successful Check",
 			"i",
 		);
-		const seenNote = new Set<string>();
-		result.results = result.results.filter((r: any) => {
-			if (exclude.test(r.path)) return false;
-			const key = `${String(r.path).split("/").pop()}#${r.heading ?? r.section}`;
-			if (seenNote.has(key)) return false;
-			seenNote.add(key);
-			return true;
-		});
+		const retrieval = (async () => {
+			const got = await Promise.all(p.lanes.map((l) => within(l, searchBy)));
+			const late = got.filter((g) => !g).length;
+			let note = late ? `${late} search lane${late === 1 ? "" : "s"} later than ${searchBudget()} ms; not used. ` : "";
+			let result = mergeLanes(got, s.candidates) ?? (await within(runQuery(buildQuery(prompt, task), s.candidates, cwd), totalBy));
+			if (!result) return { note, result: undefined, answers: undefined, ms: Date.now() - p.started };
+			// Running logs, machine-written ledgers, reference lists and draft copies answer nothing; skip them.
+			// The same note can sit in two folders (a mirror); keep one copy of each note section.
+			const seenNote = new Set<string>();
+			result.results = result.results.filter((r: any) => {
+				if (exclude.test(r.path) || NOISE_PATH.test(r.path) || NOISE_HEADING.test(String(r.heading ?? "").trim())) return false;
+				const key = `${String(r.path).split("/").pop()}#${r.heading ?? r.section}`;
+				if (seenNote.has(key)) return false;
+				seenNote.add(key);
+				return true;
+			});
+			const ms = Date.now() - p.started;
+			let answers: Record<string, RawAnswer> | undefined;
+			if (result.results.length && s.jev && totalBy - Date.now() > 300) {
+				answers = await within(askJev({ task: buildQuery(prompt, task) }, rerankQuestions(result.results)), totalBy);
+				if (!answers) note += "rerank: jev late or down; search order used. ";
+			}
+			return { note, result, answers, ms };
+		})();
+		// 1. is this a new task? (Jev, started on input; the heuristic if it is late or down)
+		if (p.intent) {
+			const a = (await within(p.intent, totalBy))?.intent;
+			if (a) d.intent = { choice: a.choice ?? "new_task", confidence: a.confidence ?? 0, source: "jev" };
+			else d.note += "intent: jev late or down; heuristic used. ";
+		}
+		if (!d.intent) d.intent = heuristicIntent(prompt, cwd);
+		// Jev's verdict counts when it clears the threshold; the heuristic's always counts (it has no real confidence)
+		// Questions read the vault too (a question about the work is when memory matters most). Only messages
+		// that continue the task under way skip it: steers, corrections and approvals.
+		const continues = ["steer", "correction", "approval"].includes(d.intent.choice);
+		if (continues && (d.intent.source === "heuristic" || d.intent.confidence >= s.threshold)) {
+			d.skipped = `intent ${d.intent.choice} at ${d.intent.confidence.toFixed(2)}`;
+			return d;
+		}
+		// 2 and 3. retrieval and rerank (already running)
+		const r = await retrieval;
+		d.note += r.note;
+		if (!r.result) {
+			d.error = "no search lane answered in time";
+			return d;
+		}
+		const result = r.result;
+		d.mode = result.mode;
+		d.query_ms = r.ms;
 		d.candidates = result.results.length;
 		if (result.note) d.note += `${result.note}. `;
-		// 3. rerank
 		let kept: Kept[];
-		if (result.results.length === 0) {
-			kept = [];
-		} else if (s.jev) {
-			try {
-				const answers = await askJev({ task: buildQuery(prompt, task) }, rerankQuestions(result.results));
-				kept = decideKeep(result.results, answers, s.threshold, s.keep);
-				d.reranked = true;
-			} catch (e) {
-				d.note += `rerank: jev failed (${(e as Error).message}); search order used. `;
-				kept = result.results.slice(0, s.keep).map((c) => ({ ...c, level: -1, confidence: 0 }));
-			}
-		} else {
-			kept = result.results.slice(0, s.keep).map((c) => ({ ...c, level: -1, confidence: 0 }));
-		}
+		if (r.answers) {
+			kept = decideKeep(result.results, r.answers, s.threshold, s.keep);
+			d.reranked = true;
+		} else kept = result.results.slice(0, s.keep).map((c) => ({ ...c, level: -1, confidence: 0 }));
 		d.kept = kept.map((k) => ({ path: k.path, section: k.section, heading: k.heading, level: k.level, confidence: k.confidence, retrieval: k.score, via: k.via }));
 		lastMessage = formatMessage(kept, result, s.chars, d.reranked);
 		return d;
@@ -474,10 +636,14 @@ export default function (pi: ExtensionAPI) {
 		last = d;
 	}
 
-	pi.on("input", async (event) => {
+	pi.on("input", async (event, ctx) => {
 		lastSource = event.source;
+		// Start reading the vault the moment the message arrives, in tandem with the router.
+		const text = String((event as any).text ?? "").trim();
+		if (enabled && event.source !== "extension" && worthReading(text)) pending = prefetch(text, ctx);
 		return { action: "continue" };
 	});
+	pi.on("session_shutdown", async () => server.stop());
 
 	pi.on("before_agent_start", async (event, ctx) => {
 		const source = lastSource;
@@ -499,10 +665,15 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.registerCommand("memory", {
-		description: "Show the vault sections injected for the last task; `/memory off|on`; `/memory <words>` searches without injecting",
+		description: "Show the vault sections injected for the last task; `/memory off|on`; `/memory deep|fast`; `/memory <words>` searches without injecting",
 		handler: async (args, ctx) => {
 			const arg = (args ?? "").trim();
 			const low = arg.toLowerCase();
+			if (low === "deep" || low === "fast") {
+				deep = low === "deep";
+				say(ctx, deep ? `Memory deep: also waits for Polygres's meaning search, up to ${searchBudget() / 1000} s per new task.` : `Memory fast: local and Polygres text search only, up to ${searchBudget() / 1000} s.`);
+				return;
+			}
 			if (low === "off" || low === "on") {
 				enabled = low === "on";
 				say(ctx, `Memory ${enabled ? "on" : "off"} for this session.`);
