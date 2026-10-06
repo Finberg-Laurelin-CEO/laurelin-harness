@@ -38,3 +38,6 @@ dns.workspace: \b(admin\.googleapis\.com|gam\s+(create|update|delete)\s)\b
 # Form submissions (applications, portals, journals)
 form.submit: \b(curl|wget|http|xh)\b[^\n]*\b(-X\s*POST|--data|--form|-F\s|-d\s)[^\n]*\b(submit|apply|application|portal|arxiv\.org/submit|manuscript|register)\b
 form.tool: \b(submit_?form|form_?submit|click_?submit|submit_?application)\b
+
+# Documents sent to or removed from WonderSearch (outside document search). Searches and reads never ask.
+data.wondersearch: "(add_documents|update_document|prepare_upload|delete_document|delete_folder|delete_drive)"

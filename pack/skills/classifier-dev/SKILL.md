@@ -1,6 +1,6 @@
 ---
 name: classifier-dev
-description: Sort many texts into labels you name (classifier.dev MCP server `classifier`, Jev underneath, free). Use when reading the inputs is the expensive part: search results, logs, emails, tickets, notes to triage, tag or count. Not for under five items.
+description: Sort many texts into your own labels with the free classifier.dev MCP (Jev). For triaging, tagging or counting search results, logs, emails or notes; not under five items.
 ---
 
 # classifier-dev

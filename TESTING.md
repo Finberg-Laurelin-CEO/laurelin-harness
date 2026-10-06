@@ -188,3 +188,7 @@ The agent has an `echo_write` tool: it gathers the facts, and Echo writes them i
 ## classifier.dev for bulk sorting
 
 The MCP server `classifier` (https://classifier.dev/mcp) is in the harness, free, no key. The `classifier-dev` skill tells the agent when to use it: many search results, emails, logs or notes to triage, tag or count. Every call sends `X-Classifier-Share-Data: false`; classifier.dev otherwise keeps request text for model training. Test: tests/test-classifier-mcp.sh.
+
+## WonderSearch (outside document sets)
+
+The MCP server `wondersearch` is signed in (OAuth, once). Ask the agent to put a set of outside documents into a WonderSearch drive and question them, for example a regulator's PDFs or a data room. Answers cite the passage and document. Uploads and deletes ask you first; searches do not. Never for vault notes or export-controlled material. If it ever asks to sign in again: `/mcp login wondersearch`.

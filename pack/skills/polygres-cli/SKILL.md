@@ -1,6 +1,6 @@
 ---
 name: polygres-cli
-description: Use available Polygres MCP tools or the Polygres CLI to authenticate, operate standard or synchronized projects, import data, apply migrations, configure retrieval, manage Runtime keys and durable operations, and check readiness. Use the CLI for explicit command-line work and as the documented fallback for operations outside the MCP catalog.
+description: Use available Polygres MCP tools or the Polygres CLI to authenticate, operate standard or synchronized projects, import data, apply migrations, configure retrieval, manage Runtime keys and durable operations, and check readiness. Use the CLI for command-line work and anything outside the MCP catalog.
 ---
 
 # Polygres CLI

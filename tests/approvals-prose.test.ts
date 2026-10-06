@@ -20,6 +20,7 @@ test("prose inside code does not ask", () => {
 		["bash", { command: `git commit -m "Draft: ${essay}"` }],
 		["connector_call", { connector: "Gmail", tool: "search_threads", arguments: { query: "forward the purchase order from vercel" } }],
 		["bash", { command: "vercel ls && vercel logs my-app" }],
+		["ipython", { code: `await mcp.call_tool("wondersearch", "search", {"query": "pastry refund"})` }],
 	];
 	for (const [tool, input] of quiet) assert.equal(hit(tool, input), undefined, JSON.stringify(input).slice(0, 90));
 });
@@ -39,6 +40,8 @@ test("real outward actions still ask", () => {
 		["bash", { command: "stripe charges create --amount 500" }, "pay.stripe-cli"],
 		["ipython", { code: "client.buy_domain(name='laurelin.energy')" }, "pay.generic"],
 		["ipython", { code: "shop.create_payment(amount=5)" }, "pay.generic"],
+		["ipython", { code: `await mcp.call_tool("wondersearch", "add_documents", {"drive_id": "d", "documents": [{"text": "x"}]})` }, "data.wondersearch"],
+		["ipython", { code: `await mcp.call_tool("wondersearch", "delete_document", {"document_id": "x"})` }, "data.wondersearch"],
 	];
 	// Several rules can cover one action (send_draft is in email.tool and email.superhuman-actions):
 	// the family (email, deploy, pay) is what must match.
