@@ -22,6 +22,7 @@ case "$task" in
 esac
 sleep "${WORKER_SLEEP:-0.3}"
 printf 'result of %s\n' "$step" > .laurelin/out.md
+[ "${2:-}" = --provider ] && echo "model $3/$5" >> .laurelin/out.md
 W
 # Stand-in Jev: picks "no" at 0.9, or "yes" at 0.4 when the question says UNSURE.
 cat > "$T/jev.sh" <<'J'
@@ -93,6 +94,15 @@ import json;s=json.load(open('$G3'))['steps']
 assert all(s[k]['status']=='done' for k in ('s1','s2','s3')), s" \
   && ok "after the loop is killed mid-run, resuming finishes the graph" || bad "resume: $(cat "$G3")"
 (cd "$T/repo" && $R status g3) | grep -qE "s3 +DONE" && ok "status shows every step" || bad "status: $(cd "$T/repo" && $R status g3)"
+
+# 4. A step that names a cheap model passes it to its worker.
+cat > "$T/g4.json" <<'G'
+{"id":"g4","goal":"model test","steps":[{"id":"bulk","task":"read many notes","expects":"text","model":"cheaperinference/deepseek-v4-flash"}]}
+G
+(cd "$T/repo" && $R run "$T/g4.json" --foreground >/dev/null 2>&1)
+grep -q "model cheaperinference/deepseek-v4-flash" "$T/repo/.laurelin/graphs/g4/outputs/bulk.md" 2>/dev/null \
+  && grep -q '"model":"cheaperinference/deepseek-v4-flash"' "$T/repo/.laurelin/graphs/g4/events.jsonl" \
+  && ok "a step's model reaches its worker as --provider and --model, and is in the trace" || bad "model: $(cat "$T/repo/.laurelin/graphs/g4/outputs/bulk.md" 2>/dev/null)"
 
 rm -rf "$T"
 echo "$pass passed, $fail failed"

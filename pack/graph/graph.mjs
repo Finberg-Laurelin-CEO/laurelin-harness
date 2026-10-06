@@ -25,7 +25,8 @@
  * out), branch (Jev picks one option; the steps listed under the other options are skipped). An option lists
  * only the steps that run just for that answer; steps after the branch that always run are not listed.
  * Fields: id, kind, task, expects, inputs (step ids), worker (laurelin | claude | codex; default laurelin),
- * question and options (branch only).
+ * model ("provider/model" for a laurelin worker, e.g. "cheaperinference/deepseek-v4-flash" for bulk steps),
+ * gates (graph-verify), question and options (branch only).
  *
  * Run state (kept by the runner): { [stepId]: { status, output?, choice?, attempts?, error? } }, where status
  * is pending | running | done | failed | skipped | blocked.
@@ -53,6 +54,10 @@ export function check(graph) {
 		const kind = s.kind ?? "work";
 		if (!KINDS.includes(kind)) problems.push(`step "${s.id}" has an unknown kind "${kind}"`);
 		if (s.worker && !WORKERS.includes(s.worker)) problems.push(`step "${s.id}" has an unknown worker "${s.worker}"`);
+		if (s.model !== undefined) {
+			if (typeof s.model !== "string" || !/^[a-z0-9._-]+\/[A-Za-z0-9._:\/-]+$/i.test(s.model)) problems.push(`step "${s.id}" has a model that is not "provider/model"`);
+			else if ((s.worker ?? "laurelin") !== "laurelin") problems.push(`step "${s.id}" names a model, which only a laurelin worker can use`);
+		}
 		for (const i of s.inputs ?? []) if (!ids.has(i)) problems.push(`step "${s.id}" takes input from "${i}", which does not exist`);
 		if (kind !== "branch" && !s.task) problems.push(`step "${s.id}" has no task`);
 		if (kind !== "branch" && !s.expects) problems.push(`step "${s.id}" has no "expects" (what done means)`);

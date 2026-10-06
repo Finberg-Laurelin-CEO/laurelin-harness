@@ -76,3 +76,12 @@ test("a branch becomes one Jev choice question over its inputs", () => {
 	assert.deepEqual(r.questions.choice.options, ["yes", "no"]);
 	assert.equal(r.state.thesis, "they back fusion");
 });
+
+test("a step can name a model for its laurelin worker; a bad or misplaced model is a problem", () => {
+	const ok = { id: "m", steps: [{ id: "a", task: "t", expects: "e", model: "cheaperinference/deepseek-v4-flash" }] };
+	assert.deepEqual(check(ok), []);
+	const bad = { id: "m", steps: [{ id: "a", task: "t", expects: "e", model: "deepseek" }, { id: "b", task: "t", expects: "e", worker: "claude", model: "x/y" }] };
+	const p = check(bad).join("\n");
+	assert.match(p, /step "a" has a model that is not "provider\/model"/);
+	assert.match(p, /step "b" names a model, which only a laurelin worker can use/);
+});

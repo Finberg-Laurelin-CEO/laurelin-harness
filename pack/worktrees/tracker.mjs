@@ -119,12 +119,14 @@ export function list(cwd) {
 	return rows;
 }
 
-function workerCommand(worker, task, path) {
-	// Tests only: a stand-in script receives the task as its one argument and runs in the worktree.
-	if (process.env.LAURELIN_FAKE_WORKER) return [process.env.LAURELIN_FAKE_WORKER, [task]];
+export function workerCommand(worker, task, path, model) {
+	// A laurelin worker can run on any configured model: "provider/model", e.g. cheaperinference/deepseek-v4-flash.
+	const modelArgs = model ? ["--provider", model.slice(0, model.indexOf("/")), "--model", model.slice(model.indexOf("/") + 1)] : [];
+	// Tests only: a stand-in script receives the task (and any model flags) and runs in the worktree.
+	if (process.env.LAURELIN_FAKE_WORKER) return [process.env.LAURELIN_FAKE_WORKER, [task, ...modelArgs]];
 	if (worker === "laurelin") {
 		const bin = existsSync(join(REPO, "bin", "laurelin-agent")) ? join(REPO, "bin", "laurelin-agent") : "laurelin-agent";
-		return [bin, ["--no-session", "--autonomous", "-p", task]];
+		return [bin, ["--no-session", "--autonomous", ...modelArgs, "-p", task]];
 	}
 	if (worker === "claude") {
 		return ["claude", ["-p", "--safe-mode", "--settings", join(PACK, "worker", "claude-settings.json"), "--permission-mode", "acceptEdits", task]];
@@ -141,7 +143,7 @@ function workerCommand(worker, task, path) {
 }
 
 /** Create a worktree with worktrunk and start a worker in it in the background. */
-export function start(cwd, { name, task = "", worker = "laurelin", base } = {}) {
+export function start(cwd, { name, task = "", worker = "laurelin", base, model } = {}) {
 	if (!name || !/^[A-Za-z0-9._/-]+$/.test(name)) throw new Error("name must be a branch name (letters, digits, . _ / -)");
 	if (!WORKERS.includes(worker)) throw new Error(`worker must be one of ${WORKERS.join(", ")}`);
 	const root = mainRoot(cwd);
@@ -152,7 +154,8 @@ export function start(cwd, { name, task = "", worker = "laurelin", base } = {}) 
 	if (!row?.path) throw new Error(`worktrunk created ${name} but it is not in wt list`);
 	const state = loadState(root);
 	const rec = { branch: name, path: row.path, task, worker, status: "todo", comment: "", created: new Date().toISOString() };
-	const cmd = worker === "none" || !task ? null : workerCommand(worker, task, row.path);
+	const cmd = worker === "none" || !task ? null : workerCommand(worker, task, row.path, model);
+	if (model) rec.model = model;
 	if (cmd) {
 		mkdirSync(join(row.path, ".laurelin"), { recursive: true });
 		const out = openSync(join(row.path, ".laurelin", "worker.log"), "a");

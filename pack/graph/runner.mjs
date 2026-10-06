@@ -127,9 +127,9 @@ function startStep(root, dir, graph, state, step) {
 	Object.assign(s, { status: "starting", branch: name, startedAt: now(), endedAt: undefined });
 	saveState(dir, state);
 	if (adopt(root, s)) return event(dir, step.id, "adopted", { branch: name });
-	const rec = tracker.start(root, { name, task: promptFor(graph, step, outputsOf(dir, state)) + retryNote, worker: step.worker ?? "laurelin" });
-	Object.assign(s, { status: "running", path: rec.path, pid: rec.pid });
-	event(dir, step.id, "started", { attempt: s.attempt, branch: name, worker: step.worker ?? "laurelin" });
+	const rec = tracker.start(root, { name, task: promptFor(graph, step, outputsOf(dir, state)) + retryNote, worker: step.worker ?? "laurelin", model: step.model });
+	Object.assign(s, { status: "running", path: rec.path, pid: rec.pid, model: step.model });
+	event(dir, step.id, "started", { attempt: s.attempt, branch: name, worker: step.worker ?? "laurelin", ...(step.model ? { model: step.model } : {}) });
 }
 
 /**

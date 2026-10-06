@@ -47,7 +47,7 @@ export function buildTrace(root, id, now = Date.now()) {
 		return {
 			step: s.id,
 			kind: s.kind ?? "work",
-			worker: (s.kind ?? "work") === "branch" ? "jev" : (s.worker ?? "laurelin"),
+			worker: (s.kind ?? "work") === "branch" ? "jev" : s.model ? s.model.split("/").pop() : (s.worker ?? "laurelin"),
 			status: st.status ?? "pending",
 			attempts: st.attempt ?? 0,
 			retries: evs.filter((e) => e.event === "retry").length,
