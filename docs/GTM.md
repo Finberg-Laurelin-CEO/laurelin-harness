@@ -56,6 +56,33 @@ The license of the base (Prime Agent, MIT) allows this. The original copyright n
 
 The pattern: the tool is free to spread. Money comes from resold inference, team seats, or a hosted version. Jcode's model fits this product best, with TypeSafe and Cheaper Inference as supply partners.
 
+## Closest competitor: AdaL (SylphAI)
+
+Researched 2026-10-06 with context.dev (repo, product, pricing, company pages, two architecture posts).
+
+| | AdaL CLI | This harness |
+|---|---|---|
+| Pitch | "Automation-first agent harness", issue to tested PR | Agents you can trust to finish unattended |
+| User | Software engineers | Founders and operators: research, investors, email, CAD, writing |
+| Source | Closed binary; the public repo is a community page (107 stars) | Fork of an MIT-licensed agent |
+| Checking | Separate LLM evaluator with its own context | Jev checks (calibrated, about 1 s, fractions of a cent), gates, approval receipts |
+| Orchestration | "AdaL Engineer" writes a shared contract.md and assigns workers | Graph workers with per-step contracts, durable runs, steering; planner (graph-planner) |
+| Cost | Routes to cheap models (MiniMax M3, GLM) | Jev for judgments, cheap models per graph step |
+
+Their architecture converges on ours: generator plus separate evaluator, a shared contract, a harness that improves from failures, cheap-model routing. Our evaluator is cheaper because Jev replaces an LLM judge.
+
+What to copy from their business model:
+
+1. One credit unit across all models, priced on Claude's ladder: Pro $20, Max $100, Max+ $200 a month. The gap between the credit price and the cost of cheap routing is the margin.
+2. A free tier that runs on the user's own credits, ChatGPT subscription, or API keys.
+3. Weekly usage windows on top of monthly allowances; sub-agents draw from the same allowance.
+4. Student pricing (50% off) and a community skills repository.
+5. Teams and enterprise up to 150 seats with SSO and onboarding.
+
+What to copy from their architecture: the engineer layer that turns a task and its success criteria into a plan of workers (our graph planner), and the public story that the worker never grades itself.
+
+What not to copy: the coding-only focus (the crowded lane), an IDE or cloud surface (too costly for one person), a closed binary (it undercuts a trust story).
+
 ## Partners
 
 | Partner | They give | They get |
