@@ -379,6 +379,9 @@ interface RawAnswer {
 
 function jevBin(): string {
 	if (process.env.JEV_BIN) return process.env.JEV_BIN;
+	// The repo's own jev: TypeSafe first, classifier.dev when TypeSafe has no key or credits.
+	const repoJev = join(REPO, "bin", "jev");
+	if (existsSync(repoJev)) return repoJev;
 	const local = join(homedir(), ".local", "bin", "jev");
 	return existsSync(local) ? local : "jev";
 }
@@ -498,6 +501,13 @@ export function formatNote(d: Decision): string {
 }
 
 /** Build the state, ask Jev, decide. Never throws; a Jev failure gives the defaults with an error field. */
+/** A short reply that continues the current task ("yes", "ok, do it", "go ahead", "thanks"): no new route needed. */
+export function isShortFollowUp(text: string): boolean {
+	const t = text.trim().toLowerCase().replace(/[.!?,]+$/g, "");
+	if (t.split(/\s+/).length > 5) return false;
+	return /^(y|yes|yeah|yep|yup|ok|okay|k|sure|go|go ahead|do it|ok do it|yes do it|yes please|please do|continue|carry on|proceed|keep going|sounds good|looks good|great|perfect|thanks|thank you|ty|no|nope|stop|wait|hold on)$/.test(t);
+}
+
 export async function route(state: RouteState, menu: Menu, thresholds = loadThresholds()): Promise<Decision> {
 	const shortlist = shortlistSkills(state.message, menu.skills);
 	const questions = buildQuestions(menu, shortlist);
@@ -707,8 +717,17 @@ export default function (pi: ExtensionAPI) {
 		return d;
 	}
 
-	pi.on("input", async (event) => {
+	// Speed: route as soon as the message arrives (overlapping memory's work), and reuse the last route
+	// for a short follow-up such as "yes" or "do it", where the task has not changed.
+	let pendingRoute: { text: string; d: Promise<Decision> } | undefined;
+	pi.on("input", async (event, ctx) => {
 		lastSource = event.source;
+		const text = String((event as any).text ?? "").trim();
+		if (enabled && event.source !== "extension" && worthRouting(text) && !(last && isShortFollowUp(text))) {
+			const d = routeAndLog(text, ctx);
+			d.catch(() => {});
+			pendingRoute = { text, d };
+		}
 		return { action: "continue" };
 	});
 
@@ -719,7 +738,14 @@ export default function (pi: ExtensionAPI) {
 		// Classification is a label for the badge and the logs, never a gate on which
 		// model sees the text (Joe, 9/25). A different Jev endpoint plugs in through
 		// JEV_BIN or the jev command's own endpoint setting.
-		const d = await routeAndLog(event.prompt.trim(), ctx);
+		const text = event.prompt.trim();
+		if (last && isShortFollowUp(text)) {
+			// Same task: keep the last route; nothing new to decide, so nothing to show.
+			pendingRoute = undefined;
+			return undefined;
+		}
+		const d = pendingRoute && pendingRoute.text === text ? await pendingRoute.d : await routeAndLog(text, ctx);
+		pendingRoute = undefined;
 		if (d.error) say(ctx, `Router: ${d.error}. Using defaults.`, "warning");
 		return {
 			message: { customType: "laurelin-route", content: `[Laurelin router] ${d.note}`, display: true },
