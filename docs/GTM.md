@@ -2,7 +2,14 @@
 
 Status: draft, 2026-09-30. Owner: Joe. Internal.
 
-The customer-input launch plan is [LAUNCH.md](LAUNCH.md). It is on hold until classifier.dev or TypeSafe agrees to co-marketing or a listing.
+The customer-input launch plan is [LAUNCH.md](LAUNCH.md).
+
+## Decisions of 2026-10-06
+
+1. Name: the product is **Laurelin Agent**, the same name as the internal build. Frege keeps its name and its governed memory product.
+2. Order: users and money come first, the partner pitch comes after. A beta that a stranger can use goes to 5 to 10 people. The aim is one payment. Then Joe pitches classifier.dev and TypeSafe for a listing, with the users' own words as evidence.
+3. Spin-out: sell the beta now. Move the product into its own company only on traction (Phase 3).
+4. Two versions, one engine: the public build loads a general pack. Joe's build also loads the private Laurelin pack (vault paths, investor and deck skills, fusion tools, canonical-number gates).
 
 ## Position
 
@@ -95,25 +102,34 @@ Credits are expected. A paid contract is unlikely, so the plan does not count on
 
 ## Phases
 
-### Phase 1: sponsored early version (October 2026)
+### Phase 1: usable beta (about one week, target 2026-10-13 to 10-15)
 
-1. Write the classifier.dev post (an X thread, with a short demo video). Joe writes the final words.
-2. In the same conversation, ask classifier.dev and TypeSafe whether they want a packaged harness for their users.
-3. Keep improving the harness for Joe's own work: stall watchdog, swarms, overnight queue, inbox triage.
+1. Split the pack: a public general pack and a private Laurelin pack that only Joe's install loads.
+2. Send every Jev call through `bin/jev`, with the classifier.dev free tier as the default. On 2026-10-06 nine test files failed because the gates call TypeSafe directly and TypeSafe was out of credits.
+3. First-run setup: keys or ChatGPT sign-in, a cheap default model, memory empty until the user adds a folder.
+4. A private install (npm package or Git link) for beta users. Nothing is published without Joe's approval.
+5. A 60-second demo: `graph plan`, the live graph view, a check that blocks a false "done", an approval receipt.
+6. A founding-plan payment link: $20 a month or $149 one time. No credit resale until a wholesale deal exists.
 
-Exit: classifier.dev or TypeSafe agrees to list or sponsor it.
+Exit: a person outside Laurelin installs it and gets a result in five minutes.
 
-### Phase 2: public release (one to two weeks of work after a yes)
+### Phase 2: paid beta (seven days, the plan in LAUNCH.md)
 
-1. Strip the Laurelin content and add a first-run setup.
-2. Publish the repository and an install command.
-3. Launch with the partners: their channels, the write-up, Hacker News.
+10 conversations, 3 quoted people, 1 payment.
+
+Exit: one person pays.
+
+### Phase 3: partner pitch and public release
+
+1. Write the classifier.dev post (an X thread with the demo). Joe writes the final words.
+2. Pitch classifier.dev and TypeSafe for a listing or co-marketing, with the beta users' quotes.
+3. Publish the repository and the install command. Launch through the partners' channels and Hacker News.
 
 Exit: 100 weekly active users, or partners asking for more.
 
-### Phase 3: spin-out decision
+### Phase 4: spin-out decision
 
-Spin out only on traction. Signals: weekly active users growing for six weeks, or teams asking for shared features. Without them, the harness stays Laurelin's internal tool, and nothing is lost.
+Spin out only on traction. Signals: weekly active users growing for six weeks, or teams asking for shared features. Without them, Laurelin Agent stays Laurelin's internal tool, and nothing is lost.
 
 ## Risks
 

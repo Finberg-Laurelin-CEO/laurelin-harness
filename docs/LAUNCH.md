@@ -1,17 +1,12 @@
 # Launch plan: customer input for the harness
 
-Status: ON HOLD until classifier.dev or TypeSafe agrees to co-marketing or a listing.
+Status: starts when the Phase 1 beta in GTM.md is ready (target 2026-10-13 to 10-15). Before 2026-10-06 it waited for a partner; Joe reversed the order.
 Written 2026-10-01 from an office-hours session. Owner: Joe. Internal.
 Goes with [GTM.md](GTM.md).
 
 ## Start condition
 
-Credits and the classifier.dev pro plan are a given. Begin this plan when classifier.dev or TypeSafe agrees to one of these:
-
-1. Co-marketing: they share or feature the write-up and the harness.
-2. A listing: the harness appears on their site or docs as a harness built on Jev.
-
-A paid contract is unlikely and is not a condition. Until then the harness stays Laurelin's internal tool, Frege keeps its name and product, and the two Frege memory customers keep their service.
+Begin when a person outside Laurelin can install Laurelin Agent and get a result in five minutes (GTM.md, Phase 1). Credits and the classifier.dev pro plan are a given. A partner listing comes after this plan, with its results as evidence. The product name is Laurelin Agent. Frege keeps its name, and the two Frege memory customers keep their service.
 
 ## What office hours found
 
@@ -19,7 +14,7 @@ A paid contract is unlikely and is not a condition. Until then the harness stays
 2. Frege's only real demand is two paying customers for governed memory. A pivot must keep serving them.
 3. The edge over Jcode, Herdr and Agent Relay is proof that the work was done: checks that block a false "done", and receipts. Fleet management is where those companies already lead.
 4. The first buyers are solo founders and small dev teams who run agents unattended. Regulated organizations come later.
-5. Joe believes the harness has more potential than Frege's memory product. This plan tests that belief with customer input before any rename or launch.
+5. Joe believes the harness has more potential than Frege's memory product. This plan tests that belief with customer input before a public launch.
 
 ## The assignment (seven days from the start condition)
 
@@ -63,6 +58,6 @@ Most people will not change their harness for a stranger. The fastest test is an
 
 | Result | Next step |
 |---|---|
-| 3 quotes agree and 1 person pays | Write the line from their words. Plan the Frege pivot or a new name with the evidence. Start Phase 2 of GTM.md. |
+| 3 quotes agree and 1 person pays | Write the line from their words. Start Phase 3 of GTM.md (partner pitch and public release). |
 | Pain is real but nobody pays | Ship the "proof of done" add-on free with the classifier.dev write-up, and measure use. |
-| No shared pain | Keep the harness internal. Keep Frege on governed memory. |
+| No shared pain | Keep Laurelin Agent internal. |
