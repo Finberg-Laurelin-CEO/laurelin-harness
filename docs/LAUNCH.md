@@ -1,6 +1,6 @@
 # Launch plan: customer input for the harness
 
-Status: starts when the Phase 1 beta in GTM.md is ready (target 2026-10-13 to 10-15). Before 2026-10-06 it waited for a partner; Joe reversed the order.
+Status: starts when the Phase 1 beta in GTM.md is ready. On 2026-10-06 Joe chose to build locally first, so it has no date.
 Written 2026-10-01 from an office-hours session. Owner: Joe. Internal.
 Goes with [GTM.md](GTM.md).
 

@@ -7,9 +7,10 @@ The customer-input launch plan is [LAUNCH.md](LAUNCH.md).
 ## Decisions of 2026-10-06
 
 1. Name: the product is **Laurelin Agent**, the same name as the internal build. Frege keeps its name and its governed memory product.
-2. Order: users and money come first, the partner pitch comes after. A beta that a stranger can use goes to 5 to 10 people. The aim is one payment. Then Joe pitches classifier.dev and TypeSafe for a listing, with the users' own words as evidence.
+2. Order (revised later on 2026-10-06): build locally first. Joe's own build gets really good before anything ships. The personal content comes out only when the product is close. The partner pitch and the paid beta come after that.
 3. Spin-out: sell the beta now. Move the product into its own company only on traction (Phase 3).
-4. Two versions, one engine: the public build loads a general pack. Joe's build also loads the private Laurelin pack (vault paths, investor and deck skills, fusion tools, canonical-number gates).
+4. Shipping model: free with bring-your-own-keys, as Jcode, AdaL and Agent Relay do. Users pay their own compute: Jev (TypeSafe or classifier.dev keys), models (provider keys or a ChatGPT subscription), memory (their own Polygres or local search). Laurelin pays no inference for other users. Money comes later from a paid tier (bundled credits, teams), and only after people use the free version.
+5. Two versions, one engine: the public build loads a general pack. Joe's build also loads the private Laurelin pack (vault paths, investor and deck skills, fusion tools, canonical-number gates).
 
 ## Position
 
@@ -102,14 +103,14 @@ Credits are expected. A paid contract is unlikely, so the plan does not count on
 
 ## Phases
 
-### Phase 1: usable beta (about one week, target 2026-10-13 to 10-15)
+### Phase 1: usable beta (after the local build is ready; no date)
 
 1. Split the pack: a public general pack and a private Laurelin pack that only Joe's install loads.
 2. Send every Jev call through `bin/jev`, with the classifier.dev free tier as the default. On 2026-10-06 nine test files failed because the gates call TypeSafe directly and TypeSafe was out of credits.
 3. First-run setup: keys or ChatGPT sign-in, a cheap default model, memory empty until the user adds a folder.
 4. A private install (npm package or Git link) for beta users. Nothing is published without Joe's approval.
 5. A 60-second demo: `graph plan`, the live graph view, a check that blocks a false "done", an approval receipt.
-6. A founding-plan payment link: $20 a month or $149 one time. No credit resale until a wholesale deal exists.
+6. Every outside cost reads the user's own key. With no key, a feature turns off and says which key it needs. A founding-plan payment link ($20 a month or $149 one time) is optional for the first beta.
 
 Exit: a person outside Laurelin installs it and gets a result in five minutes.
 
