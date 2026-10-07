@@ -337,9 +337,19 @@ export function runs(root) {
 if (import.meta.url === `file://${process.argv[1]}`) {
 	const [cmd, arg, a2, a3] = process.argv.slice(2);
 	const root = tracker.mainRoot(process.cwd());
-	const usage = "usage: graph run <file> [--foreground] | resume <id> | status <id> | trace <id> [--json] | watch <id> | list | stop <id> | decide <id> <step> [choice] | loop <id>";
+	const usage = "usage: graph plan \"<task>\" --done \"<criteria>\" [--id <id>] [--run] | run <file> [--foreground] | resume <id> | status <id> | trace <id> [--json] | watch <id> | list | stop <id> | decide <id> <step> [choice] | loop <id>";
 	try {
-		if (cmd === "run" && arg) {
+		if (cmd === "plan" && arg) {
+			const argv = process.argv.slice(3);
+			const flag = (name) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : undefined);
+			const { plan, summary } = await import("./planner.mjs");
+			const result = plan(root, arg, flag("--done"), { id: flag("--id") });
+			console.log(summary(result));
+			if (argv.includes("--run")) {
+				create(root, result.graph);
+				console.log(`started ${result.graph.id} in the background (pid ${detach(root, result.graph.id)}). Follow it: laurelin-agent graph watch ${result.graph.id}`);
+			} else console.log(`run it: laurelin-agent graph run ${result.file}`);
+		} else if (cmd === "run" && arg) {
 			const graph = JSON.parse(readFileSync(arg, "utf8"));
 			create(root, graph);
 			if (a2 === "--foreground") console.log(JSON.stringify(await loop(root, graph.id)));
